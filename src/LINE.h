@@ -1,7 +1,6 @@
 #ifndef LINE_H
 #define LINE_H
 
-#include "proRec.h"
 #include "proNet.h"
 
 /*****

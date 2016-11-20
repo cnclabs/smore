@@ -1,4 +1,10 @@
-#include "FINE.h"
+#include "proNet.h"
+
+double random_gen(const int & min, const int & max) {
+    thread_local mt19937 generator(clock());
+    uniform_real_distribution<double> distribution(min, max);
+    return distribution(generator);
+}
 
 proNet::proNet() {
     hash_table.resize(HASH_TABLE_SIZE, -1);
