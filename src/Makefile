@@ -1,5 +1,5 @@
-CC = g++-4.8
-CPPFLAGS = -std=c++11 -fopenmp -O3
+CC = g++-4.9
+CPPFLAGS = -std=c++11 -fPIC -fopenmp -O3
 OBJECTS = proRec.o proNet.o DeepWalk.o Walklets.o LINE.o HPE.o FINE.o
 
 all: $(OBJECTS)
