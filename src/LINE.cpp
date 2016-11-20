@@ -55,44 +55,6 @@ void LINE::Init(int dim) {
     }
 }
 
-void LINE::UpdateSecondOrder(long vertex, long context, int negative_samples, double alpha){
-    
-    vector< double >* w_vertex_ptr;
-    vector< double >* w_context_ptr;
-    vector< double > back_err;
-    back_err.resize(dim, 0.0);
-
-    int d;
-    long rand_v;
-    double label, g, f, rand_p;
-    
-    label = 1;
-    w_vertex_ptr = &w_vertex[vertex];
-    w_context_ptr = &w_context[context];
-
-    // 0 for postive sample, others for negative sample
-    for (int neg=0; neg<=negative_samples; ++neg)
-    {
-        // negative sampling
-        if (neg!=0){
-            label = 0;
-            w_context_ptr = &w_context[ rgraph.NegativeSample() ]; // Negative Sample
-        }
-
-        f = 0;
-        for (d=0; d<dim; ++d) // prediciton
-            f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-        f = f/(1.0 + fabs(f)); // sigmoid(prediction)
-        g = (label - f) * alpha; // gradient
-        for (d=0; d<dim; ++d) // store the back propagation error
-            back_err[d] += g * (*w_context_ptr)[d];
-        for (d=0; d<dim; ++d) // update context
-            (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
-    }
-    for (d=0; d<dim; ++d)
-        (*w_vertex_ptr)[d] += back_err[d];
-
-}
 
 void LINE::Train(int sample_times, int negative_samples, double alpha, int workers){
     
@@ -139,7 +101,7 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
             
             long v1 = rgraph.SourceSample();
             long v2 = rgraph.TargetSample(v1);
-            UpdateSecondOrder(v1, v2, negative_samples, _alpha);
+            rgraph.UpdatePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
         }
 
     }
@@ -147,23 +109,3 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
 
 }
 
-/*
-int main(int argc, char **argv){
-    
-    LINE *line;
-    line = new LINE();
-    //line->LoadEdgeList("../ml-1m/result/ml-1m.graph.train", 0);
-    line->LoadEdgeList("../../../text8.pair", 0);
-    //line->LoadEdgeList("in", 0);
-    line->Init(200);
-    
-    if (argc == 2)
-        line->Train(1000, 5, 0.025, atoi(argv[1]));
-    else
-        line->Train(1000, 5, 0.025, 4);
-
-    line->SaveWeights("GraphRecLINE.model");
-
-    return 0;
-}
-*/

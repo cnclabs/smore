@@ -32,22 +32,33 @@ class proNet {
         void BuildSourceAliasTable();
         void BuildTargetAliasTable();
         
-        // key function
+        // Key Process
         unsigned int BKDRHash(char*);
         int InsertHashTable(char*);
         int SearchHashTable(char*);
 
-        // common data function
+        // Data Process
         void LoadEdgeList(string, bool);
         void LoadFieldMeta(string);
-        
-        // common graph function
-        long NegativeSample();
+
+        // Network Process
         long SourceSample();
         long TargetSample(long);
+        long NegativeSample();
         vector< long > RandomWalk(long, int);
         vector< vector< long > > SkipGrams(vector<long>&, int, int);
         vector< vector< long > > ScaleSkipGrams(vector<long>&, int, int, int);
+
+        // Optimizer
+        
+        // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
+        void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
+        
+        // vertex vector, context vector, vertex series, context series, dimension, negative samples, alpha
+        void UpdatePairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, int, int, double);
+        
+        // vertex vector, context vector, vertex, context, dimension, negative samples, community walk steps, alpha
+        void UpdateCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
 
 };
 

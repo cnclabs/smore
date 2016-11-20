@@ -16,7 +16,6 @@ class HPE: public LINE {
 
         // model function
         void Train(int, int, int, double, int);
-        void UpdateSecondOrder(long, long, int, int, double);
 
 };
 

@@ -31,7 +31,7 @@ class LINE {
         // model function
         void Init(int);
         void UpdateFirstOrder(long, long, int, double);
-        void UpdateSecondOrder(long, long, int, double);
+        //void UpdateSecondOrder(long, long, int, double);
         void Train(int, int, double, int);
 
 };

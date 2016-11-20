@@ -59,55 +59,6 @@ void DeepWalk::Init(int dim) {
     }
 }
 
-void DeepWalk::Update(vector<long>& vertex, vector<long>& context, int negative_samples, double alpha){
-    
-    vector<long>::iterator it_v = vertex.begin();
-    vector<long>::iterator it_c = context.begin();
-
-    vector<double>* w_vertex_ptr;
-    vector<double>* w_context_ptr;
-    double* back_err = new double[dim];
-
-    int d, label;
-    double g, f;
-    while( it_v != vertex.end() )
-    {
-        label = 1;
-        w_vertex_ptr = &w_vertex[(*it_v)];
-        w_context_ptr = &w_context[(*it_c)];
-        for (d=0; d<dim; ++d)
-            back_err[d] = 0.0;
-        
-        // 0 for postive sample, others for negative sample
-        for (int neg=0; neg<=negative_samples; ++neg)
-        {
-            // negative sampling
-            if (neg!=0){
-                label = 0;
-                w_context_ptr = &w_context[ rgraph.NegativeSample() ];
-            }
-
-            f = 0;
-            for (d=0; d<dim; ++d) // prediciton
-                f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-            f = f/(1.0 + fabs(f)); // sigmoid(prediction)
-            g = (label - f) * alpha; // gradient
-            for (d=0; d<dim; ++d) // store the back propagation error
-                back_err[d] += g * (*w_context_ptr)[d];
-            for (d=0; d<dim; ++d) // update context
-                (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
-        }
-        for (d=0; d<dim; ++d)
-            (*w_vertex_ptr)[d] += back_err[d];
-
-        ++it_v;
-        ++it_c;
-    }
-    
-    delete [] back_err;
-
-}
-
 void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negative_samples, double alpha, int workers){
     
     omp_set_num_threads(workers);
@@ -150,7 +101,7 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
 
             vector<long> walks = rgraph.RandomWalk(random_keys[vid], walk_steps);
             vector<vector<long>> train_data = rgraph.SkipGrams(walks, window_size, 0);
-            Update(train_data[0], train_data[1], negative_samples, _alpha);
+            rgraph.UpdatePairs(w_vertex, w_context, train_data[0], train_data[1], dim, negative_samples, _alpha);
             
             count++;
             if (count % MONITOR == 0)
@@ -167,21 +118,3 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
 
 }
 
-/*
-int main(int argc, char **argv){
-    
-    DeepWalk *dw;
-    dw = new DeepWalk();
-    dw->LoadEdgeList("../../../text8.pair", 0);
-    dw->Init(64);
-    
-    if (argc == 2)
-        dw->Train(100, 40, 1, 5, 0.025, atoi(argv[1]));
-    else
-        dw->Train(100, 40, 1, 5, 0.025, 4);
-
-    dw->SaveWeights("GraphRecDW.model");
-
-    return 0;
-}
-*/
