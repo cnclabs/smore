@@ -93,8 +93,8 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
             {
                 current_sample += MONITOR;
                 _alpha = alpha* ( 1.0 - (double)(count)/jobs );
-                alpha_last = _alpha;
                 if (_alpha < alpha_min) _alpha = alpha_min;
+                alpha_last = _alpha;
                 printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/sample_times * 100, 13);
                 fflush(stdout);
             }
