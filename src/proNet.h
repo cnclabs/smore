@@ -59,6 +59,9 @@ class proNet {
         
         // vertex vector, context vector, vertex, context, dimension, negative samples, community walk steps, alpha
         void UpdateCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
+        
+        // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
+        void UpdateFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
 
 };
 

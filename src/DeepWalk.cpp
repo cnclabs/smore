@@ -39,13 +39,10 @@ void DeepWalk::Init(int dim) {
     
     w_vertex.resize(rgraph.MAX_vid);
     w_context.resize(rgraph.MAX_vid);
-    //w_vertex = new double* [rgraph.MAX_vid];
-    //w_context = new double* [rgraph.MAX_vid];
 
     for (long vid=0; vid<rgraph.MAX_vid; ++vid)
     {
         w_vertex[vid].resize(dim);
-        //w_vertex[vid] = new double [dim];
         for (int d=0; d<dim;++d)
             w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
     }
@@ -53,7 +50,6 @@ void DeepWalk::Init(int dim) {
     for (long vid=0; vid<rgraph.MAX_vid; ++vid)
     {
         w_context[vid].resize(dim);
-        //w_context[vid] = new double [dim];
         for (int d=0; d<dim;++d)
             w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
     }

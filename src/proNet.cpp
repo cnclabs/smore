@@ -1,4 +1,4 @@
-#include "proNet.h"
+#include "FINE.h"
 
 proNet::proNet() {
     hash_table.resize(HASH_TABLE_SIZE, -1);
@@ -792,6 +792,66 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
             context = TargetSample(context);
             if (context==-1) break;
             w_context_ptr = &w_context[ context ];
+        }
+
+        for (d=0; d<dimenstion; ++d)
+            back_err[d] = 0.0;
+        for (int neg=0; neg<=negative_samples; ++neg)
+        {
+            // negative sampling
+            if (neg!=0){
+                label = 0;
+                w_context_ptr = &w_context[ NegativeSample() ];
+            }
+
+            f = 0;
+            for (d=0; d<dimenstion; ++d) // prediciton
+                f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
+            f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+            g = (label - f) * alpha; // gradient
+            for (d=0; d<dimenstion; ++d) // store the back propagation error
+                back_err[d] += g * (*w_context_ptr)[d];
+            for (d=0; d<dimenstion; ++d) // update context
+                (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
+        }
+        for (d=0; d<dimenstion; ++d)
+            (*w_vertex_ptr)[d] += back_err[d];
+
+    }
+
+}
+
+
+void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimenstion, int negative_samples, int walk_steps, double alpha){
+
+    vector<double>* w_vertex_ptr;
+    vector<double>* w_context_ptr;
+    vector<double> back_err;
+    back_err.resize(dimenstion, 0.0);
+
+    int d, vid, fid;
+    long rand_v;
+    double label, g, f, rand_p;
+    
+    // vertex
+    fid = field[context].field;
+    vid = field[vertex].vids[fid];
+    w_vertex_ptr = &w_vertex[vid];
+
+    // context
+    fid = field[vertex].field;
+    vid = field[context].vids[fid];
+    w_context_ptr = &w_context[vid];
+        
+    // 0 for postive sample, others for negative sample
+    for (int s = 0; s <= walk_steps; s++) {
+        label = 1;
+        if (s > 0)
+        {
+            context = TargetSample(context);
+            if (context==-1) break;
+            vid = field[context].vids[fid];
+            w_context_ptr = &w_context[ vid ];
         }
 
         for (d=0; d<dimenstion; ++d)

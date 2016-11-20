@@ -1,6 +1,6 @@
 CC = g++-4.8
 CPPFLAGS = -std=c++11 -fopenmp -O3
-OBJECTS = proRec.o proNet.o DeepWalk.o LINE.o HPE.o
+OBJECTS = proRec.o proNet.o DeepWalk.o Walklets.o LINE.o HPE.o FINE.o
 
 all: $(OBJECTS)
 	mkdir -p ../bin
