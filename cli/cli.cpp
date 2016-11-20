@@ -120,7 +120,7 @@ int main(int argc, char **argv){
         fine->LoadEdgeList(network_file, 1);
         fine->LoadFieldMeta(field_file);
         fine->Init(dimenstions);
-        fine->Train(sample_times, negative_samples, walk_steps, init_alpha, threads);
+        fine->Train(sample_times, walk_steps, negative_samples, init_alpha, threads);
         fine->SaveWeights(rep_file);
     }
 

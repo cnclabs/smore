@@ -3,7 +3,7 @@
 HPE::HPE() {}
 HPE::~HPE() {}
 
-void HPE::Train(int sample_times, int negative_samples, int walk_steps, double alpha, int workers){
+void HPE::Train(int sample_times, int walk_steps, int negative_samples, double alpha, int workers){
     
     omp_set_num_threads(workers);
 

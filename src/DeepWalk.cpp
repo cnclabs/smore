@@ -93,7 +93,6 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
         #pragma omp parallel for
         for (long vid=0; vid<rgraph.MAX_vid; ++vid)
         {
-            if (_alpha < alpha_min) _alpha = alpha_min;
 
             vector<long> walks = rgraph.RandomWalk(random_keys[vid], walk_steps);
             vector<vector<long>> train_data = rgraph.SkipGrams(walks, window_size, 0);
@@ -103,6 +102,7 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
             if (count % MONITOR == 0)
             {
                 _alpha = alpha* ( 1.0 - (double)(count)/total );
+                if (_alpha < alpha_min) _alpha = alpha_min;
                 printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(count)/total * 100, 13);
                 fflush(stdout);
             }

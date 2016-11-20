@@ -23,7 +23,8 @@ void Walklets::Train(int walk_times, int walk_steps, int window_min, int window_
 
     long total = walk_times*rgraph.MAX_vid;
     double alpha_min = alpha*0.0001;
-    long samples = 0;
+    double _alpha = alpha;
+    long count = 0;
 
     for (int t=0; t<walk_times; ++t)
     {
@@ -41,18 +42,18 @@ void Walklets::Train(int walk_times, int walk_steps, int window_min, int window_
         #pragma omp parallel for
         for (long vid=0; vid<rgraph.MAX_vid; ++vid)
         {
-            double _alpha = alpha* ( 1.0 - (double)(samples)/total );
-            if (_alpha < alpha_min) _alpha = alpha_min;
 
             vector<long> walks = rgraph.RandomWalk(vid, walk_steps);
             vector<vector<long>> train_data = rgraph.ScaleSkipGrams(walks, window_min, window_max, 0);
             rgraph.UpdatePairs(w_vertex, w_context, train_data[0], train_data[1], dim, negative_samples, _alpha);
             
-            ++samples;
-            if (samples % MONITOR == 0)
+            count++;
+            if (count % MONITOR == 0)
             {
-                cout << "\tProgress:\t\t" << (double)(samples)/total * 100 << " %\r";
-                cout.flush();
+                _alpha = alpha* ( 1.0 - (double)(count)/total );
+                if (_alpha < alpha_min) _alpha = alpha_min;
+                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(count)/total * 100, 13);
+                fflush(stdout);
             }
 
         }
