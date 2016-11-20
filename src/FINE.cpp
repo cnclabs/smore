@@ -5,7 +5,7 @@ FINE::FINE() {}
 FINE::~FINE() {}
 
 void FINE::LoadFieldMeta(string filename) {
-    rgraph.LoadFieldMeta(filename);
+    pnet.LoadFieldMeta(filename);
 }
 
 void FINE::SaveWeights(string model_name){
@@ -14,14 +14,14 @@ void FINE::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
-        for (auto k: rgraph.keys)
+        for (auto k: pnet.keys)
         {
             model << k;
-            int o_vid = rgraph.kmap[k];
-            for (auto vid: rgraph.field[o_vid].vids)
+            int o_vid = pnet.kmap[k];
+            for (auto vid: pnet.field[o_vid].vids)
             {
                 for (int d=0; d<dim; ++d)
-                    model << " " << w_vertex[rgraph.kmap[k]][d];
+                    model << " " << w_vertex[pnet.kmap[k]][d];
             }
             model << endl;
         }
@@ -39,12 +39,12 @@ void FINE::Init(int dim) {
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dim << endl;
     
-    w_vertex.resize(rgraph.MAX_fvid);
-    w_context.resize(rgraph.MAX_fvid);
+    w_vertex.resize(pnet.MAX_fvid);
+    w_context.resize(pnet.MAX_fvid);
 
-    for (long vid=0; vid<rgraph.MAX_vid; ++vid)
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
-        for (auto fvid: rgraph.field[vid].vids)
+        for (auto fvid: pnet.field[vid].vids)
         {
             w_vertex[fvid].resize(dim);
             for (int d=0; d<dim;++d)
@@ -52,9 +52,9 @@ void FINE::Init(int dim) {
         }
     }
 
-    for (long vid=0; vid<rgraph.MAX_vid; ++vid)
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
-        for (auto fvid: rgraph.field[vid].vids)
+        for (auto fvid: pnet.field[vid].vids)
         {
             w_context[fvid].resize(dim);
             for (int d=0; d<dim;++d)
@@ -98,9 +98,9 @@ void FINE::Train(int sample_times, int negative_samples, int walk_steps, double 
             fflush(stdout);
         }
             
-        long v1 = rgraph.SourceSample();
-        long v2 = rgraph.TargetSample(v1);
-        //rgraph.UpdateFieldCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, walk_steps, _alpha);
+        long v1 = pnet.SourceSample();
+        long v2 = pnet.TargetSample(v1);
+        //pnet.UpdateFieldCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, walk_steps, _alpha);
 
     }
     printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", _alpha);

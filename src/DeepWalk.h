@@ -14,7 +14,7 @@ class DeepWalk {
         DeepWalk();
         ~DeepWalk();
 
-        proNet rgraph;
+        proNet pnet;
 
         // parameters
         int dim;                // representation dimensions

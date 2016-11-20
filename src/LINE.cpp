@@ -7,7 +7,7 @@ LINE::~LINE() {
 }
 
 void LINE::LoadEdgeList(string filename, bool undirect) {
-    rgraph.LoadEdgeList(filename, undirect);
+    pnet.LoadEdgeList(filename, undirect);
 }
 
 void LINE::SaveWeights(string model_name){
@@ -16,11 +16,11 @@ void LINE::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
-        for (auto k: rgraph.keys)
+        for (auto k: pnet.keys)
         {
             model << k;
             for (int d=0; d<dim; ++d)
-                model << " " << w_vertex[rgraph.kmap[k]][d];
+                model << " " << w_vertex[pnet.kmap[k]][d];
             model << endl;
         }
         cout << "\tSave to <" << model_name << ">" << endl;
@@ -37,17 +37,17 @@ void LINE::Init(int dim) {
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dim << endl;
 
-    w_vertex.resize(rgraph.MAX_vid);
-    w_context.resize(rgraph.MAX_vid);
+    w_vertex.resize(pnet.MAX_vid);
+    w_context.resize(pnet.MAX_vid);
 
-    for (long vid=0; vid<rgraph.MAX_vid; ++vid)
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
         w_vertex[vid].resize(dim);
         for (int d=0; d<dim;++d)
             w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
     }
 
-    for (long vid=0; vid<rgraph.MAX_vid; ++vid)
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
         w_context[vid].resize(dim);
         for (int d=0; d<dim;++d)
@@ -99,9 +99,9 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
                 fflush(stdout);
             }
             
-            long v1 = rgraph.SourceSample();
-            long v2 = rgraph.TargetSample(v1);
-            rgraph.UpdatePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
+            long v1 = pnet.SourceSample();
+            long v2 = pnet.TargetSample(v1);
+            pnet.UpdatePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
         }
 
     }

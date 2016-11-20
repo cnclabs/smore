@@ -7,7 +7,7 @@ DeepWalk::~DeepWalk () {
 }
 
 void DeepWalk::LoadEdgeList(string filename, bool undirect) {
-    rgraph.LoadEdgeList(filename, undirect);
+    pnet.LoadEdgeList(filename, undirect);
 }
 
 void DeepWalk::SaveWeights(string model_name){
@@ -16,11 +16,11 @@ void DeepWalk::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
-        for (auto k: rgraph.keys)
+        for (auto k: pnet.keys)
         {
             model << k;
             for (int d=0; d<dim; ++d)
-                model << " " << w_vertex[rgraph.kmap[k]][d];
+                model << " " << w_vertex[pnet.kmap[k]][d];
             model << endl;
         }
         cout << "\tSave to <" << model_name << ">" << endl;
@@ -37,17 +37,17 @@ void DeepWalk::Init(int dim) {
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dim << endl;
     
-    w_vertex.resize(rgraph.MAX_vid);
-    w_context.resize(rgraph.MAX_vid);
+    w_vertex.resize(pnet.MAX_vid);
+    w_context.resize(pnet.MAX_vid);
 
-    for (long vid=0; vid<rgraph.MAX_vid; ++vid)
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
         w_vertex[vid].resize(dim);
         for (int d=0; d<dim;++d)
             w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
     }
 
-    for (long vid=0; vid<rgraph.MAX_vid; ++vid)
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
         w_context[vid].resize(dim);
         for (int d=0; d<dim;++d)
@@ -73,7 +73,7 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
     cout << "Start Training:" << endl;
 
 
-    long total = walk_times*rgraph.MAX_vid;
+    long total = walk_times*pnet.MAX_vid;
     double alpha_min = alpha*0.0001;
     double _alpha = alpha;
     long count = 0;
@@ -81,22 +81,22 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
     for (int t=0; t<walk_times; ++t)
     {
         // shuffle the order for random keys access        
-        std::vector<long> random_keys(rgraph.MAX_vid);
-        for (long vid = 0; vid < rgraph.MAX_vid; vid++) {
+        std::vector<long> random_keys(pnet.MAX_vid);
+        for (long vid = 0; vid < pnet.MAX_vid; vid++) {
             random_keys[vid] = vid;
         }
-        for (long vid = 0; vid < rgraph.MAX_vid; vid++) {
-            int rdx = vid + rand() % (rgraph.MAX_vid - vid); // careful here!
+        for (long vid = 0; vid < pnet.MAX_vid; vid++) {
+            int rdx = vid + rand() % (pnet.MAX_vid - vid); // careful here!
             swap(random_keys[vid], random_keys[rdx]);
         }
 
         #pragma omp parallel for
-        for (long vid=0; vid<rgraph.MAX_vid; ++vid)
+        for (long vid=0; vid<pnet.MAX_vid; ++vid)
         {
 
-            vector<long> walks = rgraph.RandomWalk(random_keys[vid], walk_steps);
-            vector<vector<long>> train_data = rgraph.SkipGrams(walks, window_size, 0);
-            rgraph.UpdatePairs(w_vertex, w_context, train_data[0], train_data[1], dim, negative_samples, _alpha);
+            vector<long> walks = pnet.RandomWalk(random_keys[vid], walk_steps);
+            vector<vector<long>> train_data = pnet.SkipGrams(walks, window_size, 0);
+            pnet.UpdatePairs(w_vertex, w_context, train_data[0], train_data[1], dim, negative_samples, _alpha);
             
             count++;
             if (count % MONITOR == 0)

@@ -38,10 +38,10 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double a
             fflush(stdout);
         }
             
-        long v1 = rgraph.SourceSample();
-        long v2 = rgraph.TargetSample(v1);
-        rgraph.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
-        rgraph.UpdateCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, walk_steps, _alpha);
+        long v1 = pnet.SourceSample();
+        long v2 = pnet.TargetSample(v1);
+        pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
+        pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, walk_steps, _alpha);
 
     }
     printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", _alpha);

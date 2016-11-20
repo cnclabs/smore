@@ -14,7 +14,7 @@ class LINE {
         LINE();
         ~LINE();
         
-        proNet rgraph;
+        proNet pnet;
 
         // parameters
         int dim;                // representation dimensions

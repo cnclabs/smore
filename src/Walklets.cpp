@@ -21,7 +21,7 @@ void Walklets::Train(int walk_times, int walk_steps, int window_min, int window_
 
     cout << "Start Training:" << endl;
 
-    long total = walk_times*rgraph.MAX_vid;
+    long total = walk_times*pnet.MAX_vid;
     double alpha_min = alpha*0.0001;
     double _alpha = alpha;
     long count = 0;
@@ -30,22 +30,22 @@ void Walklets::Train(int walk_times, int walk_steps, int window_min, int window_
     {
 
         // for random keys access
-        std::vector<long> random_keys(rgraph.MAX_vid);
-        for (long vid = 0; vid < rgraph.MAX_vid; vid++) {
+        std::vector<long> random_keys(pnet.MAX_vid);
+        for (long vid = 0; vid < pnet.MAX_vid; vid++) {
              random_keys[vid] = vid;
         }
-        for (long vid = 0; vid < rgraph.MAX_vid; vid++) {
-            int rdx = vid + rand() % (rgraph.MAX_vid - vid); // careful here!
+        for (long vid = 0; vid < pnet.MAX_vid; vid++) {
+            int rdx = vid + rand() % (pnet.MAX_vid - vid); // careful here!
             swap(random_keys[vid], random_keys[rdx]);
         }
 
         #pragma omp parallel for
-        for (long vid=0; vid<rgraph.MAX_vid; ++vid)
+        for (long vid=0; vid<pnet.MAX_vid; ++vid)
         {
 
-            vector<long> walks = rgraph.RandomWalk(vid, walk_steps);
-            vector<vector<long>> train_data = rgraph.ScaleSkipGrams(walks, window_min, window_max, 0);
-            rgraph.UpdatePairs(w_vertex, w_context, train_data[0], train_data[1], dim, negative_samples, _alpha);
+            vector<long> walks = pnet.RandomWalk(vid, walk_steps);
+            vector<vector<long>> train_data = pnet.ScaleSkipGrams(walks, window_min, window_max, 0);
+            pnet.UpdatePairs(w_vertex, w_context, train_data[0], train_data[1], dim, negative_samples, _alpha);
             
             count++;
             if (count % MONITOR == 0)
