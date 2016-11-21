@@ -3,6 +3,7 @@
 #include "../src/LINE.h"
 #include "../src/HPE.h"
 #include "../src/FINE.h"
+#include "../src/MF.h"
 
 
 int ArgPos(char *str, int argc, char **argv) {
@@ -76,6 +77,7 @@ int main(int argc, char **argv){
     char model_wl[10] = "Walklets";
     char model_hpe[10] = "HPE";
     char model_fine[10] = "FINE";
+    char model_mf[10] = "MF";
     if (!strcmp(model_dw, model))
     {
         DeepWalk *dw;
@@ -122,6 +124,15 @@ int main(int argc, char **argv){
         fine->Init(dimenstions);
         fine->Train(sample_times, walk_steps, negative_samples, init_alpha, threads);
         fine->SaveWeights(rep_file);
+    }
+    else if (!strcmp(model_mf, model))
+    {
+        MF *mf;
+        mf = new MF();
+        mf->LoadEdgeList(network_file, 1);
+        mf->Init(dimenstions);
+        mf->Train(sample_times, negative_samples, init_alpha, threads);
+        mf->SaveWeights(rep_file);
     }
 
    return 0;
