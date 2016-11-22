@@ -917,9 +917,11 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
         {
             context = TargetSample(context);
             if (context==-1) break;
+
             vid = field[context].vids[fid];
             w_context_ptr = &w_context[vid];
             fid = field[context].field;
+            vid = field[vertex].vids[fid];
             w_vertex_ptr = &w_vertex[vid];
             fid = field[vertex].field;
         }
