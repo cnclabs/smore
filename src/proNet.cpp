@@ -534,6 +534,17 @@ long proNet::NegativeSample() {
 
 }
 
+long proNet::NegativeFieldSample(long fid) {
+    
+    long rand_v = random_gen(0, MAX_vid);
+    double rand_p = random_gen(0, 1);
+    
+    if (rand_p < vertex[rand_v].neg_prob)
+        return field[rand_v].vids[fid];
+    else
+        return field[vertex[rand_v].neg_alias].vids[fid];
+
+}
 
 long proNet::SourceSample() {
     
@@ -725,7 +736,7 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
         f = 0;
         for (d=0; d<dimenstion; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-        //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        f = f/(1.0 + fabs(f)); // sigmoid(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimenstion; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
@@ -764,7 +775,7 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
         f = 0;
         for (d=0; d<dimenstion; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-        f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimenstion; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
@@ -825,7 +836,7 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
 }
 
 
-void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimenstion, int negative_samples, int walk_steps, double alpha){
+void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimenstion, int walk_steps, int negative_samples, double alpha){
 
     vector<double>* w_vertex_ptr;
     vector<double>* w_context_ptr;
@@ -908,6 +919,9 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
             if (context==-1) break;
             vid = field[context].vids[fid];
             w_context_ptr = &w_context[ vid ];
+            fid = field[context].field;
+            w_vertex_ptr = &w_vertex[vid];
+            fid = field[vertex].field;
         }
 
         for (d=0; d<dimenstion; ++d)
@@ -917,7 +931,7 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
             // negative sampling
             if (neg!=0){
                 label = 0;
-                w_context_ptr = &w_context[ NegativeSample() ];
+                w_context_ptr = &w_context[ NegativeFieldSample(fid) ];
             }
 
             f = 0;

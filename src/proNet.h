@@ -100,6 +100,7 @@ class proNet {
         long TargetSample();
         long TargetSample(long);
         long NegativeSample();
+        long NegativeFieldSample(long);
         vector< long > RandomWalk(long, int);
         vector< vector< long > > SkipGrams(vector<long>&, int, int);
         vector< vector< long > > ScaleSkipGrams(vector<long>&, int, int, int);
