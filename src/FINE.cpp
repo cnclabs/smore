@@ -10,6 +10,8 @@ void FINE::LoadFieldMeta(string filename) {
 
 void FINE::SaveWeights(string model_name){
     
+    int o_vid, vid, fid;
+
     cout << "Save Model:" << endl;
     ofstream model(model_name);
     if (model)
@@ -17,11 +19,12 @@ void FINE::SaveWeights(string model_name){
         for (auto k: pnet.keys)
         {
             model << k;
-            int o_vid = pnet.kmap[k];
-            for (auto vid: pnet.field[o_vid].vids)
+            o_vid = pnet.kmap[k];
+            for (fid=0; fid<pnet.MAX_field; fid++)
             {
+                vid = pnet.field[o_vid].vids[fid];
                 for (int d=0; d<dim; ++d)
-                    model << " " << w_vertex[pnet.kmap[k]][d];
+                    model << " " << w_vertex[ vid ][d];
             }
             model << endl;
         }

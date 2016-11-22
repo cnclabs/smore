@@ -913,12 +913,12 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
     // 0 for postive sample, others for negative sample
     for (int s = 0; s <= walk_steps; s++) {
         label = 1;
-        if (s > 0)
+        if (s != 0)
         {
             context = TargetSample(context);
             if (context==-1) break;
             vid = field[context].vids[fid];
-            w_context_ptr = &w_context[ vid ];
+            w_context_ptr = &w_context[vid];
             fid = field[context].field;
             w_vertex_ptr = &w_vertex[vid];
             fid = field[vertex].field;
