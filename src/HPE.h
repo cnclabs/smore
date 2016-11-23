@@ -14,7 +14,10 @@ class HPE: public LINE {
         HPE();
         ~HPE();
 
+        void SaveWeights(string);
+
         // model function
+        void Init(int);
         void Train(int, int, int, double, int);
 
 };
