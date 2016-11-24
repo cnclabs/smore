@@ -709,12 +709,12 @@ vector< vector< long > > proNet::ScaleSkipGrams(vector< long > &walk, int window
 }
 
 // Optimizer
-void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimenstion, int negative_samples, double alpha){
+void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
     vector< double >* w_vertex_ptr;
     vector< double >* w_context_ptr;
     vector< double > back_err;
-    back_err.resize(dimenstion, 0.0);
+    back_err.resize(dimension, 0.0);
 
     int d;
     long rand_v;
@@ -734,30 +734,30 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
         }
 
         f = 0;
-        for (d=0; d<dimenstion; ++d) // prediciton
+        for (d=0; d<dimension; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
         f = f/(1.0 + fabs(f)); // sigmoid(prediction)
         g = (label - f) * alpha; // gradient
-        for (d=0; d<dimenstion; ++d) // store the back propagation error
+        for (d=0; d<dimension; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
-        for (d=0; d<dimenstion; ++d) // update context
+        for (d=0; d<dimension; ++d) // update context
             (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
     }
-    for (d=0; d<dimenstion; ++d)
+    for (d=0; d<dimension; ++d)
         (*w_vertex_ptr)[d] += back_err[d];
 
 }
 
-void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimenstion, int negative_samples, double alpha){
+void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
     vector< double >* w_vertex_ptr;
     vector< double >* w_context_ptr;
     vector< double > back_err;
-    back_err.resize(dimenstion, 0.0);
+    back_err.resize(dimension, 0.0);
 
     int d;
     long rand_v;
-    double label, g, f, rand_p;
+    double label, g, f, rand_p, reg;
     
     label = 1;
     w_vertex_ptr = &w_vertex[vertex];
@@ -773,21 +773,56 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
         }
 
         f = 0;
-        for (d=0; d<dimenstion; ++d) // prediciton
+        for (d=0; d<dimension; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-        //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        f = f/(1.0 + fabs(f)); // sigmoid(prediction)
         g = (label - f) * alpha; // gradient
-        for (d=0; d<dimenstion; ++d) // store the back propagation error
+        for (d=0; d<dimension; ++d) // store the back propagation error
+        {
+            reg = 1.0*alpha*(*w_vertex_ptr)[d];
+            back_err[d] += (g-reg) * (*w_context_ptr)[d];
+        }
+        for (d=0; d<dimension; ++d) // update context
+        {
+            reg = 1.0*alpha*(*w_vertex_ptr)[d];
+            (*w_context_ptr)[d] += (g+reg) * (*w_vertex_ptr)[d];
+        }
+    }
+    for (d=0; d<dimension; ++d)
+        (*w_vertex_ptr)[d] += back_err[d];
+    
+
+    // opposite opt
+    label = 1;
+    w_vertex_ptr = &w_vertex[context];
+    w_context_ptr = &w_context[vertex];
+
+    for (d=0; d<dimension; ++d)
+        back_err[d] = 0.0;
+    // 0 for postive sample, others for negative sample
+    for (int neg=0; neg<=negative_samples; ++neg)
+    {
+        // negative sampling
+        if (neg!=0){
+            label = 0;
+            w_context_ptr = &w_context[ SourceSample() ]; // Negative Source Sample
+        }
+
+        f = 0;
+        for (d=0; d<dimension; ++d) // prediciton
+            f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
+        f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        g = (label - f) * alpha; // gradient
+        for (d=0; d<dimension; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
-        for (d=0; d<dimenstion; ++d) // update context
+        for (d=0; d<dimension; ++d) // update context
             (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
     }
-    for (d=0; d<dimenstion; ++d)
+    for (d=0; d<dimension; ++d)
         (*w_vertex_ptr)[d] += back_err[d];
-
 }
 
-void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context, int dimenstion, int negative_samples, double alpha){
+void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context, int dimension, int negative_samples, double alpha){
 
     vector<long>::iterator it_v = vertex.begin();
     vector<long>::iterator it_c = context.begin();
@@ -795,7 +830,7 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
     vector<double>* w_vertex_ptr;
     vector<double>* w_context_ptr;
     vector<double> back_err;
-    back_err.resize(dimenstion, 0.0);
+    back_err.resize(dimension, 0.0);
 
     int d, label;
     double g, f;
@@ -804,7 +839,7 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
         label = 1;
         w_vertex_ptr = &w_vertex[(*it_v)];
         w_context_ptr = &w_context[(*it_c)];
-        for (d=0; d<dimenstion; ++d)
+        for (d=0; d<dimension; ++d)
             back_err[d] = 0.0;
 
         // 0 for postive sample, others for negative sample
@@ -817,16 +852,16 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
             }
 
             f = 0;
-            for (d=0; d<dimenstion; ++d) // prediciton
+            for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
             f = f/(1.0 + fabs(f)); // sigmoid(prediction)
             g = (label - f) * alpha; // gradient
-            for (d=0; d<dimenstion; ++d) // store the back propagation error
+            for (d=0; d<dimension; ++d) // store the back propagation error
                 back_err[d] += g * (*w_context_ptr)[d];
-            for (d=0; d<dimenstion; ++d) // update context
+            for (d=0; d<dimension; ++d) // update context
                 (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
         }
-        for (d=0; d<dimenstion; ++d)
+        for (d=0; d<dimension; ++d)
             (*w_vertex_ptr)[d] += back_err[d];
 
         ++it_v;
@@ -836,12 +871,12 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
 }
 
 
-void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimenstion, int walk_steps, int negative_samples, double alpha){
+void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int walk_steps, int negative_samples, double alpha){
 
     vector<double>* w_vertex_ptr;
     vector<double>* w_context_ptr;
     vector<double> back_err;
-    back_err.resize(dimenstion, 0.0);
+    back_err.resize(dimension, 0.0);
 
     int d;
     long rand_v;
@@ -861,7 +896,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
             w_context_ptr = &w_context[ context ];
         }
 
-        for (d=0; d<dimenstion; ++d)
+        for (d=0; d<dimension; ++d)
             back_err[d] = 0.0;
         for (int neg=0; neg<=negative_samples; ++neg)
         {
@@ -872,16 +907,16 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
             }
 
             f = 0;
-            for (d=0; d<dimenstion; ++d) // prediciton
+            for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
             f = f/(1.0 + fabs(f)); // sigmoid(prediction)
             g = (label - f) * alpha; // gradient
-            for (d=0; d<dimenstion; ++d) // store the back propagation error
+            for (d=0; d<dimension; ++d) // store the back propagation error
                 back_err[d] += g * (*w_context_ptr)[d];
-            for (d=0; d<dimenstion; ++d) // update context
+            for (d=0; d<dimension; ++d) // update context
                 (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
         }
-        for (d=0; d<dimenstion; ++d)
+        for (d=0; d<dimension; ++d)
             (*w_vertex_ptr)[d] += back_err[d];
 
     }
@@ -889,12 +924,12 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
 }
 
 
-void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimenstion, int negative_samples, int walk_steps, double alpha){
+void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, int walk_steps, double alpha){
 
     vector<double>* w_vertex_ptr;
     vector<double>* w_context_ptr;
     vector<double> back_err;
-    back_err.resize(dimenstion, 0.0);
+    back_err.resize(dimension, 0.0);
 
     int d, vid, fid;
     long rand_v;
@@ -926,7 +961,7 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
             fid = field[vertex].field;
         }
 
-        for (d=0; d<dimenstion; ++d)
+        for (d=0; d<dimension; ++d)
             back_err[d] = 0.0;
         for (int neg=0; neg<=negative_samples; ++neg)
         {
@@ -937,16 +972,16 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
             }
 
             f = 0;
-            for (d=0; d<dimenstion; ++d) // prediciton
+            for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
             f = f/(1.0 + fabs(f)); // sigmoid(prediction)
             g = (label - f) * alpha; // gradient
-            for (d=0; d<dimenstion; ++d) // store the back propagation error
+            for (d=0; d<dimension; ++d) // store the back propagation error
                 back_err[d] += g * (*w_context_ptr)[d];
-            for (d=0; d<dimenstion; ++d) // update context
+            for (d=0; d<dimension; ++d) // update context
                 (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
         }
-        for (d=0; d<dimenstion; ++d)
+        for (d=0; d<dimension; ++d)
             (*w_vertex_ptr)[d] += back_err[d];
 
     }
