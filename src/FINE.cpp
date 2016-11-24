@@ -20,12 +20,14 @@ void FINE::SaveWeights(string model_name){
         {
             model << k;
             o_vid = pnet.kmap[k];
+            /*
             for (fid=0; fid<pnet.MAX_field; fid++)
             {
                 vid = pnet.field[o_vid].vids[fid];
                 for (int d=0; d<dim; ++d)
                     model << " " << w_vertex_o1[ vid ][d];
             }
+            */
             for (fid=0; fid<pnet.MAX_field; fid++)
             {
                 vid = pnet.field[o_vid].vids[fid];
@@ -46,10 +48,10 @@ void FINE::Init(int dimension) {
    
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dimension << endl;
-    dim = int(dimension/pnet.MAX_field/2);
+    dim = int(dimension/pnet.MAX_field);
     
     w_vertex.resize(pnet.MAX_fvid);
-    w_vertex_o1.resize(pnet.MAX_fvid);
+    //w_vertex_o1.resize(pnet.MAX_fvid);
     w_context.resize(pnet.MAX_fvid);
 
     for (long vid=0; vid<pnet.MAX_vid; ++vid)
@@ -57,10 +59,10 @@ void FINE::Init(int dimension) {
         for (auto fvid: pnet.field[vid].vids)
         {
             w_vertex[fvid].resize(dim);
-            w_vertex_o1[fvid].resize(dim);
+            //w_vertex_o1[fvid].resize(dim);
             for (int d=0; d<dim;++d)
             {
-                w_vertex_o1[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+                //w_vertex_o1[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
                 w_vertex[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
             }
         }
@@ -114,10 +116,12 @@ void FINE::Train(int sample_times, int walk_steps, int negative_samples, double 
             
         long v1 = pnet.SourceSample();
         long v2 = pnet.TargetSample(v1);
-        pnet.UpdateFieldCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim, walk_steps, negative_samples, _alpha);
-        v1 = pnet.SourceSample();
-        v2 = pnet.TargetSample(v1);
+        //pnet.UpdateFieldCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim, walk_steps, negative_samples, _alpha);
+        //v1 = pnet.SourceSample();
+        //v2 = pnet.TargetSample(v1);
         pnet.UpdateFieldCommunity(w_vertex, w_context, v1, v2, dim, walk_steps, negative_samples, _alpha);
+        pnet.UpdatePair(w_vertex, w_vertex, v2, v1, dim, negative_samples, _alpha);
+        //pnet.UpdateFieldCommunity(w_vertex, w_context, v2, v1, dim, 0, negative_samples, _alpha);
 
     }
     printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", _alpha);
