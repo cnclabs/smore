@@ -116,12 +116,9 @@ void FINE::Train(int sample_times, int walk_steps, int negative_samples, double 
             
         long v1 = pnet.SourceSample();
         long v2 = pnet.TargetSample(v1);
-        //pnet.UpdateFieldCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim, walk_steps, negative_samples, _alpha);
-        //v1 = pnet.SourceSample();
-        //v2 = pnet.TargetSample(v1);
         pnet.UpdateFieldCommunity(w_vertex, w_context, v1, v2, dim, walk_steps, negative_samples, _alpha);
-        pnet.UpdatePair(w_vertex, w_vertex, v2, v1, dim, negative_samples, _alpha);
-        //pnet.UpdateFieldCommunity(w_vertex, w_context, v2, v1, dim, 0, negative_samples, _alpha);
+        pnet.UpdateFieldCommunity(w_context, w_vertex, v2, v1, dim, walk_steps, negative_samples, _alpha);
+        //pnet.UpdateFieldCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim, walk_steps, negative_samples, _alpha);
 
     }
     printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", _alpha);
