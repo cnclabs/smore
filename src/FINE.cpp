@@ -20,18 +20,12 @@ void FINE::SaveWeights(string model_name){
         {
             model << k;
             o_vid = pnet.kmap[k];
-            /*
+            for (int d=0; d<dim_1; ++d)
+                model << " " << w_vertex_o1[ o_vid ][d];
             for (fid=0; fid<pnet.MAX_field; fid++)
             {
                 vid = pnet.field[o_vid].vids[fid];
-                for (int d=0; d<dim; ++d)
-                    model << " " << w_vertex_o1[ vid ][d];
-            }
-            */
-            for (fid=0; fid<pnet.MAX_field; fid++)
-            {
-                vid = pnet.field[o_vid].vids[fid];
-                for (int d=0; d<dim; ++d)
+                for (int d=0; d<dim_2; ++d)
                     model << " " << w_vertex[ vid ][d];
             }
             model << endl;
@@ -48,23 +42,24 @@ void FINE::Init(int dimension) {
    
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dimension << endl;
-    dim = int(dimension/pnet.MAX_field);
+    dim_1 = int(dimension/2);
+    dim_2 = int(dimension/2/pnet.MAX_fvid);
     
+    w_vertex_o1.resize(pnet.MAX_vid);
     w_vertex.resize(pnet.MAX_fvid);
-    //w_vertex_o1.resize(pnet.MAX_fvid);
     w_context.resize(pnet.MAX_fvid);
 
     for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
+        w_vertex_o1[vid].resize(dim_1);
+        for (int d=0; d<dim_1;++d)
+            w_vertex_o1[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_1;
+
         for (auto fvid: pnet.field[vid].vids)
         {
-            w_vertex[fvid].resize(dim);
-            //w_vertex_o1[fvid].resize(dim);
-            for (int d=0; d<dim;++d)
-            {
-                //w_vertex_o1[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
-                w_vertex[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
-            }
+            w_vertex[fvid].resize(dim_2);
+            for (int d=0; d<dim_2;++d)
+                w_vertex[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_2;
         }
     }
 
@@ -72,9 +67,9 @@ void FINE::Init(int dimension) {
     {
         for (auto fvid: pnet.field[vid].vids)
         {
-            w_context[fvid].resize(dim);
-            for (int d=0; d<dim;++d)
-                w_context[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+            w_context[fvid].resize(dim_2);
+            for (int d=0; d<dim_2;++d)
+                w_context[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_2;
         }
     }
 }
@@ -114,7 +109,7 @@ void FINE::Train(int sample_times, int walk_steps, int negative_samples, double 
             if (count % MONITOR == 0)
             {
                 current_sample += MONITOR;
-                _alpha = alpha* ( 1.0 - (double)(count)/sample_times );
+                _alpha = alpha* ( 1.0 - (double)(count)/jobs );
                 if (_alpha < alpha_min) _alpha = alpha_min;
                 alpha_last = _alpha;
                 printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/sample_times * 100, 13);
@@ -123,8 +118,11 @@ void FINE::Train(int sample_times, int walk_steps, int negative_samples, double 
             
             long v1 = pnet.SourceSample();
             long v2 = pnet.TargetSample(v1);
-            pnet.UpdateFieldCommunity(w_vertex, w_context, v1, v2, dim, walk_steps, negative_samples, _alpha);
-            pnet.UpdateFieldCommunity(w_context, w_vertex, v2, v1, dim, walk_steps, negative_samples, _alpha);
+            pnet.UpdateFieldCommunity(w_vertex, w_context, v1, v2, dim_2, walk_steps, negative_samples, _alpha);
+            v1 = pnet.SourceSample();
+            v2 = pnet.TargetSample(v1);
+            pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim_1, negative_samples, _alpha);
+
             //pnet.UpdateFieldCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim, walk_steps, negative_samples, _alpha);
         }
 

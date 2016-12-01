@@ -14,6 +14,9 @@ class FINE: public LINE {
         FINE();
         ~FINE();
 
+        int dim_1;
+        int dim_2;
+
         // data function
         void LoadFieldMeta(string);
         void SaveWeights(string);
