@@ -133,7 +133,6 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     cout << "\tProgress:\t\t100.00 %\r" << endl;
     cout << "\t# of vertex:\t\t" << MAX_vid << endl;
 
-
     unordered_map< long, vector< long > > graph;
     unordered_map< long, vector< double > > edge;
 
@@ -161,6 +160,11 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
         }
     }
     cout << "\tProgress:\t\t100.00 %\r" << endl;
+
+    // release the occupied memory
+    v_in = vector<int>();
+    v_out = vector<int>();
+    e_w = vector<double>();
 
     cout << "Build the Alias Method:" << endl;
     if (undirect)
@@ -248,7 +252,7 @@ void proNet::LoadFieldMeta(string filename) {
 
 }
 
-void proNet::BuildAliasMethod(unordered_map< long, vector< long > > graph, unordered_map< long, vector< double > > edge) {
+void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unordered_map< long, vector< double > > &edge) {
 
     // re-construct the graph
     // source === (weight) === target
@@ -285,6 +289,9 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > graph, unord
         vid = context[line].vid;
         vertex[vid].in_degree += context[line].in_degree;
     }
+    
+    graph.clear();
+    edge.clear();
 
     // compute alias table
     cout << "\tAlias Table Constructing ..." << endl;
@@ -299,6 +306,7 @@ void proNet::BuildNegativeAliasTable() {
     // normalization of vertices weights
     double sum, norm;
     vector <double> norm_prob;
+    negative_AT.resize(MAX_vid);
     
     sum = 0;
     for (long v1=0; v1!=MAX_vid; v1++)
@@ -340,8 +348,8 @@ void proNet::BuildNegativeAliasTable() {
         large_v = large_block.back();
         large_block.pop_back();
 
-        vertex[small_v].neg_alias = large_v;
-        vertex[small_v].neg_prob = norm_prob[small_v];
+        negative_AT[small_v].alias = large_v;
+        negative_AT[small_v].prob = norm_prob[small_v];
         norm_prob[large_v] = norm_prob[large_v] + norm_prob[small_v] - 1;
         if (norm_prob[large_v] < 1)
         {
@@ -357,14 +365,14 @@ void proNet::BuildNegativeAliasTable() {
     {
         large_v = large_block.back();
         large_block.pop_back();
-        vertex[large_v].neg_prob = 1.0;
+        negative_AT[large_v].prob = 1.0;
     }
 
     while (small_block.size())
     {
         small_v = small_block.back();
         small_block.pop_back();
-        vertex[small_v].neg_prob = 1.0;
+        negative_AT[small_v].prob = 1.0;
     }
 
 }
@@ -374,6 +382,7 @@ void proNet::BuildSourceAliasTable() {
     // normalization of vertices weights
     double sum, norm;
     vector <double> norm_prob;
+    vertex_AT.resize(MAX_vid);
     
     sum = 0;
     for (long v1=0; v1<MAX_vid; v1++)
@@ -415,8 +424,8 @@ void proNet::BuildSourceAliasTable() {
         large_v = large_block.back();
         large_block.pop_back();
 
-        vertex[small_v].alias = large_v;
-        vertex[small_v].prob = norm_prob[small_v];
+        vertex_AT[small_v].alias = large_v;
+        vertex_AT[small_v].prob = norm_prob[small_v];
         norm_prob[large_v] = norm_prob[large_v] + norm_prob[small_v] - 1;
         if (norm_prob[large_v] < 1)
         {
@@ -432,20 +441,22 @@ void proNet::BuildSourceAliasTable() {
     {
         large_v = large_block.back();
         large_block.pop_back();
-        vertex[large_v].prob = 1.0;
+        vertex_AT[large_v].prob = 1.0;
     }
 
     while (small_block.size())
     {
         small_v = small_block.back();
         small_block.pop_back();
-        vertex[small_v].prob = 1.0;
+        vertex_AT[small_v].prob = 1.0;
     }
 
 }
 
 void proNet::BuildTargetAliasTable() {
     
+    context_AT.resize(MAX_line);
+
     for (int vid=0; vid<MAX_vid;vid++)
     {
         // normalization of vertices weights
@@ -492,8 +503,8 @@ void proNet::BuildTargetAliasTable() {
             large_i = large_block.back();
             large_block.pop_back();
 
-            context[small_i+offset].alias = context[large_i+offset].vid;
-            context[small_i+offset].prob = norm_prob[small_i];
+            context_AT[small_i+offset].alias = context[large_i+offset].vid;
+            context_AT[small_i+offset].prob = norm_prob[small_i];
             norm_prob[large_i] = norm_prob[large_i] + norm_prob[small_i] - 1;
             if (norm_prob[large_i] < 1)
             {
@@ -509,14 +520,14 @@ void proNet::BuildTargetAliasTable() {
         {
             large_i = large_block.back();
             large_block.pop_back();
-            context[large_i+offset].prob = 1.0;
+            context_AT[large_i+offset].prob = 1.0;
         }
 
         while (small_block.size())
         {
             small_i = small_block.back();
             small_block.pop_back();
-            context[small_i+offset].prob = 1.0;
+            context_AT[small_i+offset].prob = 1.0;
         }
 
     }
@@ -527,10 +538,10 @@ long proNet::NegativeSample() {
     long rand_v = random_gen(0, MAX_vid);
     double rand_p = random_gen(0, 1);
     
-    if (rand_p < vertex[rand_v].neg_prob)
+    if (rand_p < negative_AT[rand_v].prob)
         return rand_v;
     else
-        return vertex[rand_v].neg_alias;
+        return negative_AT[rand_v].alias;
 
 }
 
@@ -539,10 +550,10 @@ long proNet::NegativeFieldSample(long fid) {
     long rand_v = random_gen(0, MAX_vid);
     double rand_p = random_gen(0, 1);
     
-    if (rand_p < vertex[rand_v].neg_prob)
+    if (rand_p < negative_AT[rand_v].prob)
         return field[rand_v].vids[fid];
     else
-        return field[vertex[rand_v].neg_alias].vids[fid];
+        return field[negative_AT[rand_v].alias].vids[fid];
 
 }
 
@@ -551,10 +562,10 @@ long proNet::SourceSample() {
     long rand_v = random_gen(0, MAX_vid);
     double rand_p = random_gen(0, 1);
     
-    if (rand_p < vertex[rand_v].prob)
+    if (rand_p < vertex_AT[rand_v].prob)
         return rand_v;
     else
-        return vertex[rand_v].alias;
+        return vertex_AT[rand_v].alias;
 
 }
 
@@ -563,10 +574,10 @@ long proNet::TargetSample() {
     long rand_v = random_gen(0, MAX_line);
     double rand_p = random_gen(0, 1);
 
-    if (rand_p < context[rand_v].prob)
+    if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
     else
-        return context[rand_v].alias;
+        return context_AT[rand_v].alias;
 
 }
 
@@ -577,10 +588,10 @@ long proNet::TargetSample(long vid) {
     long rand_v = random_gen(0, vertex[vid].branch) + vertex[vid].offset;
     double rand_p = random_gen(0, 1);
 
-    if (rand_p < context[rand_v].prob)
+    if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
     else
-        return context[rand_v].alias;
+        return context_AT[rand_v].alias;
 
 }
 

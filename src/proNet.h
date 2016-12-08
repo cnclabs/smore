@@ -35,11 +35,10 @@ class Vertex {
         int offset, branch;
         double out_degree=0.0;
         double in_degree=0.0;
-        int alias=-1;
-        double prob=0.0;
-        int neg_alias=-1;
-        double neg_prob=0.0;
-        double subsample=0.0;
+        //int alias=-1;
+        //double prob=0.0;
+        //int neg_alias=-1;
+        //double neg_prob=0.0;
 };
 
 class Field {
@@ -52,10 +51,15 @@ class Context {
     public:
         int vid=-1;
         double in_degree=0.0;
+        //int alias=-1;
+        //double prob=0.0;
+};
+
+class AliasTable {
+    public:
         int alias=-1;
         double prob=0.0;
 };
-
 
 class proNet {
 
@@ -78,10 +82,13 @@ class proNet {
         // Alias Graph
         vector< Vertex > vertex;
         vector< Context > context;
+        vector< AliasTable > vertex_AT;
+        vector< AliasTable > context_AT;
+        vector< AliasTable > negative_AT;
         vector< Field > field;
         
         // cahce
-        void BuildAliasMethod(unordered_map<long, vector<long>>, unordered_map<long, vector<double>>);
+        void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
         void BuildNegativeAliasTable();
         void BuildSourceAliasTable();
         void BuildTargetAliasTable();
