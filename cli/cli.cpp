@@ -51,7 +51,7 @@ int main(int argc, char **argv){
         printf("\t-alpha <float>\n");
         printf("\t\tInit learning rate; default is 0.025\n");
         printf("\nExample Usage:\n");
-        printf("./cli -model DeepWalk -train net.txt -output rep.txt -window_size 64 -negative_samples 5 -alpha 0.025 -threads 20\n\n");
+        printf("./cli -model DeepWalk -train net.txt -output rep.txt -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4\n\n");
         return 0;
     }
     
