@@ -69,30 +69,41 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double a
 
     sample_times *= 1000000;
     double alpha_min = alpha * 0.0001;
-    double _alpha;
+    double alpha_last = alpha;
     
-    int count = 0;
+    int current_sample = 0;
+    int jobs = sample_times/workers;
 
     #pragma omp parallel for
-    for (int samples=0; samples<sample_times; ++samples)
+    for (int worker=0; worker<workers; ++worker)
     {
+        int count = 0;
+        double _alpha = alpha;
+        long v1, v2;
         
-        count++;
-        if (count % MONITOR == 0)
+        while (count<jobs)
         {
-            _alpha = alpha* ( 1.0 - (double)(count)/sample_times );
-            if (_alpha < alpha_min) _alpha = alpha_min;
-            printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(count)/sample_times * 100, 13);
-            fflush(stdout);
-        }
+            count ++;
+            if (count % MONITOR == 0)
+            {
+                current_sample += MONITOR;
+                _alpha = alpha* ( 1.0 - (double)(count)/jobs );
+                if (_alpha < alpha_min)
+                    _alpha = alpha_min;
+                if (_alpha < alpha_last)
+                    alpha_last = _alpha;
+                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", alpha_last, (double)(current_sample)/sample_times * 100, 13);
+                fflush(stdout);
+            }
             
-        long v1 = pnet.SourceSample();
-        long v2 = pnet.TargetSample(v1);
-        pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, walk_steps, _alpha);
-        pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
+            v1 = pnet.SourceSample();
+            v2 = pnet.TargetSample(v1);
+            pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, walk_steps, _alpha);
+            pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
+        }
 
     }
-    printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", _alpha);
+    printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", alpha_last);
 
 }
 
