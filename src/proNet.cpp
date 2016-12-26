@@ -219,7 +219,7 @@ void proNet::LoadFieldMeta(string filename) {
             MAX_field++;
         }
         vid = kmap[v];
-        field[ vid ].field = meta_idx[meta];
+        field[ vid ].fields.push_back(meta_idx[meta]);
         
         if (line % MONITOR == 0)
         {
@@ -237,7 +237,7 @@ void proNet::LoadFieldMeta(string filename) {
         field[ vid ].vids.resize(MAX_field);
         for (int i=0; i<MAX_field; i++)
         {
-            if (i == field[vid].field)
+            if (i == field[vid].fields[0])
             {
                 field[vid].vids[i] = vid;
             }
@@ -863,7 +863,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
     w_context_ptr = &w_context[context];
 
     // 0 for postive sample, others for negative sample
-    for (int s = -1; s <= walk_steps; s++)
+    for (int s = -1; s < walk_steps; s++)
     {
         label = 1;
         if (s != 0)
@@ -913,12 +913,12 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
     double label, g, f, rand_p;
     
     // vertex
-    fid = field[context].field;
+    fid = field[context].fields[0];
     vid = field[vertex].vids[fid];
     w_vertex_ptr = &w_vertex[vid];
 
     // context
-    fid = field[vertex].field;
+    fid = field[vertex].fields[0];
     vid = field[context].vids[fid];
     w_context_ptr = &w_context[vid];
         
@@ -931,10 +931,10 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
             if (context==-1) break; 
             vid = field[context].vids[fid];
             w_context_ptr = &w_context[vid];
-            fid = field[context].field;
+            fid = field[context].fields[0];
             vid = field[vertex].vids[fid];
             w_vertex_ptr = &w_vertex[vid];
-            fid = field[vertex].field;
+            fid = field[vertex].fields[0];
         }
 
         for (d=0; d<dimension; ++d)
@@ -964,4 +964,66 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
         //    break;
     }
 
+}
+
+
+void proNet::UpdateFieldsCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int walk_steps, int negative_samples, double alpha){
+
+    vector<double>* w_vertex_ptr;
+    vector<double>* w_context_ptr;
+    vector<double> back_err;
+    back_err.resize(dimension, 0.0);
+
+    int d, vid, v_fid, c_fid;
+    long rand_v;
+    double label, g, f, rand_p;
+    
+    // 0 for postive sample, others for negative sample
+    for (int s = 0; s <= walk_steps; s++) {
+        label = 1;
+        if (s != 0)
+        {
+            context = TargetSample(context);
+            if (context==-1) break; 
+        }
+
+        for (auto c_fid: field[context].fields)
+        {
+            // vertex
+            vid = field[vertex].vids[c_fid];
+            w_vertex_ptr = &w_vertex[vid];
+
+            for (auto v_fid: field[vertex].fields)
+            {
+                // context
+                vid = field[context].vids[v_fid];
+                w_context_ptr = &w_context[vid];
+
+                // optimization
+                for (d=0; d<dimension; ++d)
+                    back_err[d] = 0.0;
+                for (int neg=0; neg<=negative_samples; ++neg)
+                {
+                    // negative sampling
+                    if (neg!=0){
+                        label = 0;
+                        w_context_ptr = &w_context[ NegativeFieldSample(v_fid) ];
+                    }
+
+                    f = 0;
+                    for (d=0; d<dimension; ++d) // prediciton
+                        f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
+                    f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+                    g = (label - f) * alpha; // gradient
+                    for (d=0; d<dimension; ++d) // store the back propagation error
+                        back_err[d] += g * (*w_context_ptr)[d];
+                    for (d=0; d<dimension; ++d) // update context
+                        (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
+                }
+                for (d=0; d<dimension; ++d)
+                    (*w_vertex_ptr)[d] += back_err[d];
+
+            }
+        }
+    }
 }

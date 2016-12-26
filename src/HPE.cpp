@@ -98,7 +98,7 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double a
             
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
-            pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, walk_steps, _alpha);
+            pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, walk_steps, negative_samples, _alpha);
             pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
         }
 

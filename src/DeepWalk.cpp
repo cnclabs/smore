@@ -60,7 +60,7 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
     omp_set_num_threads(workers);
 
     cout << "Model:" << endl;
-    cout << "\tDeepWalk" << endl;
+    cout << "\t[DeepWalk]" << endl;
 
     cout << "Learning Parameters:" << endl;
     cout << "\twalk_times:\t\t" << walk_times << endl;
