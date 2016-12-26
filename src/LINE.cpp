@@ -36,7 +36,7 @@ void LINE::SaveWeights(string model_name){
 void LINE::Init(int dimension) {
    
     cout << "Model Setting:" << endl;
-    cout << "\tdimension:\t\t" << dim << endl;
+    cout << "\tdimension:\t\t" << dimension << endl;
     this->dim = int(dimension/2);
 
     w_vertex_o1.resize(pnet.MAX_vid);
