@@ -866,7 +866,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
     for (int s = -1; s < walk_steps; s++)
     {
         label = 1;
-        if (s != 0)
+        if (s != -1)
         {
             context = TargetSample(context);
             if (context==-1) break;
