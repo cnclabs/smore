@@ -78,19 +78,19 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
 
     cout << "Start Training:" << endl;
 
-    sample_times *= 1000000;
+    unsigned int total_sample_times = sample_times*1000000;
     double alpha_min = alpha * 0.0001;
     double alpha_last;
     
-    int current_sample = 0;
-    int jobs = sample_times/workers;
+    unsigned int current_sample = 0;
+    unsigned int jobs = total_sample_times/workers;
 
     //for (int samples=0; samples<sample_times; ++samples)
     #pragma omp parallel for
     for (int worker=0; worker<workers; ++worker)
     {
         
-        int count = 0;
+        unsigned int count = 0;
         double _alpha = alpha;
         
         while (count<jobs)
@@ -102,7 +102,7 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
                 _alpha = alpha* ( 1.0 - (double)(count)/jobs );
                 if (_alpha < alpha_min) _alpha = alpha_min;
                 alpha_last = _alpha;
-                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/sample_times * 100, 13);
+                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
                 fflush(stdout);
             }
             

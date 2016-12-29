@@ -67,17 +67,17 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double a
 
     cout << "Start Training:" << endl;
 
-    sample_times *= 1000000;
+    unsigned int total_sample_times = sample_times*1000000;
     double alpha_min = alpha * 0.0001;
     double alpha_last = alpha;
     
-    int current_sample = 0;
-    int jobs = sample_times/workers;
+    unsigned int current_sample = 0;
+    unsigned int jobs = total_sample_times/workers;
 
     #pragma omp parallel for
     for (int worker=0; worker<workers; ++worker)
     {
-        int count = 0;
+        unsigned int count = 0;
         double _alpha = alpha;
         long v1, v2;
         
@@ -92,7 +92,7 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double a
                     _alpha = alpha_min;
                 if (_alpha < alpha_last)
                     alpha_last = _alpha;
-                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", alpha_last, (double)(current_sample)/sample_times * 100, 13);
+                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", alpha_last, (double)(current_sample)/total_sample_times * 100, 13);
                 fflush(stdout);
             }
             

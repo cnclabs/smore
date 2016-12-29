@@ -751,6 +751,7 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
         //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
         f = tanh(f); // fast sigmoid(prediction)
         //f = max(-1.0, f); // relu(prediction)
+        //f = min(1.0, f); // relu(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
