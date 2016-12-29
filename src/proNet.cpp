@@ -740,14 +740,17 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
     {
         // negative sampling
         if (neg!=0){
-            label = 0;
+            label = -1;
             w_context_ptr = &w_context[ NegativeSample() ]; // Negative Sample
         }
 
         f = 0;
         for (d=0; d<dimension; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-        f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        //f = 1.0/(1.0+exp(-f)); // sigmoid(prediction)
+        //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
+        f = tanh(f); // fast sigmoid(prediction)
+        //f = max(-1.0, f); // relu(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
@@ -779,14 +782,15 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
     {
         // negative sampling
         if (neg!=0){
-            label = 0;
+            label = -1;
             w_context_ptr = &w_context[ TargetSample() ]; // Negative Target Sample
         }
 
         f = 0;
         for (d=0; d<dimension; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-        f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        f = tanh(f); // fast sigmoid(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
         {
@@ -815,14 +819,15 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
     {
         // negative sampling
         if (neg!=0){
-            label = 0;
+            label = -1;
             w_context_ptr = &w_context[ SourceSample() ]; // Negative Source Sample
         }
 
         f = 0;
         for (d=0; d<dimension; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-        f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+        f = tanh(f); // fast sigmoid(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
@@ -879,14 +884,15 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
         {
             // negative sampling
             if (neg!=0){
-                label = 0;
+                label = -1;
                 w_context_ptr = &w_context[ NegativeSample() ];
             }
 
             f = 0;
             for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-            f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+            //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+            f = tanh(f); // fast sigmoid(prediction)
             g = (label - f) * alpha; // gradient
             for (d=0; d<dimension; ++d) // store the back propagation error
                 back_err[d] += g * (*w_context_ptr)[d];
@@ -943,14 +949,15 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
         {
             // negative sampling
             if (neg!=0){
-                label = 0;
+                label = -1;
                 w_context_ptr = &w_context[ NegativeFieldSample(fid) ];
             }
 
             f = 0;
             for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-            f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+            //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+            f = tanh(f); // fast sigmoid(prediction)
             g = (label - f) * alpha; // gradient
             for (d=0; d<dimension; ++d) // store the back propagation error
                 back_err[d] += g * (*w_context_ptr)[d];
@@ -1006,14 +1013,15 @@ void proNet::UpdateFieldsCommunity(vector< vector<double> >& w_vertex, vector< v
                 {
                     // negative sampling
                     if (neg!=0){
-                        label = 0;
+                        label = -1;
                         w_context_ptr = &w_context[ NegativeFieldSample(v_fid) ];
                     }
 
                     f = 0;
                     for (d=0; d<dimension; ++d) // prediciton
                         f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-                    f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+                    //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
+                    f = tanh(f); // fast sigmoid(prediction)
                     g = (label - f) * alpha; // gradient
                     for (d=0; d<dimension; ++d) // store the back propagation error
                         back_err[d] += g * (*w_context_ptr)[d];
