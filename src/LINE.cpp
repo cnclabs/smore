@@ -16,6 +16,7 @@ void LINE::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
+        model << pnet.MAX_vid << " " << dim*2 << endl;
         for (auto k: pnet.keys)
         {
             model << k;

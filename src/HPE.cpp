@@ -9,6 +9,7 @@ void HPE::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
+        model << pnet.MAX_vid << " " << dim << endl;
         for (auto k: pnet.keys)
         {
             model << k;
