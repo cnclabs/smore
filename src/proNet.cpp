@@ -96,7 +96,7 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     {
         if ( fscanf(fin, "%s %s %lf", v1, v2, &w) != 3 )
         {
-            cout << "\t[ERROR] line " << line << " contains wrong number of data" << endl; 
+            cout << "\t[ERROR] line " << line << " contains wrong number of column data" << endl; 
             continue;
         }
         
@@ -311,13 +311,13 @@ void proNet::BuildNegativeAliasTable() {
     sum = 0;
     for (long v1=0; v1!=MAX_vid; v1++)
     {
-        sum += vertex[v1].in_degree;
+        sum += pow((vertex[v1].in_degree+vertex[v1].out_degree), 0.75);
     }
     norm = MAX_vid/sum;
 
     for (long v1=0; v1!=MAX_vid; v1++)
     {
-        norm_prob.push_back( vertex[v1].in_degree*norm );
+        norm_prob.push_back( pow((vertex[v1].in_degree+vertex[v1].out_degree), 0.75)*norm );
     }
  
     // block divison
@@ -731,7 +731,7 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
     long rand_v;
     double label, g, f, rand_p;
     
-    label = 1;
+    label = 1.0;
     w_vertex_ptr = &w_vertex[vertex];
     w_context_ptr = &w_context[context];
 
@@ -740,7 +740,7 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
     {
         // negative sampling
         if (neg!=0){
-            label = -1;
+            label = -1.0;
             w_context_ptr = &w_context[ NegativeSample() ]; // Negative Sample
         }
 
@@ -750,7 +750,7 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
         //f = 1.0/(1.0+exp(-f)); // sigmoid(prediction)
         //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
         f = tanh(f); // fast sigmoid(prediction)
-        //f = max(-1.0, f); // relu(prediction)
+        //f = max(0.0, f); // relu(prediction)
         //f = min(1.0, f); // relu(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error

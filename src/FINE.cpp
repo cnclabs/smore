@@ -69,7 +69,8 @@ void FINE::Init(int dimension) {
         {
             w_context[fvid].resize(dim_2);
             for (int d=0; d<dim_2;++d)
-                w_context[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_2;
+                w_context[vid][d] = 0.0;
+                //w_context[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_2;
         }
     }
 }

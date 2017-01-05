@@ -46,7 +46,8 @@ void HPE::Init(int dim) {
     {
         w_context[vid].resize(dim);
         for (int d=0; d<dim;++d)
-            w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+            w_context[vid][d] = 0.0;
+            //w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
     }
 }
 
