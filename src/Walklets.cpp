@@ -8,7 +8,7 @@ void Walklets::Train(int walk_times, int walk_steps, int window_min, int window_
     omp_set_num_threads(workers);
 
     cout << "Model:" << endl;
-    cout << "\tWalklets" << endl;
+    cout << "\t[Walklets]" << endl;
 
     cout << "Parameters:" << endl;
     cout << "\twalk_times:\t\t" << walk_times << endl;

@@ -23,8 +23,8 @@ int main(int argc, char **argv){
     int i;
 
     if (argc == 1) {
-        printf("[proRec]\n");
-        printf("\tcommand line interface for proRec\n\n");
+        printf("[proNet-core]\n");
+        printf("\tcommand line interface for proNet-core\n\n");
         printf("Options:\n");
         printf("\t-model <string>\n");
         printf("\t\tAvaliable models: <DeepWalk>, <LINE>, <Walklets>, <HPE>, <FINE>\n");
@@ -51,7 +51,7 @@ int main(int argc, char **argv){
         printf("\t-alpha <float>\n");
         printf("\t\tInit learning rate; default is 0.025\n");
         printf("\nExample Usage:\n");
-        printf("./cli -model DeepWalk -train net.txt -output rep.txt -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4\n\n");
+        printf("./cli -model DeepWalk -train net.txt -save rep.txt -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4\n\n");
         return 0;
     }
     

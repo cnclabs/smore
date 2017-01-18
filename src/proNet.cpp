@@ -312,12 +312,18 @@ void proNet::BuildNegativeAliasTable() {
     for (long v1=0; v1!=MAX_vid; v1++)
     {
         sum += pow((vertex[v1].in_degree+vertex[v1].out_degree), 0.75);
+        //sum += pow((vertex[v1].in_degree), 0.75);
+        //sum += vertex[v1].in_degree;
+        //sum += vertex[v1].in_degree+vertex[v1].out_degree;
     }
     norm = MAX_vid/sum;
 
     for (long v1=0; v1!=MAX_vid; v1++)
     {
         norm_prob.push_back( pow((vertex[v1].in_degree+vertex[v1].out_degree), 0.75)*norm );
+        //norm_prob.push_back( pow((vertex[v1].in_degree), 0.75)*norm );
+        //norm_prob.push_back( vertex[v1].in_degree*norm );
+        //norm_prob.push_back( (vertex[v1].in_degree+vertex[v1].out_degree)*norm );
     }
  
     // block divison
@@ -537,7 +543,10 @@ long proNet::NegativeSample() {
     
     long rand_v = random_gen(0, MAX_vid);
     double rand_p = random_gen(0, 1);
-    
+
+    //double rand_v = random_gen(0, MAX_vid);
+    //double rand_p = rand_v - (int)rand_v;
+   
     if (rand_p < negative_AT[rand_v].prob)
         return rand_v;
     else
@@ -632,9 +641,9 @@ vector< vector< long > > proNet::SkipGrams(vector< long > &walk, int window_size
     vector< long > couple;
     for (int i=0; i<length; ++i)
     {
-        left = i-window_size;
+        left = i-(window_size-int(random_gen(0, window_size)));
         if (left < 0) left = 0;
-        right = i+window_size;
+        right = i+(window_size-int(random_gen(0, window_size)));
         if (right >= length) right = length-1;
 
         for (int j=left; j<=right; j++)
@@ -750,8 +759,7 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
         //f = 1.0/(1.0+exp(-f)); // sigmoid(prediction)
         //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
         f = tanh(f); // fast sigmoid(prediction)
-        //f = max(0.0, f); // relu(prediction)
-        //f = min(1.0, f); // relu(prediction)
+        //f = min(1.0, max(-1.0, f)); // relu(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
@@ -843,7 +851,7 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
 
     vector<long>::iterator it_v = vertex.begin();
     vector<long>::iterator it_c = context.begin();
-
+    
     while( it_v != vertex.end() )
     {
         UpdatePair(w_vertex, w_context, (*it_v), (*it_c), dimension, negative_samples, alpha);

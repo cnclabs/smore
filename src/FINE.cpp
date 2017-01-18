@@ -43,7 +43,8 @@ void FINE::Init(int dimension) {
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dimension << endl;
     dim_1 = int(dimension/2);
-    dim_2 = int(dimension/2/pnet.MAX_fvid);
+    dim_2 = int(dimension/2/pnet.MAX_field);
+    //dim_2 = int(dimension/pnet.MAX_field);
     
     w_vertex_o1.resize(pnet.MAX_vid);
     w_vertex.resize(pnet.MAX_fvid);
@@ -69,8 +70,7 @@ void FINE::Init(int dimension) {
         {
             w_context[fvid].resize(dim_2);
             for (int d=0; d<dim_2;++d)
-                w_context[vid][d] = 0.0;
-                //w_context[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_2;
+                w_context[fvid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_2;
         }
     }
 }
@@ -120,10 +120,10 @@ void FINE::Train(int sample_times, int walk_steps, int negative_samples, double 
             long v1 = pnet.SourceSample();
             long v2 = pnet.TargetSample(v1);
             pnet.UpdateFieldCommunity(w_vertex, w_context, v1, v2, dim_2, walk_steps, negative_samples, _alpha);
+            //pnet.UpdatePair(w_context, w_vertex, v2, v1, dim_1, negative_samples, _alpha);
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
             pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim_1, negative_samples, _alpha);
-
             //pnet.UpdateFieldCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim, walk_steps, negative_samples, _alpha);
         }
 
