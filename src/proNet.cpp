@@ -6,8 +6,16 @@ double random_gen(const int & min, const int & max) {
     return distribution(generator);
 }
 
+bool isDirectory(const char *path) {
+    struct stat statbuf;
+    if (stat(path, &statbuf) != 0)
+        return 0;
+    return S_ISDIR(statbuf.st_mode);
+}
+
 proNet::proNet() {
     hash_table.resize(HASH_TABLE_SIZE, -1);
+    InitSigmoid();
 }
 
 proNet::~proNet() {
@@ -22,6 +30,25 @@ unsigned int proNet::BKDRHash(char *key) {
         hash = hash * seed + (*key++);
     }
     return (hash % HASH_TABLE_SIZE);
+}
+
+void proNet::InitSigmoid() {
+
+    cached_sigmoid.resize(SIGMOID_TABLE_SIZE);
+    for (int i = 0; i < SIGMOID_TABLE_SIZE + 1; i++) {
+        double x = double(i * 2 * MAX_SIGMOID) / SIGMOID_TABLE_SIZE - MAX_SIGMOID;
+        cached_sigmoid[i] = 1.0 / (1.0 + exp(-x));
+    }
+}
+
+double proNet::fastSigmoid(double x) {
+    if (x < -MAX_SIGMOID) {
+        return 0.0;
+    } else if (x > MAX_SIGMOID) {
+        return 1.0;
+    } else {
+        return cached_sigmoid[ int((x + MAX_SIGMOID) * SIGMOID_TABLE_SIZE / MAX_SIGMOID / 2) ];
+    }
 }
 
 int proNet::InsertHashTable(char *key)
@@ -56,18 +83,41 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     // calculate the total connections
     FILE *fin;
     char c_line[1000];
-
-    cout << "Connections Preview:" << endl;
-    fin = fopen(filename.c_str(), "rb");
-    while (fgets(c_line, sizeof(c_line), fin))
+    vector< string > filenames;
+    vector< int > filelines;
+    
+    // load from a folder or from a file
+    if (isDirectory(filename.c_str()))
     {
-        if (MAX_line % MONITOR == 0)
-        {
-            printf("\t# of connection:\t%lld%c", MAX_line, 13);
+        DIR *dir;
+        struct dirent *ent;
+        dir = opendir(filename.c_str());
+        while ((ent = readdir (dir)) != NULL) {
+            string fname = filename + "/" + ent->d_name;
+            filenames.push_back(fname);
         }
-        ++MAX_line;
+        closedir(dir);
     }
-    fclose(fin);
+    else
+    {
+        filenames.push_back(filename.c_str());
+    }
+    
+    cout << "Connections Preview:" << endl; 
+    for (auto fname: filenames)
+    {
+        fin = fopen(fname.c_str(), "rb");
+        while (fgets(c_line, sizeof(c_line), fin))
+        {
+            if (MAX_line % MONITOR == 0)
+            {
+                printf("\t# of connection:\t%lld%c", MAX_line, 13);
+            }
+            ++MAX_line;
+        }
+        fclose(fin);
+        filelines.push_back(MAX_line);
+    }
     cout << "\t# of connection:\t" << MAX_line << endl;
 
     // load the connections
@@ -91,45 +141,50 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     }
 
     cout << "Connections Loading:" << endl;
-    fin = fopen(filename.c_str(), "rb");
-    for (long long int line = 0; line != MAX_line; line++)
+    
+    long long int line = 0;
+    for (int i=0; i<filenames.size();i++)
     {
-        if ( fscanf(fin, "%s %s %lf", v1, v2, &w) != 3 )
+        fin = fopen(filenames[i].c_str(), "rb");
+        for (; line != filelines[i]; line++)
         {
-            cout << "\t[ERROR] line " << line << " contains wrong number of column data" << endl; 
-            continue;
-        }
-        
-        // generate keys lookup table (kmap)
-        vid1 = SearchHashTable(v1);
-        if (vid1 == -1)
-        {
-            vid1 = InsertHashTable(v1);
-        }
-        vid2 = SearchHashTable(v2);
-        if (vid2 == -1)
-        {
-            vid2 = InsertHashTable(v2);
-        }
+            if ( fscanf(fin, "%s %s %lf", v1, v2, &w) != 3 )
+            {
+                cout << "\t[ERROR] line " << line << " contains wrong number of column data" << endl; 
+                continue;
+            }
 
-        v_in[line] = vid1;
-        v_out[line] = vid2;
-        e_w[line] = w;
+            // generate keys lookup table (kmap)
+            vid1 = SearchHashTable(v1);
+            if (vid1 == -1)
+            {
+                vid1 = InsertHashTable(v1);
+            }
+            vid2 = SearchHashTable(v2);
+            if (vid2 == -1)
+            {
+                vid2 = InsertHashTable(v2);
+            }
 
-        if (undirect)
-        {
-            v_in[line] = vid2;
-            v_out[line] = vid1;
+            v_in[line] = vid1;
+            v_out[line] = vid2;
             e_w[line] = w;
+
+            if (undirect)
+            {
+                v_in[line] = vid2;
+                v_out[line] = vid1;
+                e_w[line] = w;
+            }
+
+            if (line % MONITOR == 0)
+            {
+                printf("\tProgress:\t\t%.2f %%%c", (double)(line)/(MAX_line+1) * 100, 13);
+                fflush(stdout);
+            }
         }
-        
-        if (line % MONITOR == 0)
-        {
-            printf("\tProgress:\t\t%.2f %%%c", (double)(line)/(MAX_line+1) * 100, 13);
-            fflush(stdout);
-        }
+        fclose(fin);
     }
-    fclose(fin);
     cout << "\tProgress:\t\t100.00 %\r" << endl;
     cout << "\t# of vertex:\t\t" << MAX_vid << endl;
 
@@ -607,14 +662,12 @@ long proNet::TargetSample(long vid) {
 vector< long > proNet::RandomWalk(long start, int steps) {
 
     long next = start;
-    long branch_size;
     vector< long > walk;
 
     walk.push_back(next);
     for (int s=0; s<steps; ++s)
     {   
-        branch_size = vertex[next].branch;
-        if (branch_size == 0)
+        if (vertex[next].branch == 0)
         {
             if (next==start)
                 return walk;
@@ -655,7 +708,7 @@ vector< vector< long > > proNet::SkipGrams(vector< long > &walk, int window_size
             
             for (int n=0; n<negative_samples; ++n){
                 vertices.push_back(walk[i]);
-                contexts.push_back( int(random_gen(0, MAX_vid)) );
+                contexts.push_back(NegativeSample());
                 labels.push_back(0);
             }
         }
@@ -749,7 +802,7 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
     {
         // negative sampling
         if (neg!=0){
-            label = -1.0;
+            label = 0.0;
             w_context_ptr = &w_context[ NegativeSample() ]; // Negative Sample
         }
 
@@ -758,7 +811,8 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
         //f = 1.0/(1.0+exp(-f)); // sigmoid(prediction)
         //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
-        f = tanh(f); // fast sigmoid(prediction)
+        //f = tanh(f); // fast sigmoid(prediction)
+        f = fastSigmoid(f); // fast sigmoid(prediction)
         //f = min(1.0, max(-1.0, f)); // relu(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
@@ -782,7 +836,7 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
     long rand_v;
     double label, g, f, rand_p, reg;
     
-    label = 1;
+    label = 1.0;
     w_vertex_ptr = &w_vertex[vertex];
     w_context_ptr = &w_context[context];
 
@@ -791,7 +845,7 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
     {
         // negative sampling
         if (neg!=0){
-            label = -1;
+            label = 0.0;
             w_context_ptr = &w_context[ TargetSample() ]; // Negative Target Sample
         }
 
@@ -799,7 +853,8 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
         for (d=0; d<dimension; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
         //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
-        f = tanh(f); // fast sigmoid(prediction)
+        //f = tanh(f); // fast sigmoid(prediction)
+        f = fastSigmoid(f); // fast sigmoid(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
         {
@@ -817,7 +872,7 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
     
 
     // opposite opt
-    label = 1;
+    label = 1.0;
     w_vertex_ptr = &w_vertex[context];
     w_context_ptr = &w_context[vertex];
 
@@ -828,7 +883,7 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
     {
         // negative sampling
         if (neg!=0){
-            label = -1;
+            label = 0.0;
             w_context_ptr = &w_context[ SourceSample() ]; // Negative Source Sample
         }
 
@@ -836,7 +891,8 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
         for (d=0; d<dimension; ++d) // prediciton
             f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
         //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
-        f = tanh(f); // fast sigmoid(prediction)
+        //f = tanh(f); // fast sigmoid(prediction)
+        f = fastSigmoid(f); // fast sigmoid(prediction)
         g = (label - f) * alpha; // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
             back_err[d] += g * (*w_context_ptr)[d];
@@ -879,7 +935,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
     // 0 for postive sample, others for negative sample
     for (int s = -1; s < walk_steps; s++)
     {
-        label = 1;
+        label = 1.0;
         if (s != -1)
         {
             context = TargetSample(context);
@@ -893,7 +949,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
         {
             // negative sampling
             if (neg!=0){
-                label = -1;
+                label = 0.0;
                 w_context_ptr = &w_context[ NegativeSample() ];
             }
 
@@ -901,7 +957,8 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
             for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
             //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
-            f = tanh(f); // fast sigmoid(prediction)
+            //f = tanh(f); // fast sigmoid(prediction)
+            f = fastSigmoid(f); // fast sigmoid(prediction)
             g = (label - f) * alpha; // gradient
             for (d=0; d<dimension; ++d) // store the back propagation error
                 back_err[d] += g * (*w_context_ptr)[d];
@@ -939,7 +996,7 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
         
     // 0 for postive sample, others for negative sample
     for (int s = 0; s <= walk_steps; s++) {
-        label = 1;
+        label = 1.0;
         if (s != 0)
         {
             context = TargetSample(context);
@@ -958,7 +1015,7 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
         {
             // negative sampling
             if (neg!=0){
-                label = -1;
+                label = 0.0;
                 w_context_ptr = &w_context[ NegativeFieldSample(fid) ];
             }
 
@@ -966,7 +1023,8 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
             for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
             //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
-            f = tanh(f); // fast sigmoid(prediction)
+            //f = tanh(f); // fast sigmoid(prediction)
+            f = fastSigmoid(f); // fast sigmoid(prediction)
             g = (label - f) * alpha; // gradient
             for (d=0; d<dimension; ++d) // store the back propagation error
                 back_err[d] += g * (*w_context_ptr)[d];
@@ -996,7 +1054,7 @@ void proNet::UpdateFieldsCommunity(vector< vector<double> >& w_vertex, vector< v
     
     // 0 for postive sample, others for negative sample
     for (int s = 0; s <= walk_steps; s++) {
-        label = 1;
+        label = 1.0;
         if (s != 0)
         {
             context = TargetSample(context);
@@ -1022,7 +1080,7 @@ void proNet::UpdateFieldsCommunity(vector< vector<double> >& w_vertex, vector< v
                 {
                     // negative sampling
                     if (neg!=0){
-                        label = -1;
+                        label = 0.0;
                         w_context_ptr = &w_context[ NegativeFieldSample(v_fid) ];
                     }
 
@@ -1030,7 +1088,8 @@ void proNet::UpdateFieldsCommunity(vector< vector<double> >& w_vertex, vector< v
                     for (d=0; d<dimension; ++d) // prediciton
                         f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
                     //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
-                    f = tanh(f); // fast sigmoid(prediction)
+                    //f = tanh(f); // fast sigmoid(prediction)
+                    f = fastSigmoid(f); // fast sigmoid(prediction)
                     g = (label - f) * alpha; // gradient
                     for (d=0; d<dimension; ++d) // store the back propagation error
                         back_err[d] += g * (*w_context_ptr)[d];

@@ -14,11 +14,16 @@
 #include <map>
 #include <utility>
 #include <omp.h>
+#include <dirent.h>
+#include <sys/stat.h>
+
 
 using namespace std;
 
 #define MONITOR 10000
 #define HASH_TABLE_SIZE 30000000
+#define SIGMOID_TABLE_SIZE 512
+#define MAX_SIGMOID 8
 
 double random_gen(const int&, const int&);
 
@@ -73,7 +78,7 @@ class proNet {
         int MAX_vid=0;
         int MAX_fvid=0;
         int MAX_field=0;
-       
+        
         // graph basics
         vector< int > hash_table;
         vector< char* > keys;
@@ -88,6 +93,8 @@ class proNet {
         vector< Field > field;
         
         // cahce
+        vector< double > cached_sigmoid;
+        void InitSigmoid();
         void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
         void BuildNegativeAliasTable();
         void BuildSourceAliasTable();
@@ -97,6 +104,9 @@ class proNet {
         unsigned int BKDRHash(char*);
         int InsertHashTable(char*);
         int SearchHashTable(char*);
+        
+        // Math-related Process
+        double fastSigmoid(double);
 
         // Data Process
         void LoadEdgeList(string, bool);
