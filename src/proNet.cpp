@@ -126,7 +126,6 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     double w;
     vector< int > v_in, v_out;
     vector< double > e_w;
-    
     if (undirect)
     {
         v_in.resize(MAX_line*2);
@@ -141,7 +140,6 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     }
 
     cout << "Connections Loading:" << endl;
-    
     long long int line = 0;
     for (int i=0; i<filenames.size();i++)
     {
@@ -273,9 +271,12 @@ void proNet::LoadFieldMeta(string filename) {
             meta_idx[ strdup(meta) ] = MAX_field;
             MAX_field++;
         }
-        vid = kmap[v];
-        field[ vid ].fields.push_back(meta_idx[meta]);
-        
+        vid = kmap[strdup(v)];
+        if (vid != -1)
+            field[ vid ].fields.push_back(meta_idx[meta]);
+        else
+            cout << "vertex " << v << " does not appear in given network" << endl;
+       
         if (line % MONITOR == 0)
         {
             printf("\tProgress:\t\t%.2f %%%c", (double)(line)/(max_line+1) * 100, 13);
