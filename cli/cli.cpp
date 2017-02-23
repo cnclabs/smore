@@ -36,6 +36,8 @@ int main(int argc, char **argv){
         printf("\t\tSave the representation data\n");
         printf("\t-dimensions <int>\n");
         printf("\t\tDimension of vertex representation; default is 64\n");
+        printf("\t-undirected <int>\n");
+        printf("\t\tWhether the edge is undirected; default is 1\n");
         printf("\t-negative_samples <int>\n");
         printf("\t\tNumber of negative examples; default is 5\n");
         printf("\t-window_size <int>\n");
@@ -56,13 +58,14 @@ int main(int argc, char **argv){
     }
     
     char model[100], network_file[100], rep_file[100], field_file[100];
-    int dimensions=64, window_size=5, negative_samples=5, walk_times=10, walk_steps=5, sample_times=10, threads=1;
+    int dimensions=64, undirected=1, window_size=5, negative_samples=5, walk_times=10, walk_steps=5, sample_times=10, threads=1;
     double init_alpha=0.025;
 
     if ((i = ArgPos((char *)"-model", argc, argv)) > 0) strcpy(model, argv[i + 1]);
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-field", argc, argv)) > 0) strcpy(field_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-save", argc, argv)) > 0) strcpy(rep_file, argv[i + 1]);
+    if ((i = ArgPos((char *)"-undirected", argc, argv)) > 0) undirected = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-dimensions", argc, argv)) > 0) dimensions = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-window_size", argc, argv)) > 0) window_size = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-negative_samples", argc, argv)) > 0) negative_samples = atoi(argv[i + 1]);
@@ -82,7 +85,7 @@ int main(int argc, char **argv){
     {
         DeepWalk *dw;
         dw = new DeepWalk();
-        dw->LoadEdgeList(network_file, 1);
+        dw->LoadEdgeList(network_file, undirected);
         dw->Init(dimensions);
         dw->Train(walk_times, walk_steps, window_size, negative_samples, init_alpha, threads);
         dw->SaveWeights(rep_file);
@@ -91,7 +94,7 @@ int main(int argc, char **argv){
     {
         LINE *line;
         line = new LINE();
-        line->LoadEdgeList(network_file, 1);
+        line->LoadEdgeList(network_file, undirected);
         line->Init(dimensions);
         line->Train(sample_times, negative_samples, init_alpha, threads);
         line->SaveWeights(rep_file);
@@ -100,7 +103,7 @@ int main(int argc, char **argv){
     {
         HPE *hpe;
         hpe = new HPE();
-        hpe->LoadEdgeList(network_file, 1);
+        hpe->LoadEdgeList(network_file, undirected);
         hpe->Init(dimensions);
         hpe->Train(sample_times, negative_samples, walk_steps, init_alpha, threads);
         hpe->SaveWeights(rep_file);
@@ -110,7 +113,7 @@ int main(int argc, char **argv){
         int window_left=1, window_right=2;
         Walklets *wl;
         wl = new Walklets();
-        wl->LoadEdgeList(network_file, 1);
+        wl->LoadEdgeList(network_file, undirected);
         wl->Init(dimensions);
         wl->Train(walk_times, walk_steps, window_left, window_right, negative_samples, init_alpha, threads);
         wl->SaveWeights(rep_file);
@@ -119,7 +122,7 @@ int main(int argc, char **argv){
     {
         FINE *fine;
         fine = new FINE();
-        fine->LoadEdgeList(network_file, 1);
+        fine->LoadEdgeList(network_file, undirected);
         fine->LoadFieldMeta(field_file);
         fine->Init(dimensions);
         fine->Train(sample_times, walk_steps, negative_samples, init_alpha, threads);
@@ -129,7 +132,7 @@ int main(int argc, char **argv){
     {
         MF *mf;
         mf = new MF();
-        mf->LoadEdgeList(network_file, 1);
+        mf->LoadEdgeList(network_file, undirected);
         mf->Init(dimensions);
         mf->Train(sample_times, negative_samples, init_alpha, threads);
         mf->SaveWeights(rep_file);
