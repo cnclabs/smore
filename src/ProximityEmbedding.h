@@ -1,5 +1,5 @@
-#ifndef ProximityEmbedding_H
-#define ProximityEmbedding_H
+#ifndef PE_H
+#define PE_H
 
 #include "LINE.h"
 
@@ -7,18 +7,18 @@
  * ProximityEmbedding
  * **************************************************************/
 
-class ProximityEmbedding: public LINE {
+class PE: public LINE {
 
     public:
         
-        ProximityEmbedding();
-        ~ProximityEmbedding();
+        PE();
+        ~PE();
 
         void SaveWeights(string);
 
         // model function
         void Init(int);
-        void Train(int, int, int, double, int);
+        void Train(int, int, int, double, double, int);
 
 };
 

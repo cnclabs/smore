@@ -4,6 +4,7 @@
 #include "../src/HPE.h"
 #include "../src/FINE.h"
 #include "../src/MF.h"
+#include "../src/ProximityEmbedding.h"
 
 
 int ArgPos(char *str, int argc, char **argv) {
@@ -49,7 +50,9 @@ int main(int argc, char **argv){
         printf("\t-sample_times <int>\n");
         printf("\t\tNumber of training samples *Million; default is 10\n");
         printf("\t-threads <int>\n");
-        printf("\t\tNumber of training threads (default 1)\n");
+        printf("\t\tNumber of training threads; default is 1\n");
+        printf("\t-bfs <float>\n");
+        printf("\t\tProbability of using BFS walk; default is 0.0\n");
         printf("\t-alpha <float>\n");
         printf("\t\tInit learning rate; default is 0.025\n");
         printf("\nExample Usage:\n");
@@ -59,7 +62,7 @@ int main(int argc, char **argv){
     
     char model[100], network_file[100], rep_file[100], field_file[100];
     int dimensions=64, undirected=1, window_size=5, negative_samples=5, walk_times=10, walk_steps=5, sample_times=10, threads=1;
-    double init_alpha=0.025;
+    double init_alpha=0.025, bfs=0.0;
 
     if ((i = ArgPos((char *)"-model", argc, argv)) > 0) strcpy(model, argv[i + 1]);
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);
@@ -72,6 +75,7 @@ int main(int argc, char **argv){
     if ((i = ArgPos((char *)"-walk_times", argc, argv)) > 0) walk_times = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-walk_steps", argc, argv)) > 0) walk_steps = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-sample_times", argc, argv)) > 0) sample_times = atoi(argv[i + 1]);
+    if ((i = ArgPos((char *)"-bfs", argc, argv)) > 0) bfs = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-alpha", argc, argv)) > 0) init_alpha = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-threads", argc, argv)) > 0) threads = atoi(argv[i + 1]);
     
@@ -81,6 +85,7 @@ int main(int argc, char **argv){
     char model_hpe[10] = "HPE";
     char model_fine[10] = "FINE";
     char model_mf[10] = "MF";
+    char model_pe[10] = "PE";
     if (!strcmp(model_dw, model))
     {
         DeepWalk *dw;
@@ -136,6 +141,15 @@ int main(int argc, char **argv){
         mf->Init(dimensions);
         mf->Train(sample_times, negative_samples, init_alpha, threads);
         mf->SaveWeights(rep_file);
+    }
+    else if (!strcmp(model_pe, model))
+    {
+        PE *pe;
+        pe = new PE();
+        pe->LoadEdgeList(network_file, undirected);
+        pe->Init(dimensions);
+        pe->Train(sample_times, negative_samples, walk_steps, bfs, init_alpha, threads);
+        pe->SaveWeights(rep_file);
     }
 
    return 0;

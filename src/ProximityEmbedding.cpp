@@ -1,9 +1,9 @@
 #include "ProximityEmbedding.h"
 
-ProximityEmbedding::ProximityEmbedding() {}
-ProximityEmbedding::~ProximityEmbedding() {}
+PE::PE() {}
+PE::~PE() {}
 
-void ProximityEmbedding::SaveWeights(string model_name){
+void PE::SaveWeights(string model_name){
     
     cout << "Save Model:" << endl;
     ofstream model(model_name);
@@ -25,7 +25,7 @@ void ProximityEmbedding::SaveWeights(string model_name){
     }
 }
 
-void ProximityEmbedding::Init(int dim) {
+void PE::Init(int dim) {
    
     this->dim = dim;
     cout << "Model Setting:" << endl;
@@ -47,23 +47,23 @@ void ProximityEmbedding::Init(int dim) {
     {
         w_context[vid].resize(dim);
         for (int d=0; d<dim;++d)
-            w_context[vid][d] = 0.0;
-            //w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+            w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
     }
 }
 
 
-void ProximityEmbedding::Train(int sample_times, int walk_steps, int negative_samples, double alpha, int workers){
+void PE::Train(int sample_times, int walk_steps, int negative_samples, double bfs, double alpha, int workers){
     
     omp_set_num_threads(workers);
 
     cout << "Model:" << endl;
-    cout << "\t[ProximityEmbedding]" << endl;
+    cout << "\t[PE]" << endl;
 
     cout << "Learning Parameters:" << endl;
-    cout << "\tsample_times:\t\t" << sample_times << "M" << endl;
+    cout << "\tsample_times:\t\t" << sample_times << endl;
     cout << "\tnegative_samples:\t" << negative_samples << endl;
     cout << "\twalk_steps:\t\t" << walk_steps << endl;
+    cout << "\tbfs:\t\t\t" << bfs << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
     cout << "\tworkers:\t\t" << workers << endl;
 
@@ -100,8 +100,8 @@ void ProximityEmbedding::Train(int sample_times, int walk_steps, int negative_sa
             
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
-            //pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, walk_steps, negative_samples, _alpha);
-            pnet.UpdatePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
+            pnet.UpdateBFSCommunity(w_vertex, w_context, v1, v2, dim, walk_steps, negative_samples, bfs, _alpha);
+            //pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
         }
 
     }
