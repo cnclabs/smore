@@ -996,7 +996,8 @@ void proNet::UpdateBFSCommunity(vector< vector<double> >& w_vertex, vector< vect
         {
             if (random_gen(0, 1)<bfs)
             {
-                context = TargetSample(pre_vertex);
+                context = TargetSample(vertex);
+                pre_vertex = vertex;
             }
             else
             {
@@ -1082,6 +1083,7 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
             if (neg!=0){
                 label = 0.0;
                 w_context_ptr = &w_context[ NegativeFieldSample(fid) ];
+                //w_context_ptr = &w_context[ NegativeSample() ];
             }
 
             f = 0;
