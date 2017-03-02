@@ -110,7 +110,7 @@ int main(int argc, char **argv){
         hpe = new HPE();
         hpe->LoadEdgeList(network_file, undirected);
         hpe->Init(dimensions);
-        hpe->Train(sample_times, negative_samples, walk_steps, init_alpha, threads);
+        hpe->Train(sample_times, walk_steps, negative_samples, init_alpha, threads);
         hpe->SaveWeights(rep_file);
     }
     else if (!strcmp(model_wl, model))
@@ -148,7 +148,7 @@ int main(int argc, char **argv){
         pe = new PE();
         pe->LoadEdgeList(network_file, undirected);
         pe->Init(dimensions);
-        pe->Train(sample_times, negative_samples, walk_steps, bfs, init_alpha, threads);
+        pe->Train(sample_times, walk_steps, negative_samples, bfs, init_alpha, threads);
         pe->SaveWeights(rep_file);
     }
 
