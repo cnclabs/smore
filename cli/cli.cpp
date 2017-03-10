@@ -1,11 +1,11 @@
-#include "../src/DeepWalk.h"
-#include "../src/Walklets.h"
-#include "../src/LINE.h"
-#include "../src/HPE.h"
-#include "../src/FINE.h"
-#include "../src/msFINE.h"
-#include "../src/MF.h"
-#include "../src/ProximityEmbedding.h"
+#include "../src/model/DeepWalk.h"
+#include "../src/model/Walklets.h"
+#include "../src/model/LINE.h"
+#include "../src/model/HPE.h"
+#include "../src/model/FINE.h"
+#include "../src/model/msFINE.h"
+#include "../src/model/MF.h"
+#include "../src/model/ProximityEmbedding.h"
 
 
 int ArgPos(char *str, int argc, char **argv) {
