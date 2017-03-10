@@ -77,7 +77,7 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
     long total = walk_times*pnet.MAX_vid;
     double alpha_min = alpha*0.0001;
     double _alpha = alpha;
-    long count = 0;
+    unsigned long long count = 0;
 
     for (int t=0; t<walk_times; ++t)
     {

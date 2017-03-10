@@ -104,17 +104,17 @@ void FINE::Train(int sample_times, int walk_steps, int negative_samples, double 
 
     cout << "Start Training:" << endl;
 
-    unsigned int total_sample_times = sample_times*1000000;
+    unsigned long long total_sample_times = sample_times*1000000;
     double alpha_min = alpha * 0.0001;
     double alpha_last;
     
-    unsigned int current_sample = 0;
-    unsigned int jobs = total_sample_times/workers;
+    unsigned long long current_sample = 0;
+    unsigned long long jobs = total_sample_times/workers;
 
     #pragma omp parallel for
     for (int worker=0; worker<workers; ++worker)
     {
-        unsigned int count = 0;
+        unsigned long long count = 0;
         double _alpha = alpha;
         long v1, v2;
 

@@ -122,9 +122,9 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
 
     // load the connections
     char v1[160], v2[160];
-    int vid1, vid2;
+    long vid1, vid2;
     double w;
-    vector< int > v_in, v_out;
+    vector< long > v_in, v_out;
     vector< double > e_w;
     if (undirect)
     {
@@ -140,7 +140,7 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     }
 
     cout << "Connections Loading:" << endl;
-    long long int line = 0;
+    unsigned long long line = 0;
     for (int i=0; i<filenames.size();i++)
     {
         fin = fopen(filenames[i].c_str(), "rb");
@@ -191,7 +191,7 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
 
     // convert the connections to a graph structure
     cout << "Graph Re-constructing:" << endl;
-    for (long long int line=0; line!=MAX_line; line++)
+    for (unsigned long long line=0; line!=MAX_line; line++)
     {
         vid1 = v_in[line];
         vid2 = v_out[line];
@@ -215,8 +215,8 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     cout << "\tProgress:\t\t100.00 %\r" << endl;
 
     // release the occupied memory
-    v_in = vector<int>();
-    v_out = vector<int>();
+    v_in = vector<long>();
+    v_out = vector<long>();
     e_w = vector<double>();
 
     cout << "Build the Alias Method:" << endl;
@@ -233,7 +233,7 @@ void proNet::LoadFieldMeta(string filename) {
     // calculate the # of meta data
     FILE *fin;
     char c_line[1000];
-    int max_line=0;
+    unsigned long long max_line=0;
     
     field.resize(MAX_vid);
     MAX_fvid = MAX_vid;
@@ -244,7 +244,7 @@ void proNet::LoadFieldMeta(string filename) {
     {
         if (max_line % MONITOR == 0)
         {
-            printf("\t# of meta data:\t\t%d%c", max_line, 13);
+            printf("\t# of meta data:\t\t%llu%c", max_line, 13);
         }
         ++max_line;
     }
@@ -252,12 +252,12 @@ void proNet::LoadFieldMeta(string filename) {
     cout << "\t# of meta data:\t\t" << max_line << endl;
     
     char v[160], meta[160];
-    int vid;
-    map< char*, int, cmp_char > meta_idx;
+    long vid;
+    map< char*, long, cmp_char > meta_idx;
 
     cout << "Meta Data Loading:" << endl;
     fin = fopen(filename.c_str(), "rb");
-    for (int line = 0; line != max_line; line++)
+    for (unsigned long long line = 0; line != max_line; line++)
     {
         if ( fscanf(fin, "%s %s", v, meta)!=2 )
         {
@@ -288,10 +288,10 @@ void proNet::LoadFieldMeta(string filename) {
     cout << "\t# of field:\t\t" << MAX_field << endl;
 
     cout << "Init Field Index:" << endl;
-    for (int vid=0; vid<MAX_vid; vid++)
+    for (long vid=0; vid<MAX_vid; vid++)
     {
         field[ vid ].vids.resize(MAX_field);
-        for (int i=0; i<MAX_field; i++)
+        for (long i=0; i<MAX_field; i++)
         {
             if (i == field[vid].fields[0])
             {
@@ -318,10 +318,10 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
     vertex.resize(MAX_vid);
     context.resize(MAX_line);
     
-    int vid;
-    long long int line_g=0, line_e=0;
+    long vid;
+    unsigned long long line_g=0, line_e=0;
     long offset = 0;
-    for (int v1=0; v1!=MAX_vid; v1++)
+    for (long v1=0; v1!=MAX_vid; v1++)
     {
         vertex[v1].offset = offset;
         vertex[v1].branch = graph[v1].size();
@@ -340,7 +340,7 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
         }
     }
 
-    for (long long int line=0; line!=MAX_line; line++)
+    for (unsigned long long line=0; line!=MAX_line; line++)
     {
         vid = context[line].vid;
         vertex[vid].in_degree += context[line].in_degree;
@@ -519,7 +519,7 @@ void proNet::BuildTargetAliasTable() {
     
     context_AT.resize(MAX_line);
 
-    for (int vid=0; vid<MAX_vid;vid++)
+    for (long vid=0; vid<MAX_vid;vid++)
     {
         // normalization of vertices weights
         long offset, branch;
@@ -529,12 +529,12 @@ void proNet::BuildTargetAliasTable() {
         double sum, norm;
         vector <double> norm_prob;
         sum = 0;
-        for (int i=0; i<branch; i++)
+        for (long i=0; i<branch; i++)
         {
             sum += context[i+offset].in_degree;
         }
         norm = branch/sum;
-        for (int i=0; i<branch; i++)
+        for (long i=0; i<branch; i++)
         {
             norm_prob.push_back( context[i+offset].in_degree*norm );
         }
@@ -542,7 +542,7 @@ void proNet::BuildTargetAliasTable() {
         // block divison
         vector <long> small_block, large_block;
         long num_small_block = 0, num_large_block = 0;
-        for (int i=0; i<branch; i++)
+        for (long i=0; i<branch; i++)
         {
             if ( norm_prob[i]<1 )
             {

@@ -1,29 +1,29 @@
-#ifndef MF_H
-#define MF_H
+#ifndef LINE_H
+#define LINE_H
 
-#include "proNet.h"
+#include "../proNet.h"
 
 /*****
- * MF
+ * LINE
  * **************************************************************/
 
-class MF {
+class LINE {
 
     public:
         
-        MF();
-        ~MF();
+        LINE();
+        ~LINE();
         
         proNet pnet;
 
         // parameters
         int dim;                // representation dimensions
+        vector< vector<double> > w_vertex_o1;
         vector< vector<double> > w_vertex;
+        vector< vector<double> > w_context;
 
         // data function
         void LoadEdgeList(string, bool);
-        void SaveFirstWeights(string);
-        void SaveSecondWeights(string);
         void SaveWeights(string);
         
         // model function

@@ -1,7 +1,7 @@
 #ifndef DEEPWALK_H
 #define DEEPWALK_H
 
-#include "proNet.h"
+#include "../proNet.h"
 
 /*****
  * DeepWalk

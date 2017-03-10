@@ -69,15 +69,15 @@ class proNet {
         ~proNet();
         
         // MAX index number
-        long long int MAX_line=0;
-        int MAX_vid=0;
-        int MAX_fvid=0;
-        int MAX_field=0;
+        unsigned long long MAX_line=0;
+        long MAX_vid=0;
+        long MAX_fvid=0;
+        long MAX_field=0;
         
         // graph basics
-        vector< int > hash_table;
+        vector< long > hash_table;
         vector< char* > keys;
-        map< char*, int, cmp_char > kmap;     // vertex map to index number
+        map< char*, long, cmp_char > kmap;     // vertex map to index number
 
         // Alias Graph
         vector< Vertex > vertex;
