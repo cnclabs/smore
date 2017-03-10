@@ -275,7 +275,7 @@ void proNet::LoadFieldMeta(string filename) {
         if (vid != -1)
             field[ vid ].fields.push_back(meta_idx[ strdup(meta) ]);
         else
-            cout << "vertex " << v << " does not appear in given network" << endl;
+            cout << "vertex " << v << " is not in given network" << endl;
        
         if (line % MONITOR == 0)
         {
@@ -981,12 +981,11 @@ void proNet::UpdateBFSCommunity(vector< vector<double> >& w_vertex, vector< vect
     back_err.resize(dimension, 0.0);
 
     int d;
-    long rand_v, pre_vertex;
+    long rand_v;
     double label, g, f, rand_p;
     
     w_vertex_ptr = &w_vertex[vertex];
     w_context_ptr = &w_context[context];
-    pre_vertex = vertex;
 
     // 0 for postive sample, others for negative sample
     for (int s = -1; s < walk_steps; s++)
@@ -997,11 +996,9 @@ void proNet::UpdateBFSCommunity(vector< vector<double> >& w_vertex, vector< vect
             if (random_gen(0, 1)<bfs)
             {
                 context = TargetSample(vertex);
-                pre_vertex = vertex;
             }
             else
             {
-                pre_vertex = context;
                 context = TargetSample(context);
             }
             if (context==-1) break;
@@ -1045,18 +1042,19 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
     vector<double> back_err;
     back_err.resize(dimension, 0.0);
 
-    int d, vid, fid;
+    int d, vid, v_fid, c_fid;
     long rand_v;
     double label, g, f, rand_p;
     
+    v_fid = field[vertex].fields[0];
+    c_fid = field[context].fields[0];
+
     // vertex
-    fid = field[context].fields[0];
-    vid = field[vertex].vids[fid];
+    vid = field[vertex].vids[c_fid];
     w_vertex_ptr = &w_vertex[vid];
 
     // context
-    fid = field[vertex].fields[0];
-    vid = field[context].vids[fid];
+    vid = field[context].vids[v_fid];
     w_context_ptr = &w_context[vid];
     
     // 0 for postive sample, others for negative sample
@@ -1066,13 +1064,14 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
         if (s != 0)
         {
             context = TargetSample(context);
-            if (context==-1) break; 
-            vid = field[context].vids[fid];
+            if (context==-1) break;
+            c_fid = field[context].fields[0];
+            
+            vid = field[context].vids[v_fid];
             w_context_ptr = &w_context[vid];
-            fid = field[context].fields[0];
-            vid = field[vertex].vids[fid];
+            
+            vid = field[vertex].vids[c_fid];
             w_vertex_ptr = &w_vertex[vid];
-            fid = field[vertex].fields[0];
         }
 
         for (d=0; d<dimension; ++d)
@@ -1082,7 +1081,15 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
             // negative sampling
             if (neg!=0){
                 label = 0.0;
-                w_context_ptr = &w_context[ NegativeFieldSample(fid) ];
+
+                vid = NegativeSample();
+                while(field[vid].fields[0]!=c_fid)
+                {
+                    vid = NegativeSample();
+                }
+                vid = field[vid].vids[v_fid];
+                w_context_ptr = &w_context[vid];
+                //w_context_ptr = &w_context[ vid ];
                 //w_context_ptr = &w_context[ NegativeSample() ];
             }
 
@@ -1103,6 +1110,75 @@ void proNet::UpdateFieldCommunity(vector< vector<double> >& w_vertex, vector< ve
 
         //if (random_gen(0, 1) < 0.2)
         //    break;
+    }
+
+}
+
+
+void proNet::UpdateMSFieldCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int walk_steps, int negative_samples, double alpha){
+
+    vector<double>* w_vertex_ptr;
+    vector<double>* w_context_ptr;
+    vector<double> back_err;
+    back_err.resize(dimension, 0.0);
+
+    int d, vid, v_fid, c_fid;
+    long rand_v;
+    double label, g, f, rand_p;
+    
+    v_fid = field[vertex].fields[0];
+    c_fid = field[context].fields[0];
+
+    // vertex
+    vid = field[vertex].vids[c_fid];
+    w_vertex_ptr = &w_vertex[vid];
+
+    // context
+    w_context_ptr = &w_context[context];
+    
+    // 0 for postive sample, others for negative sample
+    for (int s = 0; s <= walk_steps; s++) {
+        label = 1.0;
+
+        if (s != 0)
+        {
+            context = TargetSample(context);
+            if (context==-1) break;
+            w_context_ptr = &w_context[context];
+            c_fid = field[context].fields[0];
+            vid = field[vertex].vids[c_fid];
+            w_vertex_ptr = &w_vertex[vid];
+        }
+
+        for (d=0; d<dimension; ++d)
+            back_err[d] = 0.0;
+        for (int neg=0; neg<=negative_samples; ++neg)
+        {
+            // negative sampling
+            if (neg!=0){
+                label = 0.0;
+                //w_context_ptr = &w_context[ NegativeFieldSample(0) ];
+                vid = NegativeSample();
+                while(field[vid].fields[0]!=c_fid)
+                {
+                    vid = NegativeSample();
+                }
+                w_context_ptr = &w_context[ vid ];
+            }
+
+            f = 0;
+            for (d=0; d<dimension; ++d) // prediciton
+                f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
+            f = fastSigmoid(f); // fast sigmoid(prediction)
+            g = (label - f) * alpha; // gradient
+            for (d=0; d<dimension; ++d) // store the back propagation error
+                back_err[d] += g * (*w_context_ptr)[d];
+            for (d=0; d<dimension; ++d) // update context
+                (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
+        }
+        for (d=0; d<dimension; ++d)
+            (*w_vertex_ptr)[d] += back_err[d];
+
     }
 
 }

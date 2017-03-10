@@ -25,6 +25,7 @@ using namespace std;
 #define SIGMOID_TABLE_SIZE 512
 #define MAX_SIGMOID 8
 
+
 double random_gen(const int&, const int&);
 
 struct cmp_char
@@ -40,10 +41,6 @@ class Vertex {
         int offset, branch;
         double out_degree=0.0;
         double in_degree=0.0;
-        //int alias=-1;
-        //double prob=0.0;
-        //int neg_alias=-1;
-        //double neg_prob=0.0;
 };
 
 class Field {
@@ -56,8 +53,6 @@ class Context {
     public:
         int vid=-1;
         double in_degree=0.0;
-        //int alias=-1;
-        //double prob=0.0;
 };
 
 class AliasTable {
@@ -141,6 +136,9 @@ class proNet {
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
+
+        // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
+        void UpdateMSFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateFieldsCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);

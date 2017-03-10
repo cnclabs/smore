@@ -3,6 +3,7 @@
 #include "../src/LINE.h"
 #include "../src/HPE.h"
 #include "../src/FINE.h"
+#include "../src/msFINE.h"
 #include "../src/MF.h"
 #include "../src/ProximityEmbedding.h"
 
@@ -28,7 +29,7 @@ int main(int argc, char **argv){
         printf("\tcommand line interface for proNet-core\n\n");
         printf("Options:\n");
         printf("\t-model <string>\n");
-        printf("\t\tAvaliable models: <DeepWalk>, <LINE>, <Walklets>, <HPE>, <FINE>\n");
+        printf("\t\tAvaliable models: <DeepWalk>, <LINE>, <Walklets>, <HPE>, <FINE>, <msFINE>, <MF>\n");
         printf("\t-train <string>\n");
         printf("\t\tTrain the Network data\n");
         printf("\t-field <string>\n");
@@ -84,6 +85,7 @@ int main(int argc, char **argv){
     char model_wl[10] = "Walklets";
     char model_hpe[10] = "HPE";
     char model_fine[10] = "FINE";
+    char model_msfine[10] = "msFINE";
     char model_mf[10] = "MF";
     char model_pe[10] = "PE";
     if (!strcmp(model_dw, model))
@@ -132,6 +134,16 @@ int main(int argc, char **argv){
         fine->Init(dimensions);
         fine->Train(sample_times, walk_steps, negative_samples, init_alpha, threads);
         fine->SaveWeights(rep_file);
+    }
+    else if (!strcmp(model_msfine, model))
+    {
+        msFINE *msfine;
+        msfine = new msFINE();
+        msfine->LoadEdgeList(network_file, undirected);
+        msfine->LoadFieldMeta(field_file);
+        msfine->Init(dimensions);
+        msfine->Train(sample_times, walk_steps, negative_samples, init_alpha, threads);
+        msfine->SaveWeights(rep_file);
     }
     else if (!strcmp(model_mf, model))
     {

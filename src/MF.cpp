@@ -96,6 +96,7 @@ void MF::Train(int sample_times, int negative_samples, double alpha, int workers
             long v1 = pnet.SourceSample();
             long v2 = pnet.TargetSample(v1);
             pnet.UpdatePair(w_vertex, w_vertex, v1, v2, dim, negative_samples, _alpha);
+            //pnet.UpdateCommunity(w_vertex, w_vertex, v1, v2, dim, negative_samples, _alpha);
         }
 
     }

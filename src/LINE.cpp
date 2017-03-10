@@ -93,6 +93,7 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
         
         unsigned int count = 0;
         double _alpha = alpha;
+        long v1, v2;
         
         while (count<jobs)
         {
@@ -107,8 +108,8 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
                 fflush(stdout);
             }
             
-            long v1 = pnet.SourceSample();
-            long v2 = pnet.TargetSample(v1);
+            v1 = pnet.SourceSample();
+            v2 = pnet.TargetSample(v1);
             pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim, negative_samples, _alpha);
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
