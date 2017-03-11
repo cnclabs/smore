@@ -150,6 +150,7 @@ int main(int argc, char **argv){
         MF *mf;
         mf = new MF();
         mf->LoadEdgeList(network_file, undirected);
+        mf->LoadFieldMeta(field_file);
         mf->Init(dimensions);
         mf->Train(sample_times, negative_samples, init_alpha, threads);
         mf->SaveWeights(rep_file);

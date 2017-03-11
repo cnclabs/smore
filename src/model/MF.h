@@ -19,8 +19,10 @@ class MF {
         // parameters
         int dim;                // representation dimensions
         vector< vector<double> > w_vertex;
+        vector< vector<double> > w_context;
 
         // data function
+        void LoadFieldMeta(string);
         void LoadEdgeList(string, bool);
         void SaveFirstWeights(string);
         void SaveSecondWeights(string);

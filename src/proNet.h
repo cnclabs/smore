@@ -23,10 +23,13 @@ using namespace std;
 #define MONITOR 10000
 #define HASH_TABLE_SIZE 30000000
 #define SIGMOID_TABLE_SIZE 512
-#define MAX_SIGMOID 8
+#define MAX_SIGMOID 8.0
 
 
 double random_gen(const int&, const int&);
+double ran_uniform();
+double ran_gaussian();
+double ran_gaussian(double mean, double stdev);
 
 struct cmp_char
 {
@@ -38,7 +41,7 @@ struct cmp_char
 
 class Vertex {
     public:
-        int offset, branch;
+        long offset, branch;
         double out_degree=0.0;
         double in_degree=0.0;
 };
@@ -51,7 +54,7 @@ class Field {
 
 class Context {
     public:
-        int vid=-1;
+        long vid=-1;
         double in_degree=0.0;
 };
 
