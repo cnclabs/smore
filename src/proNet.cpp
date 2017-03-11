@@ -871,7 +871,7 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
     w_vertex_ptr = &w_vertex[vertex];
     w_context_ptr = &w_context[context];
 
-
+/*
     f = 0;
     for (d=0; d<dimension; ++d) // prediciton
         f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
@@ -922,11 +922,12 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
             (*w_vertex_ptr)[d] += back_err[d];
 
     }
+*/
 
+/*
     w_vertex_ptr = &w_vertex[vertex];
     w_context_ptr = &w_context[context];
 
-/*
     // 0 for postive sample, others for negative sample
     for (int s = -1; s <= 3; s++)
     {
@@ -940,41 +941,45 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
 
         for (d=0; d<dimension; ++d)
             back_err[d] = 0.0;
-//        for (int neg=0; neg<=negative_samples; ++neg)
-//        {
+        for (int neg=0; neg<=negative_samples; ++neg)
+        {
             // negative sampling
-//            if (neg!=0){
-//                label = 0.0;
-//                w_context_ptr = &w_context[ NegativeSample() ];
-//            }
+            if (neg!=0){
+                label = 0.0;
+                w_context_ptr = &w_context[ NegativeSample() ];
+            }
 
             f = 0;
             for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
             //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
             //f = tanh(f); // fast sigmoid(prediction)
-            f = fastSigmoid(f); // fast sigmoid(prediction)
+            //f = fastSigmoid(f); // fast sigmoid(prediction)
             g = (label - f) * alpha * 0.01; // gradient
             for (d=0; d<dimension; ++d) // store the back propagation error
                 back_err[d] += g * (*w_context_ptr)[d];
             for (d=0; d<dimension; ++d) // update context
                 (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
-//        }
+        }
         for (d=0; d<dimension; ++d)
             (*w_vertex_ptr)[d] += back_err[d];
     }
 */
 
 
-/*
     // 0 for postive sample, others for negative sample
     for (int neg=0; neg<=negative_samples; ++neg)
     {
         // negative sampling
         if (neg!=0){
             label = 0.0;
-            w_context_ptr = &w_context[ TargetSample() ]; // Negative Target Sample
-            //w_context_ptr = &w_context[ NegativeSample() ]; // Negative Source Sample
+//            w_context_ptr = &w_context[ TargetSample() ]; // Negative Target Sample
+            long vid = (long)random_gen(0, MAX_vid);
+            while(field[vid].fields[0]==field[vertex].fields[0])
+            {
+                vid = (long)random_gen(0, MAX_vid);
+            }
+            w_context_ptr = &w_context[ vid ]; // Negative Target Sample
         }
 
         f = 0;
@@ -988,13 +993,13 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
         g = (label - f); // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
         {
-            back_err[d] += alpha*( g*(*w_context_ptr)[d] - 0.005*(*w_vertex_ptr)[d] );
+            back_err[d] += alpha*( g*(*w_context_ptr)[d] - 0.01*(*w_vertex_ptr)[d] );
 //            reg = 1.0*alpha*(*w_vertex_ptr)[d];
 //            back_err[d] += (g-reg) * (*w_context_ptr)[d];
         }
         for (d=0; d<dimension; ++d) // update context
         {
-            (*w_context_ptr)[d] += alpha*( g*(*w_vertex_ptr)[d] - 0.005*(*w_context_ptr)[d] );
+            (*w_context_ptr)[d] += alpha*( g*(*w_vertex_ptr)[d] - 0.01*(*w_context_ptr)[d] );
 //            reg = 1.0*alpha*(*w_context_ptr)[d];
 //            (*w_context_ptr)[d] += (g-reg) * (*w_vertex_ptr)[d];
         }
@@ -1002,7 +1007,7 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertex, vector< vect
     for (d=0; d<dimension; ++d)
         (*w_vertex_ptr)[d] += back_err[d];
     
-
+/*
     // opposite opt
     label = 1.0;
     w_vertex_ptr = &w_vertex[context];
