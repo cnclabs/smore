@@ -91,6 +91,7 @@ void MF::Train(int sample_times, int negative_samples, double alpha, int workers
     for (int worker=0; worker<workers; ++worker)
     {
         
+        long v1, v2;
         int count = 0;
         double _alpha = alpha;
         
@@ -107,10 +108,12 @@ void MF::Train(int sample_times, int negative_samples, double alpha, int workers
                 fflush(stdout);
             }
             
-            long v1 = pnet.SourceSample();
-            long v2 = pnet.TargetSample(v1);
+            v1 = pnet.SourceSample();
+            while(pnet.field[v1].fields[0]!=0)
+                v1 = pnet.SourceSample();
+            v2 = pnet.TargetSample(v1);
             //pnet.UpdatePair(w_vertex, w_vertex, v1, v2, dim, negative_samples, _alpha);
-            pnet.UpdateDirectedPair(w_vertex, w_vertex, v1, v2, dim, negative_samples, _alpha);
+            pnet.UpdateDirectedPair(w_vertex, w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
             //pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, 3, negative_samples, _alpha);
         }
 

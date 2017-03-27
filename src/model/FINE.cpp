@@ -104,7 +104,7 @@ void FINE::Train(int sample_times, int walk_steps, int negative_samples, double 
 
     cout << "Start Training:" << endl;
 
-    unsigned long long total_sample_times = sample_times*1000000;
+    unsigned long long total_sample_times = (unsigned long long)sample_times*1000000;
     double alpha_min = alpha * 0.0001;
     double alpha_last;
     

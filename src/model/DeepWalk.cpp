@@ -74,7 +74,7 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
     cout << "Start Training:" << endl;
 
 
-    long total = walk_times*pnet.MAX_vid;
+    unsigned long long total = (unsigned long long)walk_times*pnet.MAX_vid;
     double alpha_min = alpha*0.0001;
     double _alpha = alpha;
     unsigned long long count = 0;
