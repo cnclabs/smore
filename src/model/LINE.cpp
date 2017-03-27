@@ -60,6 +60,7 @@ void LINE::Init(int dimension) {
         w_context[vid].resize(dim);
         for (int d=0; d<dim;++d)
             w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+            //w_context[vid][d] = 0.0;
     }
 }
 
@@ -79,7 +80,7 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
 
     cout << "Start Training:" << endl;
 
-    unsigned long long total_sample_times = sample_times*1000000;
+    unsigned long long total_sample_times = (unsigned long long)sample_times*1000000;
     double alpha_min = alpha * 0.0001;
     double alpha_last;
     
@@ -101,7 +102,7 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
             if (count % MONITOR == 0)
             {
                 current_sample += MONITOR;
-                _alpha = alpha* ( 1.0 - (double)(count)/jobs );
+                _alpha = alpha* ( 1.0 - (double)(current_sample)/total_sample_times );
                 if (_alpha < alpha_min) _alpha = alpha_min;
                 alpha_last = _alpha;
                 printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);

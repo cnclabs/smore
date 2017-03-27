@@ -5,8 +5,10 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <thread>
+#include <random>
 #include <string>
 #include <string.h>
 #include <vector>
@@ -22,7 +24,7 @@ using namespace std;
 
 #define MONITOR 10000
 #define HASH_TABLE_SIZE 30000000
-#define SIGMOID_TABLE_SIZE 512
+#define SIGMOID_TABLE_SIZE 1000
 #define MAX_SIGMOID 8.0
 
 
@@ -126,7 +128,7 @@ class proNet {
         void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
         
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
-        void UpdateDirectedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
+        void UpdateDirectedPair(vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
        
         // vertex vector, context vector, vertex series, context series, dimension, negative samples, alpha
         void UpdatePairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, int, int, double);
