@@ -1,4 +1,4 @@
-CC= g++-4.9
+CC= g++-5
 CPPCFLAGS= -std=c++11 -fopenmp -O3
 
 cli:

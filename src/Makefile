@@ -1,4 +1,4 @@
-CC = g++-4.9
+CC = g++-5
 CPPFLAGS = -std=c++11 -fPIC -fopenmp -O3
 OBJECTS = proNet.o ./model/DeepWalk.o ./model/Walklets.o ./model/LINE.o ./model/HPE.o ./model/FINE.o ./model/msFINE.o ./model/MF.o ./model/ProximityEmbedding.o
 
