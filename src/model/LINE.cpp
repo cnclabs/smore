@@ -17,6 +17,7 @@ void LINE::SaveWeights(string model_name){
     if (model)
     {
         model << pnet.MAX_vid << " " << dim*2 << endl;
+//        model << pnet.MAX_vid << " " << dim << endl;
         for (auto k: pnet.keys)
         {
             model << k;
@@ -38,7 +39,7 @@ void LINE::Init(int dimension) {
    
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dimension << endl;
-    this->dim = int(dimension/2);
+    dim = (int)(dimension/2);
 
     w_vertex_o1.resize(pnet.MAX_vid);
     w_vertex.resize(pnet.MAX_vid);
@@ -59,8 +60,8 @@ void LINE::Init(int dimension) {
     {
         w_context[vid].resize(dim);
         for (int d=0; d<dim;++d)
-            w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
-            //w_context[vid][d] = 0.0;
+            w_context[vid][d] = 0.0;
+            //w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
     }
 }
 
@@ -92,29 +93,30 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
     for (int worker=0; worker<workers; ++worker)
     {
         
-        unsigned long long count = 0;
+        unsigned long long count = 1;
         double _alpha = alpha;
         long v1, v2;
         
         while (count<jobs)
-        {
-            count++;
-            if (count % MONITOR == 0)
-            {
-                current_sample += MONITOR;
-                _alpha = alpha* ( 1.0 - (double)(current_sample)/total_sample_times );
-                if (_alpha < alpha_min) _alpha = alpha_min;
-                alpha_last = _alpha;
-                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
-                fflush(stdout);
-            }
-            
+        {            
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
             pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim, negative_samples, _alpha);
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
             pnet.UpdatePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
+
+            count++;
+            if (count % MONITOR == 0)
+            {
+                _alpha = alpha* ( 1.0 - (double)(current_sample)/total_sample_times );
+                current_sample += MONITOR;
+                if (_alpha < alpha_min) _alpha = alpha_min;
+                alpha_last = _alpha;
+                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
+                fflush(stdout);
+            }
+        
         }
 
     }

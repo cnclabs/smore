@@ -15,18 +15,29 @@
 #include <unordered_map>
 #include <map>
 #include <utility>
+#include <stdio.h>
 #include <omp.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/random_device.hpp>
+//#include <gsl/gsl_rng.h>
 
 using namespace std;
 
 #define MONITOR 10000
+#define POWER_SAMPLE 0.75
 #define HASH_TABLE_SIZE 30000000
 #define SIGMOID_TABLE_SIZE 1000
 #define MAX_SIGMOID 8.0
+#define MAX_NEG 1e8
 
+#if defined (_MSC_VER)  // Visual studio
+    #define thread_local __declspec( thread )
+#elif defined (__GCC__) // GCC
+    #define thread_local __thread
+#endif
 
 double random_gen(const int&, const int&);
 double ran_uniform();
@@ -73,6 +84,9 @@ class proNet {
         proNet();
         ~proNet();
         
+//        const gsl_rng_type * gsl_T;
+//        gsl_rng * gsl_r;
+
         // MAX index number
         unsigned long long MAX_line=0;
         long MAX_vid=0;
@@ -91,10 +105,12 @@ class proNet {
         vector< AliasTable > context_AT;
         vector< AliasTable > negative_AT;
         vector< Field > field;
+        vector< long > neg_table;
         
         // cahce
         vector< double > cached_sigmoid;
         void InitSigmoid();
+        void InitNegTable();
         void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
         void BuildNegativeAliasTable();
         void BuildSourceAliasTable();

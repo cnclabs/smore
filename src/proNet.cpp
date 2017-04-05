@@ -1,9 +1,18 @@
 #include "proNet.h"
 
 double random_gen(const int & min, const int & max) {
-    thread_local mt19937 generator(clock());
+    
+    static random_device rd;
+    static thread_local mt19937* generator = new mt19937( rd() );
+    
+    //static thread_local mt19937* generator = new mt19937( std::hash<std::thread::id>()( std::this_thread::get_id())+clock() );
     uniform_real_distribution<double> distribution(min, max);
-    return distribution(generator);
+
+    //static thread_local boost::random::random_device rd;
+    //static thread_local boost::random::mt19937* generator = new boost::random::mt19937( std::hash<std::thread::id>()( std::this_thread::get_id())+clock() );
+    //boost::random::uniform_real_distribution<double> distribution(min, max);
+    return distribution(*generator);
+    
 }
 
 double ran_uniform() {
@@ -44,6 +53,11 @@ bool isDirectory(const char *path) {
 proNet::proNet() {
     hash_table.resize(HASH_TABLE_SIZE, -1);
     InitSigmoid();
+
+    //gsl_rng_env_setup();
+    //gsl_T = gsl_rng_rand48;
+    //gsl_r = gsl_rng_alloc(gsl_T);
+    //gsl_rng_set(gsl_r, 314159265);
 }
 
 proNet::~proNet() {
@@ -76,6 +90,24 @@ double proNet::fastSigmoid(double x) {
         return 1.0;
     } else {
         return cached_sigmoid[ int((x + MAX_SIGMOID) * SIGMOID_TABLE_SIZE / MAX_SIGMOID / 2) ];
+    }
+}
+
+void proNet::InitNegTable()
+{
+    double sum = 0, cur_sum = 0, por = 0;
+    long vid = 0;
+    neg_table.resize(MAX_NEG);
+    for (long k = 0; k != MAX_vid; k++) sum += pow(vertex[k].in_degree+vertex[k].out_degree, POWER_SAMPLE);
+    for (long k = 0; k != MAX_NEG; k++)
+    {
+        if ((double)(k + 1) / MAX_NEG > por)
+        {
+            cur_sum += pow(vertex[vid].in_degree+vertex[vid].out_degree, POWER_SAMPLE);
+            por = cur_sum / sum;
+            vid++;
+        }
+        neg_table[k] = vid - 1;
     }
 }
 
@@ -154,18 +186,10 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     double w;
     vector< long > v_in, v_out;
     vector< double > e_w;
-    if (undirect)
-    {
-        v_in.resize(MAX_line*2);
-        v_out.resize(MAX_line*2);
-        e_w.resize(MAX_line*2);
-    }
-    else
-    {
-        v_in.resize(MAX_line);
-        v_out.resize(MAX_line);
-        e_w.resize(MAX_line);
-    }
+    
+    v_in.resize(MAX_line);
+    v_out.resize(MAX_line);
+    e_w.resize(MAX_line);
 
     cout << "Connections Loading:" << endl;
     unsigned long long line = 0;
@@ -195,13 +219,6 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
             v_in[line] = vid1;
             v_out[line] = vid2;
             e_w[line] = w;
-
-            if (undirect)
-            {
-                v_in[line] = vid2;
-                v_out[line] = vid1;
-                e_w[line] = w;
-            }
 
             if (line % MONITOR == 0)
             {
@@ -251,6 +268,7 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     if (undirect)
         MAX_line *= 2;
     BuildAliasMethod(graph, edge);
+    InitNegTable();
     cout << "\tFinished." << endl;
 
 }
@@ -355,15 +373,20 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
         vertex[v1].branch = graph[v1].size();
         offset += graph[v1].size();
 
-        for (auto v2: graph[v1])
+        //for (auto v2: graph[v1])
+        for (int i=0; i<graph[v1].size(); i++)
         {
-            context[line_g].vid = v2;
+            context[line_g].vid = graph[v1][i];
+            //context[line_g].vid = v2;
             line_g++;
         }
-        for (auto w: edge[v1])
+        //for (auto w: edge[v1])
+        for (int i=0; i<edge[v1].size(); i++)
         {
-            vertex[v1].out_degree += w;
-            context[line_e].in_degree = w;
+            vertex[v1].out_degree += edge[v1][i];
+            //vertex[v1].out_degree += w;
+            context[line_e].in_degree = edge[v1][i];
+            //context[line_e].in_degree = w;
             line_e++;
         }
     }
@@ -395,7 +418,7 @@ void proNet::BuildNegativeAliasTable() {
     sum = 0;
     for (long v1=0; v1!=MAX_vid; v1++)
     {
-        sum += pow((vertex[v1].in_degree+vertex[v1].out_degree), 0.75);
+        sum += pow((vertex[v1].in_degree+vertex[v1].out_degree), POWER_SAMPLE);
         //sum += pow((vertex[v1].in_degree), 0.75);
         //sum += vertex[v1].in_degree;
         //sum += vertex[v1].in_degree+vertex[v1].out_degree;
@@ -404,7 +427,7 @@ void proNet::BuildNegativeAliasTable() {
 
     for (long v1=0; v1!=MAX_vid; v1++)
     {
-        norm_prob.push_back( pow((vertex[v1].in_degree+vertex[v1].out_degree), 0.75)*norm );
+        norm_prob.push_back( pow((vertex[v1].in_degree+vertex[v1].out_degree), POWER_SAMPLE)*norm );
         //norm_prob.push_back( pow((vertex[v1].in_degree), 0.75)*norm );
         //norm_prob.push_back( vertex[v1].in_degree*norm );
         //norm_prob.push_back( (vertex[v1].in_degree+vertex[v1].out_degree)*norm );
@@ -412,19 +435,16 @@ void proNet::BuildNegativeAliasTable() {
  
     // block divison
     vector <long> small_block, large_block;
-    long num_small_block = 0, num_large_block = 0;
     
     for (long v1=0; v1!=MAX_vid; v1++)
     {
         if ( norm_prob[v1]<1 )
         {
             small_block.push_back( v1 );
-            num_small_block++;
         }
         else
         {
             large_block.push_back( v1 );
-            num_large_block++;
         }
     }
 
@@ -477,32 +497,31 @@ void proNet::BuildSourceAliasTable() {
     sum = 0;
     for (long v1=0; v1<MAX_vid; v1++)
     {
-        //sum += vertex[v1].out_degree;
-        sum += pow(vertex[v1].out_degree, 0.75);
+        //sum += vertex[v1].in_degree+vertex[v1].out_degree;
+        sum += vertex[v1].out_degree;
+        //sum += pow(vertex[v1].out_degree, 0.75);
     }
     norm = MAX_vid/sum;
 
     for (long v1=0; v1<MAX_vid; v1++)
     {
-        //norm_prob.push_back( vertex[v1].out_degree*norm );
-        norm_prob.push_back( pow(vertex[v1].out_degree, 0.75)*norm );
+        //norm_prob.push_back( (vertex[v1].in_degree+vertex[v1].out_degree)*norm );
+        norm_prob.push_back( vertex[v1].out_degree*norm );
+        //norm_prob.push_back( pow(vertex[v1].out_degree, 0.75)*norm );
     }
  
     // block divison
     vector <long> small_block, large_block;
-    long num_small_block = 0, num_large_block = 0;
     
     for (long v1=0; v1<MAX_vid; v1++)
     {
         if ( norm_prob[v1]<1 )
         {
             small_block.push_back( v1 );
-            num_small_block++;
         }
         else
         {
             large_block.push_back( v1 );
-            num_large_block++;
         }
     }
     
@@ -573,18 +592,15 @@ void proNet::BuildTargetAliasTable() {
 
         // block divison
         vector <long> small_block, large_block;
-        long num_small_block = 0, num_large_block = 0;
         for (long i=0; i<branch; i++)
         {
             if ( norm_prob[i]<1 )
             {
                 small_block.push_back( i );
-                num_small_block++;
             }
             else
             {
                 large_block.push_back( i );
-                num_large_block++;
             }
         }
 
@@ -625,15 +641,23 @@ void proNet::BuildTargetAliasTable() {
         }
 
     }
+
 }
 
 long proNet::NegativeSample() {
     
     long rand_v = random_gen(0, MAX_vid);
     double rand_p = random_gen(0, 1);
+   
+    //double rand_p = random_gen(0, MAX_vid);
+    //long rand_v = (int)rand_p;
+    //rand_p = rand_p - rand_v;
+    
+    //double rand_p = random_gen(0, 1);
+    //long rand_v = random_gen(0, 1)*MAX_vid;
 
-    //double rand_v = random_gen(0, MAX_vid);
-    //double rand_p = rand_v - (int)rand_v;
+    //long rand_v = gsl_rng_uniform(gsl_r)*MAX_vid;
+    //double rand_p = gsl_rng_uniform(gsl_r);
    
     if (rand_p < negative_AT[rand_v].prob)
         return rand_v;
@@ -644,9 +668,19 @@ long proNet::NegativeSample() {
 
 long proNet::NegativeFieldSample(long fid) {
     
-    long rand_v = random_gen(0, MAX_vid);
     double rand_p = random_gen(0, 1);
-    
+    long rand_v = random_gen(0, MAX_vid);
+
+    //double rand_p = random_gen(0, MAX_vid);
+    //long rand_v = (int)rand_p;
+    //rand_p = rand_p - rand_v;
+
+    //double rand_p = random_gen(0, 1);
+    //long rand_v = random_gen(0, 1)*MAX_vid;
+
+    //long rand_v = gsl_rng_uniform(gsl_r)*MAX_vid;
+    //double rand_p = gsl_rng_uniform(gsl_r);
+   
     if (rand_p < negative_AT[rand_v].prob)
         return field[rand_v].vids[fid];
     else
@@ -656,8 +690,18 @@ long proNet::NegativeFieldSample(long fid) {
 
 long proNet::SourceSample() {
     
-    long rand_v = random_gen(0, MAX_vid);
     double rand_p = random_gen(0, 1);
+    long rand_v = random_gen(0, MAX_vid);
+    
+    //double rand_p = random_gen(0, MAX_vid);
+    //long rand_v = (int)rand_p;
+    //rand_p = rand_p - rand_v;
+
+    //double rand_p = random_gen(0, 1);
+    //long rand_v = random_gen(0, 1)*MAX_vid;
+
+    //long rand_v = gsl_rng_uniform(gsl_r)*MAX_vid;
+    //double rand_p = gsl_rng_uniform(gsl_r);
     
     if (rand_p < vertex_AT[rand_v].prob)
         return rand_v;
@@ -668,8 +712,14 @@ long proNet::SourceSample() {
 
 long proNet::TargetSample() {
     
-    long rand_v = random_gen(0, MAX_line);
     double rand_p = random_gen(0, 1);
+    long rand_v = random_gen(0, MAX_line);
+
+    //long rand_v = gsl_rng_uniform(gsl_r)*MAX_line;
+    //double rand_p = gsl_rng_uniform(gsl_r);
+
+    //double rand_p = random_gen(0, 1);
+    //unsigned long long rand_v = random_gen(0, 1)*MAX_line;
 
     if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
@@ -682,8 +732,18 @@ long proNet::TargetSample(long vid) {
     
     if (vertex[vid].branch==0) return -1;
 
-    long rand_v = random_gen(0, vertex[vid].branch) + vertex[vid].offset;
     double rand_p = random_gen(0, 1);
+    long rand_v = random_gen(0, vertex[vid].branch) + vertex[vid].offset;
+    
+    //double rand_p = random_gen(0, vertex[vid].branch) + vertex[vid].offset;
+    //long rand_v = (int)rand_p;
+    //rand_p = rand_p - rand_v;
+    
+    //double rand_p = random_gen(0, 1);
+    //unsigned long long rand_v = random_gen(0, 1)*vertex[vid].branch + vertex[vid].offset;
+   
+    //long rand_v = gsl_rng_uniform(gsl_r)*vertex[vid].branch + vertex[vid].offset;
+    //double rand_p = gsl_rng_uniform(gsl_r);
 
     if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
@@ -724,12 +784,15 @@ vector< vector< long > > proNet::SkipGrams(vector< long > &walk, int window_size
     int length = walk.size();
     int left;
     int right;
+    int reduce;
     vector< long > couple;
     for (int i=0; i<length; ++i)
     {
-        left = i-(window_size-int(random_gen(0, window_size)));
+        reduce = random_gen(0, window_size) + 1;
+        //reduce = gsl_rng_uniform(gsl_r)*window_size + 1;
+        left = i-reduce;
         if (left < 0) left = 0;
-        right = i+(window_size-int(random_gen(0, window_size)));
+        right = i+reduce;
         if (right >= length) right = length-1;
 
         for (int j=left; j<=right; j++)
@@ -783,6 +846,7 @@ vector< vector< long > > proNet::ScaleSkipGrams(vector< long > &walk, int window
             for (int n=0; n<negative_samples; ++n){
                 vertices.push_back(walk[i]);
                 contexts.push_back( int(random_gen(0, MAX_vid)) );
+                //contexts.push_back( int(gsl_rng_uniform(gsl_r)* MAX_vid) );
                 labels.push_back(0);
             }
         }
@@ -802,6 +866,7 @@ vector< vector< long > > proNet::ScaleSkipGrams(vector< long > &walk, int window
             for (int n=0; n<negative_samples; ++n){
                 vertices.push_back(walk[i]);
                 contexts.push_back( int(random_gen(0, MAX_vid)) );
+                //contexts.push_back( int(gsl_rng_uniform(gsl_r)* MAX_vid) );
             }
         }
 
@@ -830,13 +895,15 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
     w_vertex_ptr = &w_vertex[vertex];
     w_context_ptr = &w_context[context];
 
+    negative_samples += 1;
     // 0 for postive sample, others for negative sample
-    for (int neg=0; neg<=negative_samples; ++neg)
+    for (int neg=0; neg!=negative_samples; ++neg)
     {
         // negative sampling
         if (neg!=0){
             label = 0.0;
             w_context_ptr = &w_context[ NegativeSample() ]; // Negative Sample
+            //w_context_ptr = &w_context[ neg_table[random_gen(0, MAX_NEG)] ]; // Negative Sample
         }
 
         f = 0;
