@@ -1,3 +1,4 @@
+#define _GLIBCXX_USE_CXX11_ABI 0
 #include "../src/model/DeepWalk.h"
 #include "../src/model/Walklets.h"
 #include "../src/model/LINE.h"
