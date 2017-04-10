@@ -273,6 +273,47 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
 
 }
 
+void proNet::LoadWalkMeta(string filename) {
+
+    FILE *fin;
+    char c_line[1000];
+    unsigned long long max_line=0;
+
+    cout << "Walk Data Loading:" << endl;
+    fin = fopen(filename.c_str(), "rb");
+    while (fgets(c_line, sizeof(c_line), fin))
+    {
+        if (max_line % MONITOR == 0)
+        {
+            printf("\t# of walking data:\t\t%llu%c", max_line, 13);
+        }
+        ++max_line;
+    }
+    fclose(fin);
+    cout << "\t# of walking data:\t" << max_line << endl;
+
+    char v[160];
+    int w;
+    long vid;
+    dynamic_walk.resize(MAX_vid);
+
+    fin = fopen(filename.c_str(), "rb");
+    for (unsigned long long line = 0; line != max_line; line++)
+    {
+        if ( fscanf(fin, "%s %d", v, &w)!=2 )
+        {
+            cout << "line " << line << " contains wrong number of data" << endl; 
+            continue;
+        }
+
+        vid = SearchHashTable(v);
+        if (vid != -1)
+            dynamic_walk[vid] = w;
+        else
+            cout << "vertex " << v << " is not in given network" << endl;
+    }
+
+}
 
 void proNet::LoadFieldMeta(string filename) {
 
@@ -1211,7 +1252,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
     w_context_ptr = &w_context[context];
 
     // 0 for postive sample, others for negative sample
-    for (int s = -1; s < walk_steps; s++)
+    for (int s = -1; s < dynamic_walk[context]; s++)
     {
         label = 1.0;
         if (s != -1)
@@ -1251,7 +1292,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
 }
 
 
-void proNet::UpdateBFSCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int walk_steps, int negative_samples, double bfs, double alpha){
+void proNet::UpdateDCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double bfs, double alpha){
 
     vector<double>* w_vertex_ptr;
     vector<double>* w_context_ptr;
@@ -1266,19 +1307,12 @@ void proNet::UpdateBFSCommunity(vector< vector<double> >& w_vertex, vector< vect
     w_context_ptr = &w_context[context];
 
     // 0 for postive sample, others for negative sample
-    for (int s = -1; s < walk_steps; s++)
+    for (int s = -1; s < dynamic_walk[context]; s++)
     {
         label = 1.0;
         if (s != -1)
         {
-            if (random_gen(0, 1)<bfs)
-            {
-                context = TargetSample(vertex);
-            }
-            else
-            {
-                context = TargetSample(context);
-            }
+            context = TargetSample(vertex);
             if (context==-1) break;
             w_context_ptr = &w_context[ context ];
         }

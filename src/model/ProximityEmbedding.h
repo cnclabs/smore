@@ -14,6 +14,8 @@ class PE: public LINE {
         PE();
         ~PE();
 
+        void LoadWalkMeta(string);
+        
         void SaveWeights(string);
 
         // model function

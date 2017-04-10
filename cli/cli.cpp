@@ -34,6 +34,8 @@ int main(int argc, char **argv){
         printf("\t\tTrain the Network data\n");
         printf("\t-field <string>\n");
         printf("\t\tField meta of the vertices\n");
+        printf("\t-walkf <string>\n");
+        printf("\t\twalk file name\n");
         printf("\t-save <string>\n");
         printf("\t\tSave the representation data\n");
         printf("\t-dimensions <int>\n");
@@ -61,13 +63,14 @@ int main(int argc, char **argv){
         return 0;
     }
     
-    char model[100], network_file[100], rep_file[100], field_file[100];
+    char model[100], network_file[100], rep_file[100], field_file[100], walk_file[100];
     int dimensions=64, undirected=1, window_size=5, negative_samples=5, walk_times=10, walk_steps=5, sample_times=10, threads=1;
     double init_alpha=0.025, bfs=0.0;
 
     if ((i = ArgPos((char *)"-model", argc, argv)) > 0) strcpy(model, argv[i + 1]);
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-field", argc, argv)) > 0) strcpy(field_file, argv[i + 1]);
+    if ((i = ArgPos((char *)"-walkf", argc, argv)) > 0) strcpy(walk_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-save", argc, argv)) > 0) strcpy(rep_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-undirected", argc, argv)) > 0) undirected = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-dimensions", argc, argv)) > 0) dimensions = atoi(argv[i + 1]);
@@ -160,6 +163,7 @@ int main(int argc, char **argv){
         PE *pe;
         pe = new PE();
         pe->LoadEdgeList(network_file, undirected);
+        pe->LoadWalkMeta(walk_file);
         pe->Init(dimensions);
         pe->Train(sample_times, walk_steps, negative_samples, bfs, init_alpha, threads);
         pe->SaveWeights(rep_file);

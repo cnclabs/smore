@@ -3,6 +3,10 @@
 PE::PE() {}
 PE::~PE() {}
 
+void PE::LoadWalkMeta(string filename) {
+    pnet.LoadWalkMeta(filename);
+}
+
 void PE::SaveWeights(string model_name){
     
     cout << "Save Model:" << endl;
@@ -62,8 +66,8 @@ void PE::Train(int sample_times, int walk_steps, int negative_samples, double bf
     cout << "Learning Parameters:" << endl;
     cout << "\tsample_times:\t\t" << sample_times << endl;
     cout << "\tnegative_samples:\t" << negative_samples << endl;
-    cout << "\twalk_steps:\t\t" << walk_steps << endl;
-    cout << "\tbfs:\t\t\t" << bfs << endl;
+    cout << "\twalk_steps:\t\t" << "given" << endl;
+//    cout << "\tbfs:\t\t\t" << bfs << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
     cout << "\tworkers:\t\t" << workers << endl;
 
@@ -100,7 +104,7 @@ void PE::Train(int sample_times, int walk_steps, int negative_samples, double bf
             
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
-            pnet.UpdateBFSCommunity(w_vertex, w_context, v1, v2, dim, walk_steps, negative_samples, bfs, _alpha);
+            pnet.UpdateDCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, bfs, _alpha);
             //pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
         }
 

@@ -127,6 +127,9 @@ class proNet {
         // Data Process
         void LoadEdgeList(string, bool);
         void LoadFieldMeta(string);
+        
+        vector< int > dynamic_walk;
+        void LoadWalkMeta(string);
 
         // Network Process
         long SourceSample();
@@ -153,7 +156,7 @@ class proNet {
         void UpdateCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, community walk steps, bfs, alpha
-        void UpdateBFSCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double, double);
+        void UpdateDCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
