@@ -285,7 +285,7 @@ void proNet::LoadWalkMeta(string filename) {
     {
         if (max_line % MONITOR == 0)
         {
-            printf("\t# of walking data:\t\t%llu%c", max_line, 13);
+            printf("\t# of walking data:\t%llu%c", max_line, 13);
         }
         ++max_line;
     }
@@ -295,7 +295,7 @@ void proNet::LoadWalkMeta(string filename) {
     char v[160];
     int w;
     long vid;
-    dynamic_walk.resize(MAX_vid);
+    dynamic_walk.resize(MAX_vid, 3);
 
     fin = fopen(filename.c_str(), "rb");
     for (unsigned long long line = 0; line != max_line; line++)
@@ -360,7 +360,7 @@ void proNet::LoadFieldMeta(string filename) {
         }
         vid = SearchHashTable(v);
         if (vid != -1)
-            field[ vid ].fields.push_back(meta_idx[ strdup(meta) ]);
+            field[ vid ].fields[0] = meta_idx[ strdup(meta) ];
         else
             cout << "vertex " << v << " is not in given network" << endl;
        

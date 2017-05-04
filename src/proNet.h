@@ -61,7 +61,7 @@ class Vertex {
 
 class Field {
     public:
-        vector<int> fields;
+        vector<int> fields = {0};
         vector<int> vids;
 };
 

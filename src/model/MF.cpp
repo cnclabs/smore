@@ -79,12 +79,12 @@ void MF::Train(int sample_times, int negative_samples, double alpha, int workers
 
     cout << "Start Training:" << endl;
 
-    sample_times *= 1000000;
+    unsigned long long total_sample_times = (unsigned long long)sample_times*1000000;
     double alpha_min = alpha * 0.0001;
     double alpha_last;
     
-    int current_sample = 0;
-    int jobs = sample_times/workers;
+    unsigned long long current_sample = 0;
+    unsigned long long jobs = total_sample_times/workers;
 
     //for (int samples=0; samples<sample_times; ++samples)
     #pragma omp parallel for
@@ -92,7 +92,7 @@ void MF::Train(int sample_times, int negative_samples, double alpha, int workers
     {
         
         long v1, v2;
-        int count = 0;
+        unsigned long long count = 0;
         double _alpha = alpha;
         
         while (count<jobs)
@@ -104,7 +104,7 @@ void MF::Train(int sample_times, int negative_samples, double alpha, int workers
                 _alpha = alpha* ( 1.0 - (double)(count)/jobs );
                 if (_alpha < alpha_min) _alpha = alpha_min;
                 alpha_last = _alpha;
-                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/sample_times * 100, 13);
+                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
                 fflush(stdout);
             }
             
