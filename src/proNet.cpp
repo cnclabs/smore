@@ -1252,7 +1252,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
     w_context_ptr = &w_context[context];
 
     // 0 for postive sample, others for negative sample
-    for (int s = -1; s < dynamic_walk[context]; s++)
+    for (int s = -1; s < walk_steps; s++)
     {
         label = 1.0;
         if (s != -1)
