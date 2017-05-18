@@ -51,6 +51,12 @@ bool isDirectory(const char *path) {
 }
 
 proNet::proNet() {
+
+    MAX_line=0;
+    MAX_vid=0;
+    MAX_fvid=0;
+    MAX_field=0;
+
     hash_table.resize(HASH_TABLE_SIZE, -1);
     InitSigmoid();
 
@@ -184,12 +190,8 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     char v1[160], v2[160];
     long vid1, vid2;
     double w;
-    vector< long > v_in, v_out;
-    vector< double > e_w;
-    
-    v_in.resize(MAX_line);
-    v_out.resize(MAX_line);
-    e_w.resize(MAX_line);
+    unordered_map< long, vector< long > > graph;
+    unordered_map< long, vector< double > > edge;
 
     cout << "Connections Loading:" << endl;
     unsigned long long line = 0;
@@ -215,10 +217,15 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
             {
                 vid2 = InsertHashTable(v2);
             }
+            
+            graph[vid1].push_back(vid2);
+            edge[vid1].push_back(w);
 
-            v_in[line] = vid1;
-            v_out[line] = vid2;
-            e_w[line] = w;
+            if (undirect)
+            {
+                graph[ vid2 ].push_back( vid1 );
+                edge[ vid2 ].push_back( w );
+            }
 
             if (line % MONITOR == 0)
             {
@@ -230,39 +237,6 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     }
     cout << "\tProgress:\t\t100.00 %\r" << endl;
     cout << "\t# of vertex:\t\t" << MAX_vid << endl;
-
-    unordered_map< long, vector< long > > graph;
-    unordered_map< long, vector< double > > edge;
-
-    // convert the connections to a graph structure
-    cout << "Graph Re-constructing:" << endl;
-    for (unsigned long long line=0; line!=MAX_line; line++)
-    {
-        vid1 = v_in[line];
-        vid2 = v_out[line];
-        w = e_w[line];
-
-        graph[ vid1 ].push_back( vid2 );
-        edge[ vid1 ].push_back( w );
-
-        if (undirect)
-        {
-            graph[ vid2 ].push_back( vid1 );
-            edge[ vid2 ].push_back( w );
-        }
-
-        if (line % MONITOR == 0)
-        {
-            printf("\tProgress:\t\t%.2f %%%c", (double)(line)/(MAX_line+1) * 100, 13);
-            fflush(stdout);
-        }
-    }
-    cout << "\tProgress:\t\t100.00 %\r" << endl;
-
-    // release the occupied memory
-    v_in = vector<long>();
-    v_out = vector<long>();
-    e_w = vector<double>();
 
     cout << "Build the Alias Method:" << endl;
     if (undirect)

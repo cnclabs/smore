@@ -55,8 +55,9 @@ struct cmp_char
 class Vertex {
     public:
         long offset, branch;
-        double out_degree=0.0;
-        double in_degree=0.0;
+        double out_degree;
+        double in_degree;
+        Vertex() { out_degree=0.0; in_degree=0.0; }
 };
 
 class Field {
@@ -67,14 +68,16 @@ class Field {
 
 class Context {
     public:
-        long vid=-1;
-        double in_degree=0.0;
+        long vid;
+        double in_degree;
+        Context() { vid=-1; in_degree=0.0; }
 };
 
 class AliasTable {
     public:
-        int alias=-1;
-        double prob=0.0;
+        int alias;
+        double prob;
+        AliasTable() { alias=-1; prob=0.0;}
 };
 
 class proNet {
@@ -88,10 +91,10 @@ class proNet {
 //        gsl_rng * gsl_r;
 
         // MAX index number
-        unsigned long long MAX_line=0;
-        long MAX_vid=0;
-        long MAX_fvid=0;
-        long MAX_field=0;
+        unsigned long long MAX_line;
+        long MAX_vid;
+        long MAX_fvid;
+        long MAX_field;
         
         // graph basics
         vector< long > hash_table;
