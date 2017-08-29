@@ -1,7 +1,13 @@
 # proNet-core
-This is a C++-based on-going project for variant fast network embeddings within . Now we release the command line interface for four models including *DeepWalk*, *Walklets*, *LINE* and *HPE*. In the near future, we will redesign the framework making some solid APIs for fast development on network embedding techniques.
+This is a C++-based on-going project for variant fast weighted network embeddings. We currently release the command line interface for following models:
+- [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
+- [Walklets](https://arxiv.org/abs/1605.02115)
+- [LINE](http://dl.acm.org/citation.cfm?id=2741093)
+- [HPE](http://dl.acm.org/citation.cfm?id=2959169)
 
-Developed Environment:
+In the near future, we will redesign the framework making some solid APIs for fast development on network embedding techniques.
+
+# Developed Environment
 - g++ > 4.9
 
 # Compilation
@@ -42,6 +48,7 @@ An example comment:
 ```
 
 # Example Script
+This shell script will help obtain the representations of the users and movies in [movielens-1m](https://grouplens.org/datasets/movielens/1m/) dataset.
 ```sh
 cd script
 sh ml-1m.sh
