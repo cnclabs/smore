@@ -1,8 +1,8 @@
 # proNet-core
-pair-wise representations optimization Network, a c++ framework for varient network embedding models.
+This is a C++-based on-going project for variant fast network embeddings within . Now we release the command line interface for four models including *DeepWalk*, *Walklets*, *LINE* and *HPE*. In the near future, we will redesign the framework making some solid APIs for fast development on network embedding techniques.
 
 Developed Environment:
-- g++ 4.9
+- g++ > 4.9
 
 # Installation
 ```
@@ -31,8 +31,13 @@ userC -0.156576 -0.3505 0.213454 0.10476 0.259673
 ```
 
 # Command Line Interface
-Example Usage:
+Execute the cli to see the comment usage:
+```
+./cli
+```
+An example comment:
 ```
 ./cli -model DeepWalk -train net.txt -output rep.txt -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4
 ```
+
 
