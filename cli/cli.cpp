@@ -28,15 +28,15 @@ int main(int argc, char **argv){
     if (argc == 1) {
         printf("[proNet-core]\n");
         printf("\tcommand line interface for proNet-core\n\n");
-        printf("Options:\n");
+        printf("Options Description:\n");
         printf("\t-model <string>\n");
-        printf("\t\tAvaliable models: <DeepWalk>, <LINE>, <Walklets>, <HPE>, <FINE>, <msFINE>, <MF>\n");
+        printf("\t\tAvaliable models: <DeepWalk>, <Walklets>, <LINE>, <HPE>\n");
         printf("\t-train <string>\n");
         printf("\t\tTrain the Network data\n");
-        printf("\t-field <string>\n");
-        printf("\t\tField meta of the vertices\n");
-        printf("\t-walkf <string>\n");
-        printf("\t\twalk file name\n");
+//        printf("\t-field <string>\n");
+//        printf("\t\tField meta of the vertices\n");
+//        printf("\t-walkf <string>\n");
+//        printf("\t\twalk file name\n");
         printf("\t-save <string>\n");
         printf("\t\tSave the representation data\n");
         printf("\t-dimensions <int>\n");
@@ -55,16 +55,26 @@ int main(int argc, char **argv){
         printf("\t\tNumber of training samples *Million; default is 10\n");
         printf("\t-threads <int>\n");
         printf("\t\tNumber of training threads; default is 1\n");
-        printf("\t-bfs <float>\n");
-        printf("\t\tProbability of using BFS walk; default is 0.0\n");
+//        printf("\t-bfs <float>\n");
+//        printf("\t\tProbability of using BFS walk; default is 0.0\n");
         printf("\t-alpha <float>\n");
         printf("\t\tInit learning rate; default is 0.025\n");
-        printf("\nExample Usage:\n");
-        printf("./cli -model DeepWalk -train net.txt -save rep.txt -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4\n\n");
+
+        printf("Usage:\n");
+        printf("\n[DeepWalk]\n");
+        printf("./cli -model DeepWalk -train net.txt -save rep.txt -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("\n[Walklets]\n");
+        printf("./cli -model Walklets -train net.txt -save rep.txt -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("\n[LINE]\n");
+        printf("./cli -model LINE -train net.txt -save rep.txt -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("\n[HPE]\n");
+        printf("./cli -model HPE -train net.txt -save rep.txt -sample_times 5 -walk_steps 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
+
         return 0;
     }
     
     char model[100], network_file[100], rep_file[100], field_file[100], walk_file[100];
+    int help=0;
     int dimensions=64, undirected=1, window_size=5, negative_samples=5, walk_times=10, walk_steps=5, sample_times=10, threads=1;
     double init_alpha=0.025, bfs=0.0;
 
