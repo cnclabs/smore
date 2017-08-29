@@ -4,10 +4,10 @@ double random_gen(const int & min, const int & max) {
     
     static random_device rd;
     static thread_local mt19937* generator = new mt19937( rd() );
-    
     //static thread_local mt19937* generator = new mt19937( std::hash<std::thread::id>()( std::this_thread::get_id())+clock() );
     uniform_real_distribution<double> distribution(min, max);
-
+    
+    // boost_random version
     //static thread_local boost::random::random_device rd;
     //static thread_local boost::random::mt19937* generator = new boost::random::mt19937( std::hash<std::thread::id>()( std::this_thread::get_id())+clock() );
     //boost::random::uniform_real_distribution<double> distribution(min, max);
@@ -1024,17 +1024,16 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertexA, vector< vec
         g = (label - f); // gradient
         for (d=0; d<dimension; ++d) // store the back propagation error
         {
-            back_err[d] += alpha*( g*(*w_vertexB_ptr)[d] - 0.01*(*w_vertexA_ptr)[d] );
+            back_err[d] += alpha*( g*(*w_vertexB_ptr)[d] - 0.0*(*w_vertexA_ptr)[d] );
         }
         for (d=0; d<dimension; ++d) // update context
         {
-            (*w_vertexB_ptr)[d] += alpha*( g*(*w_vertexA_ptr)[d] - 0.01*(*w_vertexB_ptr)[d] );
+            (*w_vertexB_ptr)[d] += alpha*( g*(*w_vertexA_ptr)[d] - 0.0*(*w_vertexB_ptr)[d] );
         }
     }
     //for (d=0; d<dimension; ++d)
     //    (*w_vertexA_ptr)[d] += back_err[d];
     //back_err.resize(dimension, 0.0);
-    
     
     w_vertexB_ptr = &w_vertexB[context];
     //w_vertexB_ptr = &w_context[context];
@@ -1080,7 +1079,6 @@ void proNet::UpdateDirectedPair(vector< vector<double> >& w_vertexA, vector< vec
             }
         }
     }
-
 
     /*
     label = 0.0;

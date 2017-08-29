@@ -16,7 +16,7 @@ void msFINE::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
-        model << pnet.MAX_vid << " " << dim_2*(pnet.MAX_field+1) << endl;
+        model << pnet.MAX_vid << " " << dim << endl;
         for (auto k: pnet.keys)
         {
             model << k;
@@ -49,9 +49,10 @@ void msFINE::SaveWeights(string model_name){
 void msFINE::Init(int dimension) {
    
     cout << "Model Setting:" << endl;
-    cout << "\tdimension:\t\t" << dimension*(1+pnet.MAX_field) << endl;
-    dim_1 = int(dimension);
-    dim_2 = int(dimension);
+    cout << "\tdimension:\t\t" << dimension << endl;
+    dim = dimension;
+    dim_2 = int(dimension/(1+pnet.MAX_field));
+    dim_1 = int(dimension-dim_2*pnet.MAX_field);
     
     w_vertex_o1.resize(pnet.MAX_vid);
     //w_vertex_o1.resize(pnet.MAX_fvid);

@@ -164,8 +164,11 @@ class proNet {
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
 
-        // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
+        // vertex vector, context vector, vertex, context, dimension, walk_steps, negative samples, alpha
         void UpdateMSFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
+        
+        // vertex vector, context vector, vertex, context, dimension_f1, dimension_f2, walk_steps, negative samples, alpha
+        //void UpdateMSDiffFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateFieldsCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
