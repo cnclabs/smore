@@ -1,5 +1,5 @@
 # proNet-core
-This is a C++-based on-going project for variant fast weighted network embeddings. We currently release the command line interface for following models:
+This is a C++ framework for variant weighted network embeddings. We currently release the command line interface for following models:
 - [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
 - [Walklets](https://arxiv.org/abs/1605.02115)
 - [LINE](http://dl.acm.org/citation.cfm?id=2741093)
