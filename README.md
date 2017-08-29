@@ -1,14 +1,25 @@
+[![Build Status][travis-image]][travis-url]
+[![Coverage Status][codecov-image]][codecov-url]
+
+[travis-image]: https://img.shields.io/travis/chihming/proNet-core.svg
+[travis-url]: https://travis-ci.org/chihming/proNet-core
+[codecov-image]: https://img.shields.io/codecov/c/github/chihming/proNet-core.svg
+[codecov-url]: https://codecov.io/gh/chihming/proNet-core
+
 # proNet-core
-This is a C++-based on-going project for variant fast weighted network embeddings. We currently release the command line interface for following models:
+This is a C++ framework for variant weighted network embeddings. We currently release the command line interface for following models:
 - [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
 - [Walklets](https://arxiv.org/abs/1605.02115)
 - [LINE](http://dl.acm.org/citation.cfm?id=2741093)
 - [HPE](http://dl.acm.org/citation.cfm?id=2959169)
 
-In the near future, we will redesign the framework making some solid APIs for fast development on network embedding techniques.
+In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
 
 # Developed Environment
-- g++ > 4.9
+- g++ > 4.9 (In macOS, it needs OpenMP-enabled compilers. Try ```brew install gcc --without-multilib```)
+
+# Related Work
+You can find related work from [awesome-network-embedding](https://github.com/chihming/awesome-network-embedding).
 
 # Compilation
 ```
