@@ -338,16 +338,13 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
         for (int i=0; i<graph[v1].size(); i++)
         {
             context[line_g].vid = graph[v1][i];
-            //context[line_g].vid = v2;
             line_g++;
         }
         //for (auto w: edge[v1])
         for (int i=0; i<edge[v1].size(); i++)
         {
             vertex[v1].out_degree += edge[v1][i];
-            //vertex[v1].out_degree += w;
             context[line_e].in_degree = edge[v1][i];
-            //context[line_e].in_degree = w;
             line_e++;
         }
     }
@@ -609,17 +606,7 @@ long proNet::NegativeSample() {
     
     long rand_v = random_gen(0, MAX_vid);
     double rand_p = random_gen(0, 1);
-   
-    //double rand_p = random_gen(0, MAX_vid);
-    //long rand_v = (int)rand_p;
-    //rand_p = rand_p - rand_v;
-    
-    //double rand_p = random_gen(0, 1);
-    //long rand_v = random_gen(0, 1)*MAX_vid;
-
-    //long rand_v = gsl_rng_uniform(gsl_r)*MAX_vid;
-    //double rand_p = gsl_rng_uniform(gsl_r);
-   
+      
     if (rand_p < negative_AT[rand_v].prob)
         return rand_v;
     else
@@ -631,16 +618,6 @@ long proNet::NegativeFieldSample(long fid) {
     
     double rand_p = random_gen(0, 1);
     long rand_v = random_gen(0, MAX_vid);
-
-    //double rand_p = random_gen(0, MAX_vid);
-    //long rand_v = (int)rand_p;
-    //rand_p = rand_p - rand_v;
-
-    //double rand_p = random_gen(0, 1);
-    //long rand_v = random_gen(0, 1)*MAX_vid;
-
-    //long rand_v = gsl_rng_uniform(gsl_r)*MAX_vid;
-    //double rand_p = gsl_rng_uniform(gsl_r);
    
     if (rand_p < negative_AT[rand_v].prob)
         return field[rand_v].vids[fid];
@@ -653,17 +630,7 @@ long proNet::SourceSample() {
     
     double rand_p = random_gen(0, 1);
     long rand_v = random_gen(0, MAX_vid);
-    
-    //double rand_p = random_gen(0, MAX_vid);
-    //long rand_v = (int)rand_p;
-    //rand_p = rand_p - rand_v;
-
-    //double rand_p = random_gen(0, 1);
-    //long rand_v = random_gen(0, 1)*MAX_vid;
-
-    //long rand_v = gsl_rng_uniform(gsl_r)*MAX_vid;
-    //double rand_p = gsl_rng_uniform(gsl_r);
-    
+        
     if (rand_p < vertex_AT[rand_v].prob)
         return rand_v;
     else
@@ -675,12 +642,6 @@ long proNet::TargetSample() {
     
     double rand_p = random_gen(0, 1);
     long rand_v = random_gen(0, MAX_line);
-
-    //long rand_v = gsl_rng_uniform(gsl_r)*MAX_line;
-    //double rand_p = gsl_rng_uniform(gsl_r);
-
-    //double rand_p = random_gen(0, 1);
-    //unsigned long long rand_v = random_gen(0, 1)*MAX_line;
 
     if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
@@ -696,16 +657,6 @@ long proNet::TargetSample(long vid) {
     double rand_p = random_gen(0, 1);
     long rand_v = random_gen(0, vertex[vid].branch) + vertex[vid].offset;
     
-    //double rand_p = random_gen(0, vertex[vid].branch) + vertex[vid].offset;
-    //long rand_v = (int)rand_p;
-    //rand_p = rand_p - rand_v;
-    
-    //double rand_p = random_gen(0, 1);
-    //unsigned long long rand_v = random_gen(0, 1)*vertex[vid].branch + vertex[vid].offset;
-   
-    //long rand_v = gsl_rng_uniform(gsl_r)*vertex[vid].branch + vertex[vid].offset;
-    //double rand_p = gsl_rng_uniform(gsl_r);
-
     if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
     else

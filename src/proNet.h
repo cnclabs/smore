@@ -28,7 +28,6 @@ using namespace std;
 #include "random.h"
 #include "util.h"
 
-
 #define MONITOR 10000
 #define POWER_SAMPLE 0.75
 #define HASH_TABLE_SIZE 30000000
@@ -79,9 +78,6 @@ class proNet {
         proNet();
         ~proNet();
         
-//        const gsl_rng_type * gsl_T;
-//        gsl_rng * gsl_r;
-
         // MAX index number
         unsigned long long MAX_line;
         long MAX_vid;
