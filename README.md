@@ -38,13 +38,13 @@ userC -0.156576 -0.3505 0.213454 0.10476 0.259673
 ```
 
 # Command Line Interface
-Execute the cli to see the comment usage:
+Directly call cli to see the comment usage:
 ```
 ./cli
 ```
 An example comment:
 ```
-./cli -model DeepWalk -train net.txt -output rep.txt -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4
+./cli -model DeepWalk -train net.txt -output rep.txt -dimensions 64 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4
 ```
 
 # Example Script
