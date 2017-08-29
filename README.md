@@ -1,3 +1,10 @@
+[![Build Status][travis-image]][travis-url]
+[![Coverage Status][codecov-image]][codecov-url]
+[travis-image]: https://img.shields.io/travis/chihming/proNet-core.svg
+[travis-url]: https://travis-ci.org/chihming/proNet-core
+[codecov-image]: https://img.shields.io/codecov/c/github/chihming/proNet-core.svg
+[codecov-url]: https://codecov.io/gh/chihming/proNet-core
+
 # proNet-core
 This is a C++ framework for variant weighted network embeddings. We currently release the command line interface for following models:
 - [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
