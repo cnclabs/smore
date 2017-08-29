@@ -62,13 +62,13 @@ int main(int argc, char **argv){
 
         printf("Usage:\n");
         printf("\n[DeepWalk]\n");
-        printf("./cli -model DeepWalk -train net.txt -save rep.txt -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("./cli -model DeepWalk -train net.txt -save rep.txt -dimensions 64 -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
         printf("\n[Walklets]\n");
-        printf("./cli -model Walklets -train net.txt -save rep.txt -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("./cli -model Walklets -train net.txt -save rep.txt -dimensions 64 -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
         printf("\n[LINE]\n");
-        printf("./cli -model LINE -train net.txt -save rep.txt -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("./cli -model LINE -train net.txt -save rep.txt -dimensions 64 -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1\n");
         printf("\n[HPE]\n");
-        printf("./cli -model HPE -train net.txt -save rep.txt -sample_times 5 -walk_steps 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("./cli -model HPE -train net.txt -save rep.txt -dimensions 64 -sample_times 5 -walk_steps 5 -negative_samples 5 -alpha 0.025 -threads 1\n");
 
         return 0;
     }
