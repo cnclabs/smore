@@ -4,14 +4,14 @@ This is a C++-based on-going project for variant fast network embeddings within 
 Developed Environment:
 - g++ > 4.9
 
-# Installation
+# Compilation
 ```
 $ git clone https://github.com/chihming/proNet-core
 $ cd proNet-core
 $ make
 ```
 
-# Task Explaination
+# Task
 Given a network input:
 ```txt
 userA itemA 3
@@ -22,6 +22,7 @@ userC itemA 4
 ```
 The model learns the representations of each vertex:
 ```
+6 5
 userA 0.0815412 0.0205459 0.288714 0.296497 0.394043
 itemA -0.207083 -0.258583 0.233185 0.0959801 0.258183
 itemC 0.0185886 0.138003 0.213609 0.276383 0.45732
@@ -40,4 +41,8 @@ An example comment:
 ./cli -model DeepWalk -train net.txt -output rep.txt -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4
 ```
 
-
+# Example Script
+```sh
+cd script
+sh ml-1m.sh
+```
