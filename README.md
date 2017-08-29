@@ -48,8 +48,8 @@ An example comment:
 ```
 
 # Example Script
-This shell script will help obtain the representations of the users and movies in [movielens-1m](https://grouplens.org/datasets/movielens/1m/) dataset.
+This shell script will help obtain the representations of the Youtube links in [Youtube-links](http://socialnetworks.mpi-sws.mpg.de/data/youtube-links.txt.gz) dataset.
 ```sh
 cd example
-sh ml-1m.sh
+sh train_youtube.sh
 ```
