@@ -1,55 +1,5 @@
 #include "proNet.h"
 
-double random_gen(const int & min, const int & max) {
-    
-    static random_device rd;
-    static thread_local mt19937* generator = new mt19937( rd() );
-    //static thread_local mt19937* generator = new mt19937( std::hash<std::thread::id>()( std::this_thread::get_id())+clock() );
-    uniform_real_distribution<double> distribution(min, max);
-    
-    // boost_random version
-    //static thread_local boost::random::random_device rd;
-    //static thread_local boost::random::mt19937* generator = new boost::random::mt19937( std::hash<std::thread::id>()( std::this_thread::get_id())+clock() );
-    //boost::random::uniform_real_distribution<double> distribution(min, max);
-    return distribution(*generator);
-    
-}
-
-double ran_uniform() {
-    return rand()/((double)RAND_MAX + 1);
-}
-
-double ran_gaussian() {
-    // Joseph L. Leva: A fast normal Random number generator
-    double u,v, x, y, Q;
-    do {
-        do {
-            u = ran_uniform();
-        } while (u == 0.0); 
-        v = 1.7156 * (ran_uniform() - 0.5);
-        x = u - 0.449871;
-        y = std::abs(v) + 0.386595;
-        Q = x*x + y*(0.19600*y-0.25472*x);
-        if (Q < 0.27597) { break; }
-    } while ((Q > 0.27846) || ((v*v) > (-4.0*u*u*std::log(u)))); 
-    return v / u;
-}
-
-double ran_gaussian(double mean, double stdev) {
-    if ((stdev == 0.0) || (std::isnan(stdev))) {
-        return mean;
-    } else {
-        return mean + stdev*ran_gaussian();
-    }
-}
-
-bool isDirectory(const char *path) {
-    struct stat statbuf;
-    if (stat(path, &statbuf) != 0)
-        return 0;
-    return S_ISDIR(statbuf.st_mode);
-}
-
 proNet::proNet() {
 
     MAX_line=0;
@@ -59,11 +9,6 @@ proNet::proNet() {
 
     hash_table.resize(HASH_TABLE_SIZE, -1);
     InitSigmoid();
-
-    //gsl_rng_env_setup();
-    //gsl_T = gsl_rng_rand48;
-    //gsl_r = gsl_rng_alloc(gsl_T);
-    //gsl_rng_set(gsl_r, 314159265);
 }
 
 proNet::~proNet() {
@@ -90,6 +35,7 @@ void proNet::InitSigmoid() {
 }
 
 double proNet::fastSigmoid(double x) {
+
     if (x < -MAX_SIGMOID) {
         return 0.0;
     } else if (x > MAX_SIGMOID) {
@@ -99,8 +45,8 @@ double proNet::fastSigmoid(double x) {
     }
 }
 
-void proNet::InitNegTable()
-{
+void proNet::InitNegTable() {
+
     double sum = 0, cur_sum = 0, por = 0;
     long vid = 0;
     neg_table.resize(MAX_NEG);
@@ -117,8 +63,8 @@ void proNet::InitNegTable()
     }
 }
 
-int proNet::InsertHashTable(char *key)
-{
+int proNet::InsertHashTable(char *key) {
+
     unsigned int pos = BKDRHash(key);
     while (hash_table[pos] != -1)
         pos = (pos + 1) % HASH_TABLE_SIZE;
@@ -130,8 +76,8 @@ int proNet::InsertHashTable(char *key)
     return MAX_vid-1;
 }
 
-int proNet::SearchHashTable(char *key)
-{
+int proNet::SearchHashTable(char *key) {
+
     unsigned int pos = BKDRHash(key);
     while (1)
     {

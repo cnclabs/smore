@@ -1,6 +1,13 @@
 #ifndef PRONET_H
 #define PRONET_H
 
+using namespace std;
+#if defined (_MSC_VER)  // Visual studio
+    #define thread_local __declspec( thread )
+#elif defined (__GCC__) // GCC
+    #define thread_local __thread
+#endif
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -18,13 +25,9 @@
 #include <stdio.h>
 #include <omp.h>
 #include <dirent.h>
-#include <sys/stat.h>
-//#include <boost/random/mersenne_twister.hpp>
-//#include <boost/random/uniform_real_distribution.hpp>
-//#include <boost/random/random_device.hpp>
-//#include <gsl/gsl_rng.h>
+#include "random.h"
+#include "util.h"
 
-using namespace std;
 
 #define MONITOR 10000
 #define POWER_SAMPLE 0.75
@@ -32,17 +35,6 @@ using namespace std;
 #define SIGMOID_TABLE_SIZE 1000
 #define MAX_SIGMOID 8.0
 #define MAX_NEG 1e8
-
-#if defined (_MSC_VER)  // Visual studio
-    #define thread_local __declspec( thread )
-#elif defined (__GCC__) // GCC
-    #define thread_local __thread
-#endif
-
-double random_gen(const int&, const int&);
-double ran_uniform();
-double ran_gaussian();
-double ran_gaussian(double mean, double stdev);
 
 struct cmp_char
 {
