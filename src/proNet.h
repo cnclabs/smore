@@ -66,7 +66,7 @@ class Context {
 
 class AliasTable {
     public:
-        int alias;
+        long alias;
         double prob;
         AliasTable() { alias=-1; prob=0.0;}
 };
@@ -106,7 +106,8 @@ class proNet {
         void BuildNegativeAliasTable();
         void BuildSourceAliasTable();
         void BuildTargetAliasTable();
-        
+        vector<AliasTable> alias_method(vector<long> index, vector<double> distribution, double power);
+
         // Key Process
         unsigned int BKDRHash(char*);
         int InsertHashTable(char*);

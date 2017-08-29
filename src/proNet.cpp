@@ -366,6 +366,84 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
 
 }
 
+vector<AliasTable> alias_method(vector<long> index, vector<double> distribution, double power) {
+    
+    vector<AliasTable> alias_table;
+
+    // normalization of vertices weights
+    double sum, norm;
+    vector<double> norm_prob;
+    alias_table.resize(distribution.size());
+    
+    sum = 0;
+    vector<double>::iterator distribution_i;
+
+    for (distribution_i=distribution.begin(); distribution_i!=distribution.end(); ++distribution_i)
+    {
+        sum += pow(*distribution_i, POWER_SAMPLE);
+    }
+    norm = distribution.size()/sum;
+
+    for (distribution_i=distribution.begin(); distribution_i!=distribution.end(); ++distribution_i)
+    {
+        norm_prob.push_back( pow(*distribution_i, POWER_SAMPLE)*norm );
+    }
+
+    // block divison
+    vector<long> small_block, large_block;
+    
+    for (long pos=0; pos!=norm_prob.size(); ++pos)
+    {
+        if ( norm_prob[pos]<1 )
+        {
+            small_block.push_back( pos );
+        }
+        else
+        {
+            large_block.push_back( pos );
+        }
+    }
+
+    // assign alias table
+    long small_pos, large_pos;
+
+    while (small_block.size() && large_block.size())
+    {
+        small_pos = small_block.back();
+        small_block.pop_back();
+        large_pos = large_block.back();
+        large_block.pop_back();
+
+        alias_table[small_pos].alias = large_pos;
+        alias_table[small_pos].prob = norm_prob[small_pos];
+        norm_prob[large_pos] = norm_prob[large_pos] + norm_prob[small_pos] - 1;
+        if (norm_prob[large_pos] < 1)
+        {
+            small_block.push_back( large_pos );
+        }
+        else
+        {
+            large_block.push_back( large_pos );
+        }
+    }
+
+    while (large_block.size())
+    {
+        large_pos = large_block.back();
+        large_block.pop_back();
+        alias_table[large_pos].prob = 1.0;
+    }
+
+    while (small_block.size())
+    {
+        small_pos = small_block.back();
+        small_block.pop_back();
+        alias_table[small_pos].prob = 1.0;
+    }
+    
+    return alias_table;
+}
+
 void proNet::BuildNegativeAliasTable() {
 
     // normalization of vertices weights
