@@ -8,7 +8,10 @@ This is a C++-based on-going project for variant fast weighted network embedding
 In the near future, we will redesign the framework making some solid APIs for fast development on network embedding techniques.
 
 # Developed Environment
-- g++ > 4.9
+- g++ > 4.9 (In macOS, it needs OpenMP-enabled compilers. Try ```brew install gcc --without-multilib```)
+
+# Related Work
+You can find related work from [awesome-network-embedding](https://github.com/chihming/awesome-network-embedding).
 
 # Compilation
 ```
