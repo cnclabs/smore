@@ -50,6 +50,6 @@ An example comment:
 # Example Script
 This shell script will help obtain the representations of the users and movies in [movielens-1m](https://grouplens.org/datasets/movielens/1m/) dataset.
 ```sh
-cd script
+cd example
 sh ml-1m.sh
 ```
