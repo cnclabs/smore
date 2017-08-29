@@ -1,17 +1,23 @@
 # proNet-core
-pair-wise representations optimization Network, a c++ framework for varient network embedding models.
+This is a C++-based on-going project for variant fast weighted network embeddings. We currently release the command line interface for following models:
+- [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
+- [Walklets](https://arxiv.org/abs/1605.02115)
+- [LINE](http://dl.acm.org/citation.cfm?id=2741093)
+- [HPE](http://dl.acm.org/citation.cfm?id=2959169)
 
-Developed Environment:
-- g++ 4.9
+In the near future, we will redesign the framework making some solid APIs for fast development on network embedding techniques.
 
-# Installation
+# Developed Environment
+- g++ > 4.9
+
+# Compilation
 ```
 $ git clone https://github.com/chihming/proNet-core
 $ cd proNet-core
 $ make
 ```
 
-# Task Explaination
+# Task
 Given a network input:
 ```txt
 userA itemA 3
@@ -22,6 +28,7 @@ userC itemA 4
 ```
 The model learns the representations of each vertex:
 ```
+6 5
 userA 0.0815412 0.0205459 0.288714 0.296497 0.394043
 itemA -0.207083 -0.258583 0.233185 0.0959801 0.258183
 itemC 0.0185886 0.138003 0.213609 0.276383 0.45732
@@ -31,8 +38,18 @@ userC -0.156576 -0.3505 0.213454 0.10476 0.259673
 ```
 
 # Command Line Interface
-Example Usage:
+Directly call cli to see the comment usage:
 ```
-./cli -model DeepWalk -train net.txt -output rep.txt -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4
+./cli
+```
+An example comment:
+```
+./cli -model DeepWalk -train net.txt -output rep.txt -dimensions 64 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 4
 ```
 
+# Example Script
+This shell script will help obtain the representations of the Youtube links in [Youtube-links](http://socialnetworks.mpi-sws.mpg.de/data/youtube-links.txt.gz) dataset.
+```sh
+cd example
+sh train_youtube.sh
+```
