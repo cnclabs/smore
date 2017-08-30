@@ -13,4 +13,8 @@ fi
 zcat youtube-links.txt.gz | awk -F '	' '{print $1" "$2" 1"}' > net.txt
 
 # run the comment
-../cli/cli -model HPE -train net.txt -save rep.txt -dimensions 64 -sample_times 5 -walk_steps 5 -negative_samples 5 -alpha 0.025 -threads 1
+../cli/deepwalk -train net.txt -save rep_dw.txt -undirected 1 -dimensions 64 -walk_times 1 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1
+../cli/walklets -train net.txt -save rep_wl.txt -undirected 1 -dimensions 64 -walk_times 1 -walk_steps 40 -window_min 2 -window_max 5 -negative_samples 5 -alpha 0.025 -threads 1
+../cli/line -train net.txt -save rep_line1.txt -undirected 1 -order 1 -dimensions 64 -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1
+../cli/line -train net.txt -save rep_line2.txt -undirected 1 -order 2 -dimensions 64 -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1
+../cli/hpe -train net.txt -save rep_hpe.txt -undirected 1 -dimensions 64 -sample_times 10 -walk_steps 5 -negative_samples 5 -alpha 0.025 -threads 1
