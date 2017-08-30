@@ -46,27 +46,12 @@ userC -0.156576 -0.3505 0.213454 0.10476 0.259673
 ```
 
 # Command Line Interface
-Directly call cli to see the comment usage:
+Directly call the execution file to see the usage like:
 ```
-./cli
-```
-Example comments:
-
-*DeepWalk*
-```sh
-./cli -model DeepWalk -train net.txt -save rep.txt -dimensions 64 -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1
-```
-*Walklets*
-```sh
-./cli -model Walklets -train net.txt -save rep.txt -dimensions 64 -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1
-```
-*LINE*
-```sh
-./cli -model LINE -train net.txt -save rep.txt -dimensions 64 -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1
-```
-*HPE*
-```sh
-./cli -model HPE -train net.txt -save rep.txt -dimensions 64 -sample_times 5 -walk_steps 5 -negative_samples 5 -alpha 0.025 -threads 1
+./bin/deepwalk
+./bin/walklets
+./bin/line
+./bin/hpe
 ```
 
 # Example Script
