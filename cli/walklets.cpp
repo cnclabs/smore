@@ -50,10 +50,9 @@ int main(int argc, char **argv){
         return 0;
     }
     
-    char model[100], network_file[100], rep_file[100], field_file[100], walk_file[100];
-    int help=0;
+    char network_file[100], rep_file[100];
     int dimensions=64, undirected=1, window_min=2, window_max=5, negative_samples=5, walk_times=10, walk_steps=40, threads=1;
-    double init_alpha=0.025, bfs=0.0;
+    double init_alpha=0.025;
 
     if ((i = ArgPos((char *)"-model", argc, argv)) > 0) strcpy(model, argv[i + 1]);
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);

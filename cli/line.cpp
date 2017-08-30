@@ -44,16 +44,16 @@ int main(int argc, char **argv){
 
         printf("Usage:\n");
         printf("\n[LINE 1st]\n");
-        printf("./line -model LINE -train net.txt -save rep.txt -undirected 1 -order 1 -dimensions 64 -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("./line -train net.txt -save rep.txt -undirected 1 -order 1 -dimensions 64 -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1\n");
         printf("\n[LINE 2nd]\n");
-        printf("./line -model LINE -train net.txt -save rep.txt -undirected 1 -order 2 -dimensions 64 -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1\n");
+        printf("./line -train net.txt -save rep.txt -undirected 1 -order 2 -dimensions 64 -sample_times 10 -negative_samples 5 -alpha 0.025 -threads 1\n");
 
         return 0;
     }
     
     char network_file[100], rep_file[100];
     int dimensions=64, undirected=1, negative_samples=5, sample_times=10, threads=1, order=2;
-    double init_alpha=0.025, bfs=0.0;
+    double init_alpha=0.025;
 
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-save", argc, argv)) > 0) strcpy(rep_file, argv[i + 1]);
