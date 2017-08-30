@@ -18,6 +18,7 @@ class LINE {
 
         // parameters
         int dim;                // representation dimensions
+        int order=2;
         vector< vector<double> > w_vertex_o1;
         vector< vector<double> > w_vertex;
         vector< vector<double> > w_context;
@@ -27,7 +28,7 @@ class LINE {
         void SaveWeights(string);
         
         // model function
-        void Init(int);
+        void Init(int, int);
         void Train(int, int, double, int);
 
 };

@@ -366,7 +366,7 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
 
 }
 
-vector<AliasTable> alias_method(vector<long> index, vector<double> distribution, double power) {
+vector<AliasTable> proNet::AliasMethod(vector<long> index, vector<double> distribution, double power) {
     
     vector<AliasTable> alias_table;
 

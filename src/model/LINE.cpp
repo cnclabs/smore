@@ -16,16 +16,27 @@ void LINE::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
-        model << pnet.MAX_vid << " " << dim*2 << endl;
-//        model << pnet.MAX_vid << " " << dim << endl;
-        for (auto k: pnet.keys)
+        model << pnet.MAX_vid << " " << dim << endl;
+
+        if (order==1)
         {
-            model << k;
-            for (int d=0; d<dim; ++d)
-                model << " " << w_vertex_o1[pnet.kmap[k]][d];
-            for (int d=0; d<dim; ++d)
-                model << " " << w_vertex[pnet.kmap[k]][d];
-            model << endl;
+            for (auto k: pnet.keys)
+            {
+                model << k;
+                for (int d=0; d<dim; ++d)
+                    model << " " << w_vertex_o1[pnet.kmap[k]][d];
+                model << endl;
+            }
+        }
+        else
+        {
+            for (auto k: pnet.keys)
+            {
+                model << k;
+                for (int d=0; d<dim; ++d)
+                    model << " " << w_vertex[pnet.kmap[k]][d];
+                model << endl;
+            }
         }
         cout << "\tSave to <" << model_name << ">" << endl;
     }
@@ -35,33 +46,44 @@ void LINE::SaveWeights(string model_name){
     }
 }
 
-void LINE::Init(int dimension) {
+void LINE::Init(int dimension, int order) {
    
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dimension << endl;
-    dim = (int)(dimension/2);
+    this->dim = (int)(dimension);
+    if (order == 1)
+        this->order = order;
 
-    w_vertex_o1.resize(pnet.MAX_vid);
-    w_vertex.resize(pnet.MAX_vid);
-    w_context.resize(pnet.MAX_vid);
-
-    for (long vid=0; vid<pnet.MAX_vid; ++vid)
+    if (order==1)
     {
-        w_vertex_o1[vid].resize(dim);
-        w_vertex[vid].resize(dim);
-        for (int d=0; d<dim;++d)
+        w_vertex_o1.resize(pnet.MAX_vid);
+        for (long vid=0; vid<pnet.MAX_vid; ++vid)
         {
-            w_vertex_o1[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
-            w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+            w_vertex_o1[vid].resize(dim);
+            for (int d=0; d<dim;++d)
+            {
+                w_vertex_o1[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+            }
         }
     }
-
-    for (long vid=0; vid<pnet.MAX_vid; ++vid)
+    else
     {
-        w_context[vid].resize(dim);
-        for (int d=0; d<dim;++d)
-            w_context[vid][d] = 0.0;
-            //w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+        w_vertex.resize(pnet.MAX_vid);
+        w_context.resize(pnet.MAX_vid);
+        for (long vid=0; vid<pnet.MAX_vid; ++vid)
+        {
+            w_vertex[vid].resize(dim);
+            for (int d=0; d<dim;++d)
+            {
+                w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+            }
+        }
+        for (long vid=0; vid<pnet.MAX_vid; ++vid)
+        {
+            w_context[vid].resize(dim);
+            for (int d=0; d<dim;++d)
+                w_context[vid][d] = 0.0;
+        }
     }
 }
 
@@ -74,6 +96,10 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
     cout << "\t[LINE]" << endl;
 
     cout << "Learning Parameters:" << endl;
+    if (order==1)
+        cout << "\torder:\t\t\t" << order << "st" << endl;
+    else
+        cout << "\torder:\t\t\t" << order << "nd" << endl;
     cout << "\tsample_times:\t\t" << sample_times << endl;
     cout << "\tnegative_samples:\t" << negative_samples << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
@@ -87,40 +113,71 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
     
     unsigned long long current_sample = 0;
     unsigned long long jobs = total_sample_times/workers;
-
-    //for (int samples=0; samples<sample_times; ++samples)
-    #pragma omp parallel for
-    for (int worker=0; worker<workers; ++worker)
+    
+    if (order==1)
     {
-        
-        unsigned long long count = 1;
-        double _alpha = alpha;
-        long v1, v2;
-        
-        while (count<jobs)
-        {            
-            v1 = pnet.SourceSample();
-            v2 = pnet.TargetSample(v1);
-            pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim, negative_samples, _alpha);
-            v1 = pnet.SourceSample();
-            v2 = pnet.TargetSample(v1);
-            pnet.UpdatePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
+        #pragma omp parallel for
+        for (int worker=0; worker<workers; ++worker)
+        {
 
-            count++;
-            if (count % MONITOR == 0)
-            {
-                _alpha = alpha* ( 1.0 - (double)(current_sample)/total_sample_times );
-                current_sample += MONITOR;
-                if (_alpha < alpha_min) _alpha = alpha_min;
-                alpha_last = _alpha;
-                printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
-                fflush(stdout);
+            unsigned long long count = 1;
+            double _alpha = alpha;
+            long v1, v2;
+
+            while (count<jobs)
+            {            
+                v1 = pnet.SourceSample();
+                v2 = pnet.TargetSample(v1);
+                pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim, negative_samples, _alpha);
+
+                count++;
+                if (count % MONITOR == 0)
+                {
+                    _alpha = alpha* ( 1.0 - (double)(current_sample)/total_sample_times );
+                    current_sample += MONITOR;
+                    if (_alpha < alpha_min) _alpha = alpha_min;
+                    alpha_last = _alpha;
+                    printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
+                    fflush(stdout);
+                }
+
             }
-        
-        }
 
+        }
+        printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", alpha_last);
     }
-    printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", alpha_last);
+    else
+    {
+        #pragma omp parallel for
+        for (int worker=0; worker<workers; ++worker)
+        {
+
+            unsigned long long count = 1;
+            double _alpha = alpha;
+            long v1, v2;
+
+            while (count<jobs)
+            {            
+                v1 = pnet.SourceSample();
+                v2 = pnet.TargetSample(v1);
+                pnet.UpdatePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
+
+                count++;
+                if (count % MONITOR == 0)
+                {
+                    _alpha = alpha* ( 1.0 - (double)(current_sample)/total_sample_times );
+                    current_sample += MONITOR;
+                    if (_alpha < alpha_min) _alpha = alpha_min;
+                    alpha_last = _alpha;
+                    printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
+                    fflush(stdout);
+                }
+
+            }
+
+        }
+        printf("\tAlpha: %.6f\tProgress: 100.00 %%\n", alpha_last);
+    }
 
 }
 

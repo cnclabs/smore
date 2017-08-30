@@ -1,6 +1,6 @@
 all:
 	( cd src; make )
-	( cd cli; make cli )
+	( cd cli; make all )
 
 clean:
 	( cd src; make clean )

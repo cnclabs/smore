@@ -106,7 +106,7 @@ class proNet {
         void BuildNegativeAliasTable();
         void BuildSourceAliasTable();
         void BuildTargetAliasTable();
-        vector<AliasTable> alias_method(vector<long> index, vector<double> distribution, double power);
+        vector<AliasTable> AliasMethod(vector<long> index, vector<double> distribution, double power);
 
         // Key Process
         unsigned int BKDRHash(char*);
