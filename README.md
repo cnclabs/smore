@@ -53,6 +53,32 @@ Directly call the execution file to see the usage like:
 ./bin/line
 ./bin/hpe
 ```
+then you will see the options description like:
+```
+Options Description:
+        -train <string>
+                Train the Network data
+        -save <string>
+                Save the representation data
+        -dimensions <int>
+                Dimension of vertex representation; default is 64
+        -undirected <int>
+                Whether the edge is undirected; default is 1
+        -negative_samples <int>
+                Number of negative examples; default is 5
+        -window_size <int>
+                Size of skip-gram window; default is 5
+        -walk_times <int>
+                Times of being staring vertex; default is 10
+        -walk_steps <int>
+                Step of random walk; default is 40
+        -threads <int>
+                Number of training threads; default is 1
+        -alpha <float>
+                Init learning rate; default is 0.025
+Usage:
+./deepwalk -train net.txt -save rep.txt -undirected 1 -dimensions 64 -walk_times 10 -walk_steps 40 -window_size 5 -negative_samples 5 -alpha 0.025 -threads 1
+```
 
 # Example Script
 This shell script will help obtain the representations of the Youtube links in [Youtube-links](http://socialnetworks.mpi-sws.mpg.de/data/youtube-links.txt.gz) dataset.
