@@ -54,7 +54,6 @@ int main(int argc, char **argv){
     int dimensions=64, undirected=1, window_min=2, window_max=5, negative_samples=5, walk_times=10, walk_steps=40, threads=1;
     double init_alpha=0.025;
 
-    if ((i = ArgPos((char *)"-model", argc, argv)) > 0) strcpy(model, argv[i + 1]);
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-save", argc, argv)) > 0) strcpy(rep_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-undirected", argc, argv)) > 0) undirected = atoi(argv[i + 1]);
