@@ -60,3 +60,4 @@ This shell script will help obtain the representations of the Youtube links in [
 cd example
 sh train_youtube.sh
 ```
+Changing the number of threads in *train_youtube.sh* could speedup the process.
