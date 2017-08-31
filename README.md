@@ -17,9 +17,6 @@ In the near future, we will redesign the framework making some solid APIs for fa
 # Developed Environment
 - g++ > 4.9 (In macOS, it needs OpenMP-enabled compilers. Try ```brew install gcc --without-multilib```)
 
-# Related Work
-You can find related work from [awesome-network-embedding](https://github.com/chihming/awesome-network-embedding).
-
 # Compilation
 ```
 $ git clone https://github.com/chihming/proNet-core
@@ -50,10 +47,10 @@ userC -0.156576 -0.3505 0.213454 0.10476 0.259673
 # Command Line Interface
 Directly call the execution file to see the usage like:
 ```
-./bin/deepwalk
-./bin/walklets
-./bin/line
-./bin/hpe
+./cli/deepwalk
+./cli/walklets
+./cli/line
+./cli/hpe
 ```
 then you will see the options description like:
 ```
@@ -89,3 +86,6 @@ cd example
 sh train_youtube.sh
 ```
 Changing the number of threads in *train_youtube.sh* could speedup the process.
+
+# Related Work
+You can find related work from [awesome-network-embedding](https://github.com/chihming/awesome-network-embedding).
