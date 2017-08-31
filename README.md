@@ -1,5 +1,7 @@
 [![Build Status][travis-image]][travis-url]
+[![Gitter chat for developers at https://gitter.im/dmlc/xgboost][gitter-image]](https://gitter.im/proNet-core/Lobby)
 
+[gitter-image]: https://badges.gitter.im/Join%20Chat.svg
 [travis-image]: https://img.shields.io/travis/chihming/proNet-core.svg
 [travis-url]: https://travis-ci.org/chihming/proNet-core
 
