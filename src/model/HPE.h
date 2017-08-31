@@ -18,7 +18,7 @@ class HPE: public LINE {
 
         // model function
         void Init(int);
-        void Train(int, int, int, double, int);
+        void Train(int, int, int, double, double, int);
 
 };
 

@@ -320,7 +320,7 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
     // re-construct the graph
     // source === (weight) === target
     
-    cout << "\tInitializing ..." << endl;
+    cout << "\tReconstructing Graph ..." << endl;
     
     vertex.resize(MAX_vid);
     context.resize(MAX_line);
@@ -334,13 +334,11 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
         vertex[v1].branch = graph[v1].size();
         offset += graph[v1].size();
 
-        //for (auto v2: graph[v1])
         for (int i=0; i<graph[v1].size(); i++)
         {
             context[line_g].vid = graph[v1][i];
             line_g++;
         }
-        //for (auto w: edge[v1])
         for (int i=0; i<edge[v1].size(); i++)
         {
             vertex[v1].out_degree += edge[v1][i];
@@ -359,7 +357,7 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
     edge.clear();
 
     // compute alias table
-    cout << "\tAlias Table Constructing ..." << endl;
+    cout << "\tBuilding Alias Tables ..." << endl;
     vector<double> distribution;
     
     // Alias table for source vertices
@@ -708,6 +706,7 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
             back_err[d] += g * (*w_context_ptr)[d];
         for (d=0; d<dimension; ++d) // update context
             (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
+
     }
     for (d=0; d<dimension; ++d)
         (*w_vertex_ptr)[d] += back_err[d];
@@ -983,7 +982,7 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
     
 }
 
-void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int walk_steps, int negative_samples, double alpha){
+void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
 
     vector<double>* w_vertex_ptr;
     vector<double>* w_context_ptr;
@@ -1018,17 +1017,18 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
                 w_context_ptr = &w_context[ NegativeSample() ];
             }
 
-            f = 0;
+            f = 1;
             for (d=0; d<dimension; ++d) // prediciton
                 f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
             //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
             //f = tanh(f); // fast sigmoid(prediction)
             f = fastSigmoid(f); // fast sigmoid(prediction)
-            g = (label - f) * alpha; // gradient
+            g = (label - f); // gradient
             for (d=0; d<dimension; ++d) // store the back propagation error
-                back_err[d] += g * (*w_context_ptr)[d];
+                back_err[d] += alpha * (g * (*w_context_ptr)[d] - reg * (*w_vertex_ptr)[d]);
             for (d=0; d<dimension; ++d) // update context
-                (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
+                (*w_context_ptr)[d] += alpha * (g * (*w_vertex_ptr)[d] - reg * (*w_context_ptr)[d]);
+
         }
         for (d=0; d<dimension; ++d)
             (*w_vertex_ptr)[d] += back_err[d];

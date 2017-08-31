@@ -52,7 +52,7 @@ void HPE::Init(int dim) {
 }
 
 
-void HPE::Train(int sample_times, int walk_steps, int negative_samples, double alpha, int workers){
+void HPE::Train(int sample_times, int walk_steps, int negative_samples, double reg, double alpha, int workers){
     
     omp_set_num_threads(workers);
 
@@ -63,6 +63,7 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double a
     cout << "\tsample_times:\t\t" << sample_times << endl;
     cout << "\tnegative_samples:\t" << negative_samples << endl;
     cout << "\twalk_steps:\t\t" << walk_steps << endl;
+    cout << "\tregularization:\t\t" << reg << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
     cout << "\tworkers:\t\t" << workers << endl;
 
@@ -97,7 +98,7 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double a
             
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
-            pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, walk_steps, negative_samples, _alpha);
+            pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, reg, walk_steps, negative_samples, _alpha);
             pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
         }
 
