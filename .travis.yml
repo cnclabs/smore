@@ -3,3 +3,8 @@ compiler: gcc
 
 script:
   - make
+
+notifications:
+  email:
+    recipients:
+      - changecandy@gmail.com
