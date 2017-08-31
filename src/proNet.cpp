@@ -376,7 +376,7 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
     {
         distribution[v] = vertex[v].in_degree + vertex[v].out_degree;
     }
-    negative_AT = AliasMethod(distribution, 1.0);
+    negative_AT = AliasMethod(distribution, POWER_SAMPLE);
 
     // Alias table for context vertices
     long branch;
@@ -390,12 +390,12 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
         {
             distribution[i] = context[i+offset].in_degree;
         }
-        vector<AliasTable> sub_at = AliasMethod(distribution, POWER_SAMPLE);
-        context_AT.insert(context_AT.end(), sub_at.begin(), sub_at.end());
+        vector<AliasTable> sub_at = AliasMethod(distribution, 1.0);
         for (long i=0; i<branch; i++)
         {
-            context_AT[i+offset].alias += offset;
+            sub_at[i].alias += offset;
         }
+        context_AT.insert(context_AT.end(), sub_at.begin(), sub_at.end());
     }
 
 }

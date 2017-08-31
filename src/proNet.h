@@ -104,9 +104,6 @@ class proNet {
         void InitSigmoid();
         void InitNegTable();
         void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
-        void BuildNegativeAliasTable();
-        void BuildSourceAliasTable();
-        void BuildTargetAliasTable();
         vector<AliasTable> AliasMethod(vector<double>& distribution, double power);
 
         // Key Process
