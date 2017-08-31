@@ -360,13 +360,47 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
 
     // compute alias table
     cout << "\tAlias Table Constructing ..." << endl;
-    BuildNegativeAliasTable();
-    BuildSourceAliasTable();
-    BuildTargetAliasTable();
+    vector<double> distribution;
+    
+    // Alias table for source vertices
+    distribution.resize(MAX_vid);
+    for (long v=0; v<MAX_vid; v++)
+    {
+        distribution[v] = vertex[v].out_degree;
+    }
+    vertex_AT = AliasMethod(distribution, 1.0);
+    
+    // Alias table for negative sampling
+    distribution.resize(MAX_vid);
+    for (long v=0; v<MAX_vid; v++)
+    {
+        distribution[v] = vertex[v].in_degree + vertex[v].out_degree;
+    }
+    negative_AT = AliasMethod(distribution, 1.0);
+
+    // Alias table for context vertices
+    long branch;
+    for (long vid=0; vid<MAX_vid;vid++)
+    {
+        offset = vertex[vid].offset;
+        branch = vertex[vid].branch;
+        
+        distribution.resize(branch);
+        for (long i=0; i<branch; i++)
+        {
+            distribution[i] = context[i+offset].in_degree;
+        }
+        vector<AliasTable> sub_at = AliasMethod(distribution, POWER_SAMPLE);
+        context_AT.insert(context_AT.end(), sub_at.begin(), sub_at.end());
+        for (long i=0; i<branch; i++)
+        {
+            context_AT[i+offset].alias += offset;
+        }
+    }
 
 }
 
-vector<AliasTable> proNet::AliasMethod(vector<long> index, vector<double> distribution, double power) {
+vector<AliasTable> proNet::AliasMethod(vector<double>& distribution, double power) {
     
     vector<AliasTable> alias_table;
 
@@ -383,7 +417,7 @@ vector<AliasTable> proNet::AliasMethod(vector<long> index, vector<double> distri
         sum += pow(*distribution_i, POWER_SAMPLE);
     }
     norm = distribution.size()/sum;
-
+    
     for (distribution_i=distribution.begin(); distribution_i!=distribution.end(); ++distribution_i)
     {
         norm_prob.push_back( pow(*distribution_i, POWER_SAMPLE)*norm );
@@ -444,241 +478,6 @@ vector<AliasTable> proNet::AliasMethod(vector<long> index, vector<double> distri
     return alias_table;
 }
 
-void proNet::BuildNegativeAliasTable() {
-
-    // normalization of vertices weights
-    double sum, norm;
-    vector <double> norm_prob;
-    negative_AT.resize(MAX_vid);
-    
-    sum = 0;
-    for (long v1=0; v1!=MAX_vid; v1++)
-    {
-        sum += pow((vertex[v1].in_degree+vertex[v1].out_degree), POWER_SAMPLE);
-        //sum += pow((vertex[v1].in_degree), 0.75);
-        //sum += vertex[v1].in_degree;
-        //sum += vertex[v1].in_degree+vertex[v1].out_degree;
-    }
-    norm = MAX_vid/sum;
-
-    for (long v1=0; v1!=MAX_vid; v1++)
-    {
-        norm_prob.push_back( pow((vertex[v1].in_degree+vertex[v1].out_degree), POWER_SAMPLE)*norm );
-        //norm_prob.push_back( pow((vertex[v1].in_degree), 0.75)*norm );
-        //norm_prob.push_back( vertex[v1].in_degree*norm );
-        //norm_prob.push_back( (vertex[v1].in_degree+vertex[v1].out_degree)*norm );
-    }
- 
-    // block divison
-    vector <long> small_block, large_block;
-    
-    for (long v1=0; v1!=MAX_vid; v1++)
-    {
-        if ( norm_prob[v1]<1 )
-        {
-            small_block.push_back( v1 );
-        }
-        else
-        {
-            large_block.push_back( v1 );
-        }
-    }
-
-    // assign alias table
-    long small_v, large_v;
-
-    while (small_block.size() && large_block.size())
-    {
-        small_v = small_block.back();
-        small_block.pop_back();
-        large_v = large_block.back();
-        large_block.pop_back();
-
-        negative_AT[small_v].alias = large_v;
-        negative_AT[small_v].prob = norm_prob[small_v];
-        norm_prob[large_v] = norm_prob[large_v] + norm_prob[small_v] - 1;
-        if (norm_prob[large_v] < 1)
-        {
-            small_block.push_back( large_v );
-        }
-        else
-        {
-            large_block.push_back( large_v );
-        }
-    }
-
-    while (large_block.size())
-    {
-        large_v = large_block.back();
-        large_block.pop_back();
-        negative_AT[large_v].prob = 1.0;
-    }
-
-    while (small_block.size())
-    {
-        small_v = small_block.back();
-        small_block.pop_back();
-        negative_AT[small_v].prob = 1.0;
-    }
-
-}
-
-void proNet::BuildSourceAliasTable() {
-
-    // normalization of vertices weights
-    double sum, norm;
-    vector <double> norm_prob;
-    vertex_AT.resize(MAX_vid);
-    
-    sum = 0;
-    for (long v1=0; v1<MAX_vid; v1++)
-    {
-        //sum += vertex[v1].in_degree+vertex[v1].out_degree;
-        sum += vertex[v1].out_degree;
-        //sum += pow(vertex[v1].out_degree, 0.75);
-    }
-    norm = MAX_vid/sum;
-
-    for (long v1=0; v1<MAX_vid; v1++)
-    {
-        //norm_prob.push_back( (vertex[v1].in_degree+vertex[v1].out_degree)*norm );
-        norm_prob.push_back( vertex[v1].out_degree*norm );
-        //norm_prob.push_back( pow(vertex[v1].out_degree, 0.75)*norm );
-    }
- 
-    // block divison
-    vector <long> small_block, large_block;
-    
-    for (long v1=0; v1<MAX_vid; v1++)
-    {
-        if ( norm_prob[v1]<1 )
-        {
-            small_block.push_back( v1 );
-        }
-        else
-        {
-            large_block.push_back( v1 );
-        }
-    }
-    
-    // assign alias table
-    long small_v, large_v;
-
-    while (small_block.size() && large_block.size())
-    {
-        small_v = small_block.back();
-        small_block.pop_back();
-        large_v = large_block.back();
-        large_block.pop_back();
-
-        vertex_AT[small_v].alias = large_v;
-        vertex_AT[small_v].prob = norm_prob[small_v];
-        norm_prob[large_v] = norm_prob[large_v] + norm_prob[small_v] - 1;
-        if (norm_prob[large_v] < 1)
-        {
-            small_block.push_back( large_v );
-        }
-        else
-        {
-            large_block.push_back( large_v );
-        }
-    }
-
-    while (large_block.size())
-    {
-        large_v = large_block.back();
-        large_block.pop_back();
-        vertex_AT[large_v].prob = 1.0;
-    }
-
-    while (small_block.size())
-    {
-        small_v = small_block.back();
-        small_block.pop_back();
-        vertex_AT[small_v].prob = 1.0;
-    }
-
-}
-
-void proNet::BuildTargetAliasTable() {
-    
-    context_AT.resize(MAX_line);
-
-    for (long vid=0; vid<MAX_vid;vid++)
-    {
-        // normalization of vertices weights
-        long offset, branch;
-        offset = vertex[vid].offset;
-        branch = vertex[vid].branch;
-
-        double sum, norm;
-        vector <double> norm_prob;
-        sum = 0;
-        for (long i=0; i<branch; i++)
-        {
-            sum += context[i+offset].in_degree;
-            //sum += pow((context[i+offset].in_degree), 0.75);
-        }
-        norm = branch/sum;
-        for (long i=0; i<branch; i++)
-        {
-            norm_prob.push_back( context[i+offset].in_degree*norm );
-            //norm_prob.push_back( pow((context[i+offset].in_degree), 0.75)*norm );
-        }
-
-        // block divison
-        vector <long> small_block, large_block;
-        for (long i=0; i<branch; i++)
-        {
-            if ( norm_prob[i]<1 )
-            {
-                small_block.push_back( i );
-            }
-            else
-            {
-                large_block.push_back( i );
-            }
-        }
-
-        // assign alias table
-        long small_i, large_i;
-        while (small_block.size() && large_block.size())
-        {
-            small_i = small_block.back();
-            small_block.pop_back();
-            large_i = large_block.back();
-            large_block.pop_back();
-
-            context_AT[small_i+offset].alias = context[large_i+offset].vid;
-            context_AT[small_i+offset].prob = norm_prob[small_i];
-            norm_prob[large_i] = norm_prob[large_i] + norm_prob[small_i] - 1;
-            if (norm_prob[large_i] < 1)
-            {
-                small_block.push_back( large_i );
-            }
-            else
-            {
-                large_block.push_back( large_i );
-            }
-        }
-        
-        while (large_block.size())
-        {
-            large_i = large_block.back();
-            large_block.pop_back();
-            context_AT[large_i+offset].prob = 1.0;
-        }
-
-        while (small_block.size())
-        {
-            small_i = small_block.back();
-            small_block.pop_back();
-            context_AT[small_i+offset].prob = 1.0;
-        }
-
-    }
-
-}
 
 long proNet::NegativeSample() {
     

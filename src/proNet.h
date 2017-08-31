@@ -94,10 +94,11 @@ class proNet {
         vector< Context > context;
         vector< AliasTable > vertex_AT;
         vector< AliasTable > context_AT;
+//        vector< vector<AliasTable> > context_AT;
         vector< AliasTable > negative_AT;
         vector< Field > field;
         vector< long > neg_table;
-        
+
         // cahce
         vector< double > cached_sigmoid;
         void InitSigmoid();
@@ -106,7 +107,7 @@ class proNet {
         void BuildNegativeAliasTable();
         void BuildSourceAliasTable();
         void BuildTargetAliasTable();
-        vector<AliasTable> AliasMethod(vector<long> index, vector<double> distribution, double power);
+        vector<AliasTable> AliasMethod(vector<double>& distribution, double power);
 
         // Key Process
         unsigned int BKDRHash(char*);
@@ -129,6 +130,8 @@ class proNet {
         long TargetSample(long);
         long NegativeSample();
         long NegativeFieldSample(long);
+        //long AliasSample();
+        //long AliasSample(vector<AliasTable>&);
         vector< long > RandomWalk(long, int);
         vector< vector< long > > SkipGrams(vector<long>&, int, int);
         vector< vector< long > > ScaleSkipGrams(vector<long>&, int, int, int);
