@@ -188,7 +188,7 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
     if (undirect)
         MAX_line *= 2;
     BuildAliasMethod(graph, edge);
-    InitNegTable();
+    //InitNegTable();
     cout << "\tFinished." << endl;
 
 }

@@ -73,6 +73,11 @@ class AliasTable {
 
 class proNet {
 
+    private:
+        void InitSigmoid();
+        void InitNegTable();
+        void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
+        
     public:
         
         proNet();
@@ -94,16 +99,12 @@ class proNet {
         vector< Context > context;
         vector< AliasTable > vertex_AT;
         vector< AliasTable > context_AT;
-//        vector< vector<AliasTable> > context_AT;
         vector< AliasTable > negative_AT;
         vector< Field > field;
         vector< long > neg_table;
 
         // cahce
         vector< double > cached_sigmoid;
-        void InitSigmoid();
-        void InitNegTable();
-        void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
         vector<AliasTable> AliasMethod(vector<double>& distribution, double power);
 
         // Key Process
