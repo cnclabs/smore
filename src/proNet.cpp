@@ -391,7 +391,8 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
         vector<AliasTable> sub_at = AliasMethod(distribution, 1.0);
         for (long i=0; i<branch; i++)
         {
-            sub_at[i].alias += offset;
+            if (sub_at[i].alias!=-1)
+                sub_at[i].alias += offset;
         }
         context_AT.insert(context_AT.end(), sub_at.begin(), sub_at.end());
     }
@@ -521,7 +522,7 @@ long proNet::TargetSample() {
     if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
     else
-        return context_AT[rand_v].alias;
+        return context[context_AT[rand_v].alias].vid;
 
 }
 
@@ -535,7 +536,7 @@ long proNet::TargetSample(long vid) {
     if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
     else
-        return context_AT[rand_v].alias;
+        return context[context_AT[rand_v].alias].vid;
 
 }
 
@@ -561,6 +562,49 @@ vector< long > proNet::RandomWalk(long start, int steps) {
     return walk;
 }
 
+vector< vector< long > > proNet::CBOWs(vector< long > &walk, int window_size, int negative_samples){
+
+    vector< vector< long > > wraper;
+    vector< long > vertices;
+    vector< long > contexts;
+    vector< long > labels;
+
+    int length = walk.size();
+    int left;
+    int right;
+    int reduce;
+    vector< long > couple;
+    for (int i=0; i<length; ++i)
+    {
+        reduce = random_gen(0, window_size) + 1;
+        left = i-reduce;
+        if (left < 0) left = 0;
+        right = i+reduce;
+        if (right >= length) right = length-1;
+
+        for (int j=left; j<=right; j++)
+        {
+            if (i==j) continue;
+            vertices.push_back(walk[i]);
+            contexts.push_back(walk[j]);
+            labels.push_back(1);
+            
+            for (int n=0; n<negative_samples; ++n){
+                vertices.push_back(walk[i]);
+                contexts.push_back(NegativeSample());
+                labels.push_back(0);
+            }
+        }
+    }
+    wraper.push_back(vertices);
+    wraper.push_back(contexts);
+    wraper.push_back(labels);
+    
+    return wraper; // [ [vertices], [contexts], [labels] ]
+
+}
+
+
 vector< vector< long > > proNet::SkipGrams(vector< long > &walk, int window_size, int negative_samples){
 
     vector< vector< long > > wraper;
@@ -576,7 +620,6 @@ vector< vector< long > > proNet::SkipGrams(vector< long > &walk, int window_size
     for (int i=0; i<length; ++i)
     {
         reduce = random_gen(0, window_size) + 1;
-        //reduce = gsl_rng_uniform(gsl_r)*window_size + 1;
         left = i-reduce;
         if (left < 0) left = 0;
         right = i+reduce;
@@ -667,20 +710,78 @@ vector< vector< long > > proNet::ScaleSkipGrams(vector< long > &walk, int window
 }
 
 // Optimizer
+
+void proNet::Opt_SGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
+    
+    int d = 0;
+    double f = 0, g = 0;
+    int dimension = w_vertex_ptr.size();
+    
+    for (d=0; d<dimension; ++d) // prediciton
+        f += w_vertex_ptr[d] * w_context_ptr[d];
+    //f = 1.0/(1.0+exp(-f)); // sigmoid(prediction)
+    //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
+    //f = tanh(f); // fast sigmoid(prediction)
+    //f = fastSigmoid(f); // fast sigmoid(prediction)
+    //f = min(1.0, max(-1.0, f)); // relu(prediction)
+    g = (label - f) * alpha; // gradient
+    for (d=0; d<dimension; ++d) // store the back propagation error
+        loss_vertex_ptr[d] += g * w_context_ptr[d];
+    for (d=0; d<dimension; ++d) // update context
+        loss_context_ptr[d] += g * w_vertex_ptr[d];
+
+}
+
+void proNet::Opt_SigmoidSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
+    
+    int d = 0;
+    double f = 0, g = 0;
+    int dimension = w_vertex_ptr.size();
+    
+    for (d=0; d<dimension; ++d) // prediciton
+        f += w_vertex_ptr[d] * w_context_ptr[d];
+    //f = 1.0/(1.0+exp(-f)); // sigmoid(prediction)
+    //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
+    //f = tanh(f); // fast sigmoid(prediction)
+    f = fastSigmoid(f); // fast sigmoid(prediction)
+    //f = min(1.0, max(-1.0, f)); // relu(prediction)
+    g = (label - f) * alpha; // gradient
+    for (d=0; d<dimension; ++d) // store the back propagation error
+        loss_vertex_ptr[d] += g * w_context_ptr[d];
+    for (d=0; d<dimension; ++d) // update context
+        loss_context_ptr[d] += g * w_vertex_ptr[d];
+
+}
+
+void proNet::Opt_SigmoidRegSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, double alpha, double reg, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
+    
+    int d = 0;
+    double f = 0, g = 0;
+    int dimension = w_vertex_ptr.size();
+    
+    for (d=0; d<dimension; ++d) // prediciton
+        f += w_vertex_ptr[d] * w_context_ptr[d];
+    //f = 1.0/(1.0+exp(-f)); // sigmoid(prediction)
+    //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
+    //f = tanh(f); // fast sigmoid(prediction)
+    f = fastSigmoid(f); // fast sigmoid(prediction)
+    //f = min(1.0, max(-1.0, f)); // relu(prediction)
+    g = (label - f) * alpha; // gradient
+    for (d=0; d<dimension; ++d) // store the back propagation error
+        loss_vertex_ptr[d] += alpha * (g * w_context_ptr[d] - reg * w_vertex_ptr[d]);
+    for (d=0; d<dimension; ++d) // update context
+        loss_context_ptr[d] += alpha * (g * w_vertex_ptr[d] - reg * w_context_ptr[d]);
+
+}
+
+
 void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
-    vector< double >* w_vertex_ptr;
-    vector< double >* w_context_ptr;
     vector< double > back_err;
     back_err.resize(dimension, 0.0);
 
     int d;
-    long rand_v;
-    double label, g, f, rand_p;
-    
-    label = 1.0;
-    w_vertex_ptr = &w_vertex[vertex];
-    w_context_ptr = &w_context[context];
+    double label=1.0;
 
     negative_samples += 1;
     // 0 for postive sample, others for negative sample
@@ -689,27 +790,12 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
         // negative sampling
         if (neg!=0){
             label = 0.0;
-            w_context_ptr = &w_context[ NegativeSample() ]; // Negative Sample
-            //w_context_ptr = &w_context[ neg_table[random_gen(0, MAX_NEG)] ]; // Negative Sample
+            context = NegativeSample();
         }
-
-        f = 0;
-        for (d=0; d<dimension; ++d) // prediciton
-            f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-        //f = 1.0/(1.0+exp(-f)); // sigmoid(prediction)
-        //f = f/(1.0 + fabs(f)); // fast sigmoid(prediction)
-        //f = tanh(f); // fast sigmoid(prediction)
-        f = fastSigmoid(f); // fast sigmoid(prediction)
-        //f = min(1.0, max(-1.0, f)); // relu(prediction)
-        g = (label - f) * alpha; // gradient
-        for (d=0; d<dimension; ++d) // store the back propagation error
-            back_err[d] += g * (*w_context_ptr)[d];
-        for (d=0; d<dimension; ++d) // update context
-            (*w_context_ptr)[d] += g * (*w_vertex_ptr)[d];
-
+        Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, back_err, w_context[context]);
     }
     for (d=0; d<dimension; ++d)
-        (*w_vertex_ptr)[d] += back_err[d];
+        w_vertex[vertex][d] += back_err[d];
 
 }
 
@@ -984,54 +1070,37 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
 
 void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
 
-    vector<double>* w_vertex_ptr;
-    vector<double>* w_context_ptr;
     vector<double> back_err;
     back_err.resize(dimension, 0.0);
 
     int d;
-    long rand_v;
-    double label, g, f, rand_p;
+    double label, neg_context;
     
-    w_vertex_ptr = &w_vertex[vertex];
-    w_context_ptr = &w_context[context];
-
     // 0 for postive sample, others for negative sample
-    for (int s = -1; s < walk_steps; s++)
+    for (int s = 0; s < walk_steps; s++)
     {
-        label = 1.0;
-        if (s != -1)
+        if (s != 0)
         {
             context = TargetSample(context);
             if (context==-1) break;
-            w_context_ptr = &w_context[ context ];
         }
 
         for (d=0; d<dimension; ++d)
             back_err[d] = 0.0;
-        for (int neg=0; neg<=negative_samples; ++neg)
+
+        // positive training
+        label = 1.0;
+        Opt_SigmoidRegSGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
+
+        // negative sampling
+        label = 0.0;
+        for (int neg=0; neg!=negative_samples; ++neg)
         {
-            // negative sampling
-            if (neg!=0){
-                label = 0.0;
-                w_context_ptr = &w_context[ NegativeSample() ];
-            }
-
-            f = 1;
-            for (d=0; d<dimension; ++d) // prediciton
-                f += (*w_vertex_ptr)[d] * (*w_context_ptr)[d];
-            //f = f/(1.0 + fabs(f)); // sigmoid(prediction)
-            //f = tanh(f); // fast sigmoid(prediction)
-            f = fastSigmoid(f); // fast sigmoid(prediction)
-            g = (label - f); // gradient
-            for (d=0; d<dimension; ++d) // store the back propagation error
-                back_err[d] += alpha * (g * (*w_context_ptr)[d] - reg * (*w_vertex_ptr)[d]);
-            for (d=0; d<dimension; ++d) // update context
-                (*w_context_ptr)[d] += alpha * (g * (*w_vertex_ptr)[d] - reg * (*w_context_ptr)[d]);
-
+            neg_context = NegativeSample();
+            Opt_SigmoidRegSGD(w_vertex[vertex], w_context[neg_context], label, alpha, reg, back_err, w_context[context]);
         }
         for (d=0; d<dimension; ++d)
-            (*w_vertex_ptr)[d] += back_err[d];
+            w_vertex[vertex][d] += back_err[d];
 
     }
 
