@@ -392,7 +392,7 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
         for (long i=0; i<branch; i++)
         {
             if (sub_at[i].alias!=-1)
-                sub_at[i].alias += offset;
+                sub_at[i].alias = context[offset+sub_at[i].alias].vid;
         }
         context_AT.insert(context_AT.end(), sub_at.begin(), sub_at.end());
     }
@@ -522,7 +522,7 @@ long proNet::TargetSample() {
     if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
     else
-        return context[context_AT[rand_v].alias].vid;
+        return context_AT[rand_v].alias;
 
 }
 
@@ -536,7 +536,7 @@ long proNet::TargetSample(long vid) {
     if (rand_p < context_AT[rand_v].prob)
         return context[rand_v].vid;
     else
-        return context[context_AT[rand_v].alias].vid;
+        return context_AT[rand_v].alias;
 
 }
 
