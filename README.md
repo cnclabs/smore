@@ -6,7 +6,9 @@
 [travis-url]: https://travis-ci.org/chihming/proNet-core
 
 # proNet-core
-This is a C++ framework for variant weighted network embeddings. We currently release the command line interface for following models:
+<img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/pronet.png" width="480">
+
+This is a C++ framework for variant **weighted** network embedding techniques. We currently release the command line interface for following models:
 - [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
 - [Walklets](https://arxiv.org/abs/1605.02115)
 - [LINE](http://dl.acm.org/citation.cfm?id=2741093)
