@@ -84,22 +84,23 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double r
         long v1, v2;
         
         while (count<jobs)
-        {
+        {            
+            v1 = pnet.SourceSample();
+            v2 = pnet.TargetSample(v1);
+            pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, reg, walk_steps, negative_samples, _alpha);
+            pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
+
             count ++;
             if (count % MONITOR == 0)
             {
+                _alpha = alpha* ( 1.0 - (double)(current_sample)/total_sample_times );
                 current_sample += MONITOR;
-                _alpha = alpha* ( 1.0 - (double)(count)/jobs );
                 if (_alpha < alpha_min) _alpha = alpha_min;
                 alpha_last = _alpha;
                 printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
                 fflush(stdout);
             }
-            
-            v1 = pnet.SourceSample();
-            v2 = pnet.TargetSample(v1);
-            pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, reg, walk_steps, negative_samples, _alpha);
-            pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
+
         }
 
     }
