@@ -766,7 +766,7 @@ void proNet::Opt_SigmoidRegSGD(vector<double>& w_vertex_ptr, vector<double>& w_c
     //f = tanh(f); // fast sigmoid(prediction)
     f = fastSigmoid(f); // fast sigmoid(prediction)
     //f = min(1.0, max(-1.0, f)); // relu(prediction)
-    g = (label - f) * alpha; // gradient
+    g = (label - f); // gradient
     for (d=0; d<dimension; ++d) // store the back propagation error
         loss_vertex_ptr[d] += alpha * (g * w_context_ptr[d] - reg * w_vertex_ptr[d]);
     for (d=0; d<dimension; ++d) // update context
