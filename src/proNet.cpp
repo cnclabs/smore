@@ -1097,7 +1097,7 @@ void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<
         for (int neg=0; neg!=negative_samples; ++neg)
         {
             neg_context = NegativeSample();
-            Opt_SigmoidRegSGD(w_vertex[vertex], w_context[neg_context], label, alpha, reg, back_err, w_context[context]);
+            Opt_SigmoidRegSGD(w_vertex[vertex], w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
         }
         for (d=0; d<dimension; ++d)
             w_vertex[vertex][d] += back_err[d];
