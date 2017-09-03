@@ -1,9 +1,11 @@
 [![Build Status][travis-image]][travis-url]
+[![license][MIT-licence]](https://raw.githubusercontent.com/chihming/proNet-core/master/LICENSE)
 [![Gitter chat for developers at https://gitter.im/dmlc/xgboost][gitter-image]](https://gitter.im/proNet-core/Lobby)
 
 [gitter-image]: https://badges.gitter.im/Join%20Chat.svg
 [travis-image]: https://img.shields.io/travis/chihming/proNet-core.svg
 [travis-url]: https://travis-ci.org/chihming/proNet-core
+[MIT-licence]: https://img.shields.io/github/license/mashape/apistatus.svg
 
 # proNet-core
 <img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/pronet.png" width="480">
