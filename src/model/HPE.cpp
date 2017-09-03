@@ -89,6 +89,7 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double r
             v2 = pnet.TargetSample(v1);
             pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, reg, walk_steps, negative_samples, _alpha);
             pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
+            //pnet.UpdateCBOW(w_vertex, w_context, v2, v1, dim, reg, walk_steps, negative_samples, _alpha);
 
             count ++;
             if (count % MONITOR == 0)

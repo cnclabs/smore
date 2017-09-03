@@ -149,6 +149,9 @@ class proNet {
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
 
+        // vertex vector, context vector, vertex, context, dimension, regularization, walk steps, negative samples, alpha
+        void UpdateCBOW(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
+
         // vertex vector, context vector, vertex series, context series, dimension, negative samples, alpha
         void UpdatePairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, int, int, double);
 
