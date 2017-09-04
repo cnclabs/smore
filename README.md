@@ -13,8 +13,9 @@
 This is a C++ framework for variant **weighted** network embedding techniques. We currently release the command line interface for following models:
 - [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
 - [Walklets](https://arxiv.org/abs/1605.02115)
-- [LINE](http://dl.acm.org/citation.cfm?id=2741093)
-- [HPE](http://dl.acm.org/citation.cfm?id=2959169)
+- [LINE](http://dl.acm.org/citation.cfm?id=2741093) (**L**arge-scale **I**nformation **N**etwork **E**mbedding)
+- [HPE](http://dl.acm.org/citation.cfm?id=2959169) (**H**eterogeneous **P**reference **E**mbedding)
+- MF (**M**atrix **F**actorization)
 
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
 
@@ -55,6 +56,7 @@ Directly call the execution file to see the usage like:
 ./cli/walklets
 ./cli/line
 ./cli/hpe
+./cli/mf
 ```
 then you will see the options description like:
 ```
