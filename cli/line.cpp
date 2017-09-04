@@ -21,8 +21,6 @@ int main(int argc, char **argv){
         printf("[proNet-core]\n");
         printf("\tcommand line interface for proNet-core\n\n");
         printf("Options Description:\n");
-        printf("\t-model <string>\n");
-        printf("\t\tAvaliable models: <DeepWalk>, <Walklets>, <LINE>, <HPE>\n");
         printf("\t-train <string>\n");
         printf("\t\tTrain the Network data\n");
         printf("\t-save <string>\n");

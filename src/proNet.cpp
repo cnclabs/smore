@@ -711,7 +711,7 @@ vector< vector< long > > proNet::ScaleSkipGrams(vector< long > &walk, int window
 
 // Optimizer
 
-void proNet::Opt_SGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
+void proNet::Opt_SGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, double alpha, double reg, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
     
     int d = 0;
     double f = 0, g = 0;
@@ -724,11 +724,11 @@ void proNet::Opt_SGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr
     //f = tanh(f); // fast sigmoid(prediction)
     //f = fastSigmoid(f); // fast sigmoid(prediction)
     //f = min(1.0, max(-1.0, f)); // relu(prediction)
-    g = (label - f) * alpha; // gradient
+    g = (label - f); // gradient
     for (d=0; d<dimension; ++d) // store the back propagation error
-        loss_vertex_ptr[d] += g * w_context_ptr[d];
+        loss_vertex_ptr[d] += alpha * (g * w_context_ptr[d] - reg * w_vertex_ptr[d]);
     for (d=0; d<dimension; ++d) // update context
-        loss_context_ptr[d] += g * w_vertex_ptr[d];
+        loss_context_ptr[d] += alpha * (g * w_vertex_ptr[d] - reg * w_context_ptr[d]);
 
 }
 
@@ -774,7 +774,6 @@ void proNet::Opt_SigmoidRegSGD(vector<double>& w_vertex_ptr, vector<double>& w_c
 
 }
 
-
 void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
     vector< double > back_err;
@@ -783,16 +782,38 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
     int d;
     double label=1.0;
 
-    negative_samples += 1;
-    // 0 for postive sample, others for negative sample
+    // positive
+    Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, back_err, w_context[context]);
+
+    // negative
+    label = 0.0;
     for (int neg=0; neg!=negative_samples; ++neg)
     {
-        // negative sampling
-        if (neg!=0){
-            label = 0.0;
-            context = NegativeSample();
-        }
+        context = NegativeSample();
         Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, back_err, w_context[context]);
+    }
+    for (d=0; d<dimension; ++d)
+        w_vertex[vertex][d] += back_err[d];
+
+}
+
+void proNet::UpdateFactorizedPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int negative_samples, double alpha){
+    
+    vector< double > back_err;
+    back_err.resize(dimension, 0.0);
+
+    int d;
+    double label=1.0;
+
+    // positive
+    Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
+
+    // negative
+    label = 0.0;
+    for (int neg=0; neg!=negative_samples; ++neg)
+    {
+        context = NegativeSample();
+        Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
     }
     for (d=0; d<dimension; ++d)
         w_vertex[vertex][d] += back_err[d];
