@@ -6,10 +6,6 @@ MF::MF() {
 MF::~MF() {
 }
 
-void MF::LoadFieldMeta(string filename) {
-    pnet.LoadFieldMeta(filename);
-}
-
 void MF::LoadEdgeList(string filename, bool undirect) {
     pnet.LoadEdgeList(filename, undirect);
 }
@@ -43,28 +39,18 @@ void MF::Init(int dim) {
     cout << "\tdimension:\t\t" << dim << endl;
 
     w_vertex.resize(pnet.MAX_vid);
-    w_context.resize(pnet.MAX_vid);
-
-    //random_device rd;
-    //mt19937 e2(rd());
-    //normal_distribution<double> dist(0.0, 0.01);
 
     for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
         w_vertex[vid].resize(dim);
-        w_context[vid].resize(dim);
         for (int d=0; d<dim;++d)
-            //w_vertex[vid][d] = ran_gaussian(0.0, 0.1);
             w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
-        for (int d=0; d<dim;++d)
-            //w_context[vid][d] = ran_gaussian(0.0, 0.1);
-            w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
     }
 
 }
 
 
-void MF::Train(int sample_times, int negative_samples, double alpha, int workers){
+void MF::Train(int sample_times, int negative_samples, double alpha, double reg, int workers){
     
     omp_set_num_threads(workers);
 
@@ -75,6 +61,7 @@ void MF::Train(int sample_times, int negative_samples, double alpha, int workers
     cout << "\tsample_times:\t\t" << sample_times << endl;
     cout << "\tnegative_samples:\t" << negative_samples << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
+    cout << "\tregularization:\t\t" << reg << endl;
     cout << "\tworkers:\t\t" << workers << endl;
 
     cout << "Start Training:" << endl;
@@ -97,24 +84,20 @@ void MF::Train(int sample_times, int negative_samples, double alpha, int workers
         
         while (count<jobs)
         {
-            count++;
+            v1 = pnet.SourceSample();
+            v2 = pnet.TargetSample(v1);
+            pnet.UpdateFactorizedPair(w_vertex, w_vertex, v1, v2, dim, reg, negative_samples, _alpha);
+
+            count ++;
             if (count % MONITOR == 0)
             {
+                _alpha = alpha* ( 1.0 - (double)(current_sample)/total_sample_times );
                 current_sample += MONITOR;
-                _alpha = alpha* ( 1.0 - (double)(count)/jobs );
                 if (_alpha < alpha_min) _alpha = alpha_min;
                 alpha_last = _alpha;
                 printf("\tAlpha: %.6f\tProgress: %.3f %%%c", _alpha, (double)(current_sample)/total_sample_times * 100, 13);
                 fflush(stdout);
             }
-            
-            v1 = pnet.SourceSample();
-            while(pnet.field[v1].fields[0]!=0)
-                v1 = pnet.SourceSample();
-            v2 = pnet.TargetSample(v1);
-            //pnet.UpdatePair(w_vertex, w_vertex, v1, v2, dim, negative_samples, _alpha);
-            pnet.UpdateDirectedPair(w_vertex, w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
-            //pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, 3, negative_samples, _alpha);
         }
 
     }

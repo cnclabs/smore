@@ -135,8 +135,8 @@ class proNet {
 
         // Optimizer
 
-        // vertex representation, context representation, label, alpha, vertex loss, context loss, alpha
-        void Opt_SGD(vector<double>&, vector<double>&, double, double, vector<double>&, vector<double>&);
+        // vertex representation, context representation, label, alpha, regularization, vertex loss, context loss, alpha
+        void Opt_SGD(vector<double>&, vector<double>&, double, double, double, vector<double>&, vector<double>&);
 
         // vertex representation, context representation, label, alpha, vertex loss, context loss, alpha
         void Opt_SigmoidSGD(vector<double>&, vector<double>&, double, double, vector<double>&, vector<double>&);
@@ -149,14 +149,14 @@ class proNet {
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
 
+        // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
+        void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
+
         // vertex vector, context vector, vertex, context, dimension, regularization, walk steps, negative samples, alpha
         void UpdateCBOW(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
 
         // vertex vector, context vector, vertex series, context series, dimension, negative samples, alpha
         void UpdatePairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, int, int, double);
-
-        // vertex vector, context vector, vertex series, context series, vertex batch size, context batch size, dimension, negative samples, alpha
-        //void UpdateManyMany(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, int, int, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateDirectedPair(vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
