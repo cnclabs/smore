@@ -1,6 +1,6 @@
 CC = g++
 CPPFLAGS = -std=c++11 -fPIC -fopenmp -lm -O3
-OBJECTS = util.o random.o proNet.o ./model/DeepWalk.o ./model/Walklets.o ./model/LINE.o ./model/HPE.o ./model/FINE.o ./model/MF.o ./model/ProximityEmbedding.o ./model/msFINE.o
+OBJECTS = util.o random.o proNet.o ./model/DeepWalk.o ./model/Walklets.o ./model/LINE.o ./model/HPE.o ./model/APP.o ./model/FINE.o ./model/MF.o ./model/ProximityEmbedding.o ./model/msFINE.o
 
 all: $(OBJECTS)
 	mkdir -p ../bin

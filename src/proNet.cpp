@@ -372,7 +372,8 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
     distribution.resize(MAX_vid);
     for (long v=0; v<MAX_vid; v++)
     {
-        distribution[v] = vertex[v].in_degree + vertex[v].out_degree;
+        //distribution[v] = vertex[v].in_degree + vertex[v].out_degree;
+        distribution[v] = 1;
     }
     negative_AT = AliasMethod(distribution, POWER_SAMPLE);
 
@@ -539,6 +540,25 @@ long proNet::TargetSample(long vid) {
         return context_AT[rand_v].alias;
 
 }
+
+vector< long > proNet::JumpingRandomWalk(long start, double jump) {
+
+    long next = start;
+    vector< long > walk;
+
+    walk.push_back(next);
+    while (1)
+    {   
+        if (vertex[next].branch == 0)
+            return walk;
+        next = TargetSample(next);
+        walk.push_back(next);
+        if (random_gen(0.0, 1.0) < jump) break;
+    }
+
+    return walk;
+}
+
 
 vector< long > proNet::RandomWalk(long start, int steps) {
 
@@ -773,6 +793,31 @@ void proNet::Opt_SigmoidRegSGD(vector<double>& w_vertex_ptr, vector<double>& w_c
         loss_context_ptr[d] += alpha * (g * w_vertex_ptr[d] - reg * w_context_ptr[d]);
 
 }
+
+void proNet::UpdateAPPPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
+    
+    vector< double > vertex_err;
+    vertex_err.resize(dimension, 0.0);
+
+    int d;
+    double label;
+
+    // positive
+    label = 1.0;
+    Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, vertex_err, w_context[context]);
+
+    // negative
+    label = 0.0;
+    for (int neg=0; neg!=negative_samples; ++neg)
+    {
+        context = NegativeSample();
+        Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, vertex_err, w_context[context]);
+    }
+    for (d=0; d<dimension; ++d)
+        w_vertex[vertex][d] += vertex_err[d];
+
+}
+
 
 void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
