@@ -129,6 +129,7 @@ class proNet {
         long NegativeSample();
         long NegativeFieldSample(long);
         vector< long > RandomWalk(long, int);
+        vector< long > JumpingRandomWalk(long, double);
         vector< vector< long > > CBOWs(vector<long>&, int, int);
         vector< vector< long > > SkipGrams(vector<long>&, int, int);
         vector< vector< long > > ScaleSkipGrams(vector<long>&, int, int, int);
@@ -148,6 +149,9 @@ class proNet {
         
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
+
+        // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
+        void UpdateAPPPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
         void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
