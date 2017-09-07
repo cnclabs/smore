@@ -15,6 +15,7 @@ This is a C++ framework for variant **weighted** network embedding techniques. W
 - [Walklets](https://arxiv.org/abs/1605.02115)
 - [LINE](http://dl.acm.org/citation.cfm?id=2741093) (**L**arge-scale **I**nformation **N**etwork **E**mbedding)
 - [HPE](http://dl.acm.org/citation.cfm?id=2959169) (**H**eterogeneous **P**reference **E**mbedding)
+- [APP](https://aaai.org/ocs/index.php/AAAI/AAAI17/paper/view/14696)(**A**symmetric **P**roximity **P**reserving graph embedding)
 - MF (**M**atrix **F**actorization)
 
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
@@ -57,6 +58,7 @@ Directly call the execution file to see the usage like:
 ./cli/line
 ./cli/hpe
 ./cli/mf
+./cli/app
 ```
 then you will see the options description like:
 ```
