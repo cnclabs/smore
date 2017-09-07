@@ -372,8 +372,8 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
     distribution.resize(MAX_vid);
     for (long v=0; v<MAX_vid; v++)
     {
-        //distribution[v] = vertex[v].in_degree + vertex[v].out_degree;
-        distribution[v] = 1;
+        distribution[v] = vertex[v].in_degree + vertex[v].out_degree;
+        //distribution[v] = 1;
     }
     negative_AT = AliasMethod(distribution, POWER_SAMPLE);
 
