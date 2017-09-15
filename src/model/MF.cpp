@@ -17,11 +17,11 @@ void MF::SaveWeights(string model_name){
     if (model)
     {
         model << pnet.MAX_vid << " " << dim << endl;
-        for (auto k: pnet.keys)
+        for (long vid=0; vid!=pnet.MAX_vid; vid++)
         {
-            model << k;
+            model << pnet.vertex_hash.keys[vid];
             for (int d=0; d<dim; ++d)
-                model << " " << w_vertex[pnet.kmap[k]][d];
+                model << " " << w_vertex[vid][d];
             model << endl;
         }
         cout << "\tSave to <" << model_name << ">" << endl;
@@ -73,7 +73,6 @@ void MF::Train(int sample_times, int negative_samples, double alpha, double reg,
     unsigned long long current_sample = 0;
     unsigned long long jobs = total_sample_times/workers;
 
-    //for (int samples=0; samples<sample_times; ++samples)
     #pragma omp parallel for
     for (int worker=0; worker<workers; ++worker)
     {
