@@ -51,12 +51,6 @@ class Vertex {
         Vertex() { out_degree=0.0; in_degree=0.0; }
 };
 
-class Field {
-    public:
-        vector<int> fields = {0};
-        vector<int> vids;
-};
-
 class Context {
     public:
         long vid;
@@ -64,11 +58,23 @@ class Context {
         Context() { vid=-1; in_degree=0.0; }
 };
 
+class Field {
+    public:
+        vector<int> fields = {0};
+        vector<int> vids;
+};
+
 class AliasTable {
     public:
         long alias;
         double prob;
         AliasTable() { alias=-1; prob=0.0;}
+};
+
+class HashTable {
+    public:
+        vector< long > table;
+        vector< char* > keys;
 };
 
 class proNet {
@@ -88,11 +94,6 @@ class proNet {
         long MAX_vid;
         long MAX_fvid;
         long MAX_field;
-        
-        // graph basics
-        vector< long > hash_table;
-        vector< char* > keys;
-        map< char*, long, cmp_char > kmap;     // vertex map to index number
 
         // Alias Graph
         vector< Vertex > vertex;
@@ -108,9 +109,10 @@ class proNet {
         vector<AliasTable> AliasMethod(vector<double>& distribution, double power);
 
         // Key Process
+        HashTable vertex_hash;
         unsigned int BKDRHash(char*);
-        int InsertHashTable(char*);
-        int SearchHashTable(char*);
+        void InsertHashTable(HashTable&, char*);
+        long SearchHashTable(HashTable&, char*);
         
         // Math-related Process
         double fastSigmoid(double);

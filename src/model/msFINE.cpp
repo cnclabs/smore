@@ -17,25 +17,18 @@ void msFINE::SaveWeights(string model_name){
     if (model)
     {
         model << pnet.MAX_vid << " " << dim << endl;
-        for (auto k: pnet.keys)
+        for (long o_vid=0; o_vid!=pnet.MAX_vid; o_vid++)
         {
-            model << k;
-            o_vid = pnet.kmap[k];
+            model << pnet.vertex_hash.keys[o_vid];
             for (int d=0; d<dim_1; ++d)
-                model << " " << w_vertex_o1[ o_vid ][d];
-                        
+                model << " " << w_vertex[o_vid][d];
+
             for (fid=0; fid<pnet.MAX_field; fid++)
             {
                 vid = pnet.field[o_vid].vids[fid];
-                //for (int d=0; d<dim_1; ++d)
-                //    model << " " << w_vertex_o1[ vid ][d];
                 for (int d=0; d<dim_2; ++d)
                     model << " " << w_vertex[ vid ][d];
             }
-
-            //for (int d=0; d<dim_2; ++d)
-            //    model << " " << w_vertex[ o_vid ][d];
-
             model << endl;
         }
         cout << "\tSave to <" << model_name << ">" << endl;

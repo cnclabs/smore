@@ -7,7 +7,7 @@ proNet::proNet() {
     MAX_fvid=0;
     MAX_field=0;
 
-    hash_table.resize(HASH_TABLE_SIZE, -1);
+    vertex_hash.table.resize(HASH_TABLE_SIZE, -1);
     InitSigmoid();
 }
 
@@ -63,28 +63,24 @@ void proNet::InitNegTable() {
     }
 }
 
-int proNet::InsertHashTable(char *key) {
+void proNet::InsertHashTable(HashTable& hash_table, char *key) {
 
     unsigned int pos = BKDRHash(key);
-    while (hash_table[pos] != -1)
+    while (hash_table.table[pos] != -1)
         pos = (pos + 1) % HASH_TABLE_SIZE;
-    hash_table[pos] = MAX_vid;
-    kmap[ strdup(key) ] = MAX_vid;
-    keys.push_back( strdup(key) );
-    MAX_vid++;
-
-    return MAX_vid-1;
+    hash_table.table[pos] = hash_table.keys.size();
+    hash_table.keys.push_back(strdup(key));
 }
 
-int proNet::SearchHashTable(char *key) {
+long proNet::SearchHashTable(HashTable& hash_table, char *key) {
 
     unsigned int pos = BKDRHash(key);
     while (1)
     {
-        if (hash_table[pos] == -1)
+        if (hash_table.table[pos] == -1)
             return -1;
-        if ( !strcmp(key, keys[ hash_table[pos] ]) )
-            return hash_table[pos];
+        if ( !strcmp(key, hash_table.keys[ hash_table.table[pos] ]) )
+            return hash_table.table[pos];
         pos = (pos + 1) % HASH_TABLE_SIZE;
     }
 }
@@ -152,18 +148,21 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
                 continue;
             }
 
-            // generate keys lookup table (kmap)
-            vid1 = SearchHashTable(v1);
+            // generate keys lookup table (vertex_map)
+            vid1 = SearchHashTable(vertex_hash, v1);
             if (vid1 == -1)
             {
-                vid1 = InsertHashTable(v1);
+                InsertHashTable(vertex_hash, v1);
+                vid1 = vertex_hash.keys.size()-1;
             }
-            vid2 = SearchHashTable(v2);
+            vid2 = SearchHashTable(vertex_hash, v2);
             if (vid2 == -1)
             {
-                vid2 = InsertHashTable(v2);
+                InsertHashTable(vertex_hash, v2);
+                vid2 = vertex_hash.keys.size()-1;
             }
-            
+            MAX_vid = vertex_hash.keys.size();
+
             graph[vid1].push_back(vid2);
             edge[vid1].push_back(w);
 
@@ -226,7 +225,7 @@ void proNet::LoadWalkMeta(string filename) {
             continue;
         }
 
-        vid = SearchHashTable(v);
+        vid = SearchHashTable(vertex_hash, v);
         if (vid != -1)
             dynamic_walk[vid] = w;
         else
@@ -278,7 +277,7 @@ void proNet::LoadFieldMeta(string filename) {
             meta_idx[ strdup(meta) ] = MAX_field;
             MAX_field++;
         }
-        vid = SearchHashTable(v);
+        vid = SearchHashTable(vertex_hash, v);
         if (vid != -1)
             field[ vid ].fields[0] = meta_idx[ strdup(meta) ];
         else

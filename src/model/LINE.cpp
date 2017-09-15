@@ -20,21 +20,21 @@ void LINE::SaveWeights(string model_name){
 
         if (order==1)
         {
-            for (auto k: pnet.keys)
+            for (long vid=0; vid!=pnet.MAX_vid; vid++)
             {
-                model << k;
+                model << pnet.vertex_hash.keys[vid];
                 for (int d=0; d<dim; ++d)
-                    model << " " << w_vertex_o1[pnet.kmap[k]][d];
+                    model << " " << w_vertex_o1[vid][d];
                 model << endl;
             }
         }
         else
         {
-            for (auto k: pnet.keys)
+            for (long vid=0; vid!=pnet.MAX_vid; vid++)
             {
-                model << k;
+                model << pnet.vertex_hash.keys[vid];
                 for (int d=0; d<dim; ++d)
-                    model << " " << w_vertex[pnet.kmap[k]][d];
+                    model << " " << w_vertex[vid][d];
                 model << endl;
             }
         }
