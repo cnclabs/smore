@@ -6,6 +6,7 @@ proNet::proNet() {
     MAX_vid=0;
     MAX_fvid=0;
     MAX_field=0;
+    strcpy(negative_method, "degrees");
 
     vertex_hash.table.resize(HASH_TABLE_SIZE, -1);
     InitSigmoid();

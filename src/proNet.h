@@ -81,7 +81,6 @@ class proNet {
 
     private:
 
-        char negative_method[20]="degrees";
         void InitSigmoid();
         void InitNegTable();
         void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
@@ -94,6 +93,7 @@ class proNet {
         void SetNegativeMethod(char*);
 
         // MAX index number
+        char negative_method[20];
         unsigned long long MAX_line;
         long MAX_vid;
         long MAX_fvid;
