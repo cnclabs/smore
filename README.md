@@ -17,6 +17,7 @@ This is a C++ framework for variant **weighted** network embedding techniques. W
 - [HPE](http://dl.acm.org/citation.cfm?id=2959169) (**H**eterogeneous **P**reference **E**mbedding)
 - [APP](https://aaai.org/ocs/index.php/AAAI/AAAI17/paper/view/14696) (**A**symmetric **P**roximity **P**reserving graph embedding)
 - MF (**M**atrix **F**actorization)
+- [BPR](https://dl.acm.org/citation.cfm?id=1795167) (**B**ayesian **P**ersonalized **R**anking)
 
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
 
@@ -59,6 +60,7 @@ Directly call the execution file to see the usage like:
 ./cli/hpe
 ./cli/app
 ./cli/mf
+./cli/bpr
 ```
 then you will see the options description like:
 ```
