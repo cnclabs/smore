@@ -6,12 +6,17 @@ proNet::proNet() {
     MAX_vid=0;
     MAX_fvid=0;
     MAX_field=0;
+    strcpy(negative_method, "degrees");
 
     vertex_hash.table.resize(HASH_TABLE_SIZE, -1);
     InitSigmoid();
 }
 
 proNet::~proNet() {
+}
+
+void proNet::SetNegativeMethod(char *method) {
+    strcpy(this->negative_method, method);
 }
 
 unsigned int proNet::BKDRHash(char *key) {
@@ -369,10 +374,19 @@ void proNet::BuildAliasMethod(unordered_map< long, vector< long > > &graph, unor
     
     // Alias table for negative sampling
     distribution.resize(MAX_vid);
-    for (long v=0; v<MAX_vid; v++)
+    if ( !strcmp(this->negative_method, "degrees") )
     {
-        distribution[v] = vertex[v].in_degree + vertex[v].out_degree;
-        //distribution[v] = 1;
+        for (long v=0; v<MAX_vid; v++)
+        {
+            distribution[v] = vertex[v].in_degree + vertex[v].out_degree;
+        }
+    }
+    else
+    {
+    for (long v=0; v<MAX_vid; v++)
+        {
+            distribution[v] = vertex[v].in_degree;
+        }
     }
     negative_AT = AliasMethod(distribution, POWER_SAMPLE);
 
@@ -751,6 +765,24 @@ void proNet::Opt_SGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr
 
 }
 
+void proNet::Opt_BPRSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
+    
+    int d = 0;
+    double f = 0, g = 0;
+    int dimension = w_vertex_ptr.size();
+    
+    for (d=0; d<dimension; ++d) // prediciton
+        f += w_vertex_ptr[d] * w_context_ptr[d];
+    g = fastSigmoid(0.0-f) * alpha; // gradient
+    //g = (0.0-f) * alpha; // gradient
+    for (d=0; d<dimension; ++d) // store the back propagation error
+        loss_vertex_ptr[d] += g * w_context_ptr[d];
+    for (d=0; d<dimension; ++d) // update context
+        loss_context_ptr[d] += g * w_vertex_ptr[d];
+
+}
+
+
 void proNet::Opt_SigmoidSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
     
     int d = 0;
@@ -793,27 +825,32 @@ void proNet::Opt_SigmoidRegSGD(vector<double>& w_vertex_ptr, vector<double>& w_c
 
 }
 
-void proNet::UpdateAPPPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
+void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context_i, long context_j, int dimension, double alpha){
     
     vector< double > vertex_err;
+    vector< double > context_err;
+    vector< double > context_vec;
     vertex_err.resize(dimension, 0.0);
+    context_err.resize(dimension, 0.0);
+    context_vec.resize(dimension, 0.0);
 
     int d;
-    double label;
+    double f=0.0;
 
-    // positive
-    label = 1.0;
-    Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, vertex_err, w_context[context]);
-
-    // negative
-    label = 0.0;
-    for (int neg=0; neg!=negative_samples; ++neg)
+    for (int d=0; d<dimension; d++)
+        context_vec[d] = w_context[context_i][d] - w_context[context_j][d];
+    Opt_BPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err);
+    
+    for (int d=0; d<dimension; d++)
     {
-        context = NegativeSample();
-        Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, vertex_err, w_context[context]);
-    }
-    for (d=0; d<dimension; ++d)
+        w_vertex[vertex][d] -= alpha*0.01*w_vertex[vertex][d];
+        w_context[context_i][d] -= alpha*0.01*w_context[context_i][d];
+        w_context[context_j][d] -= alpha*0.001*w_context[context_j][d];
+        
         w_vertex[vertex][d] += vertex_err[d];
+        w_context[context_i][d] += context_err[d];
+        w_context[context_j][d] -= context_err[d];
+    }
 
 }
 

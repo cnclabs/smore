@@ -80,6 +80,7 @@ class HashTable {
 class proNet {
 
     private:
+
         void InitSigmoid();
         void InitNegTable();
         void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
@@ -89,7 +90,10 @@ class proNet {
         proNet();
         ~proNet();
         
+        void SetNegativeMethod(char*);
+
         // MAX index number
+        char negative_method[20];
         unsigned long long MAX_line;
         long MAX_vid;
         long MAX_fvid;
@@ -141,6 +145,9 @@ class proNet {
         // vertex representation, context representation, label, alpha, regularization, vertex loss, context loss, alpha
         void Opt_SGD(vector<double>&, vector<double>&, double, double, double, vector<double>&, vector<double>&);
 
+        // vertex representation, context representation, alpha, vertex loss, context loss, alpha
+        void Opt_BPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&);
+
         // vertex representation, context representation, label, alpha, vertex loss, context loss, alpha
         void Opt_SigmoidSGD(vector<double>&, vector<double>&, double, double, vector<double>&, vector<double>&);
 
@@ -153,7 +160,7 @@ class proNet {
         void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
-        void UpdateAPPPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
+        void UpdateBPRPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
         void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
