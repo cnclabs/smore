@@ -22,7 +22,7 @@ This is a C++ framework for variant **weighted** network embedding techniques. W
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
 
 # Developed Environment
-- g++ > 4.9 (In macOS, it needs OpenMP-enabled compilers. Try ```brew install gcc --without-multilib```)
+- g++ > 4.9 (In macOS, it needs OpenMP-enabled compilers. or try installing lateast version of gcc)
 
 # Compilation
 ```
