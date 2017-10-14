@@ -12,12 +12,18 @@
 
 This is a C++ framework for variant **weighted** network embedding techniques. We currently release the command line interface for following models:
 - [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
+  - DeepWalk: online learning of social representations
 - [Walklets](https://arxiv.org/abs/1605.02115)
+  - Don't Walk, Skip! Online Learning of Multi-scale Network Embeddings
 - [LINE](http://dl.acm.org/citation.cfm?id=2741093) (**L**arge-scale **I**nformation **N**etwork **E**mbedding)
+  - LINE: Large-scale Information Network Embedding
 - [HPE](http://dl.acm.org/citation.cfm?id=2959169) (**H**eterogeneous **P**reference **E**mbedding)
+  - Query-based Music Recommendations via Preference Embedding
 - [APP](https://aaai.org/ocs/index.php/AAAI/AAAI17/paper/view/14696) (**A**symmetric **P**roximity **P**reserving graph embedding)
+  - Scalable Graph Embedding for Asymmetric Proximity
 - MF (**M**atrix **F**actorization)
 - [BPR](https://dl.acm.org/citation.cfm?id=1795167) (**B**ayesian **P**ersonalized **R**anking)
+  - BPR: Bayesian personalized ranking from implicit feedback
 
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
 
