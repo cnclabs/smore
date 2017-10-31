@@ -1,6 +1,6 @@
 CC= g++
 CPPFLAGS= -std=c++11 -fopenmp -lm -O3
-OBJS= deepwalk line walklets hpe app mf bpr
+OBJS= deepwalk line walklets hpe app mf bpr bprne
 LIBS= -L ../bin -lproNet
 
 all: $(OBJS)

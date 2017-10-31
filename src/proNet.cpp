@@ -680,6 +680,121 @@ vector< vector< long > > proNet::SkipGrams(vector< long > &walk, int window_size
 
 }
 
+vector< vector< long > > proNet::OrdinalSkipGrams(vector< long > &walk){
+
+    vector< vector< long > > wraper;
+    vector< long > vertices;
+    vector< long > contexts_i;
+    vector< long > contexts_j;
+
+    int length = walk.size();
+    long negative;
+    
+    for (int i=1; i<length; i++)
+    {
+        vertices.push_back(walk[0]);
+        contexts_i.push_back(walk[i]);
+        negative = NegativeSample();
+        contexts_j.push_back(negative);
+    }
+    
+    /*
+    for (int j=2; j<length; j++)
+    {
+        vertices.push_back(walk[0]);
+        contexts_i.push_back(walk[1]);
+        contexts_j.push_back(walk[j]);
+
+        negative = NegativeSample();
+        vertices.push_back(walk[0]);
+        contexts_i.push_back(walk[1]);
+        contexts_j.push_back(negative);
+
+        vertices.push_back(walk[0]);
+        contexts_i.push_back(walk[j]);
+        contexts_j.push_back(negative);
+    }
+    */
+
+    /*
+    for (int i=1; i<length-1; i++)
+        for (int j=i+1; j<length; j++)
+        {
+            vertices.push_back(walk[0]);
+            contexts_i.push_back(walk[i]);
+            contexts_j.push_back(walk[j]);
+
+            negative = NegativeSample();
+            vertices.push_back(walk[0]);
+            contexts_i.push_back(walk[i]);
+            contexts_j.push_back(negative);
+            
+            negative = NegativeSample();
+            vertices.push_back(walk[0]);
+            contexts_i.push_back(walk[j]);
+            contexts_j.push_back(negative);
+        }
+    */
+    
+    /*
+    vector<int> labels;
+    labels.resize(length);
+
+    for (int i=1; i<length; i++)
+    {
+        if (context[walk[i]].in_degree > 3.5)
+            labels[i] = 1;
+        else
+            labels[i] = 0;
+    }
+    for (int i=2; i<length; i++)
+    {
+        if (labels[i] == labels[i-1])
+            labels[i] = 1;
+        else
+            labels[i] = 0;
+    }
+    for (int i=1; i<length; i++)
+    {
+        if (labels[i] == 1)
+        {
+            vertices.push_back(walk[0]);
+            contexts_i.push_back(walk[i]);
+            negative = NegativeSample();
+            contexts_j.push_back(negative);
+        }
+    }
+    */
+   
+    /*
+    for (int i=1; i<length-1; i++)
+    {
+        for (int j=i+1; j<length; j++)
+        {
+            if (labels[i] > labels[j])
+            {
+                vertices.push_back(walk[0]);
+                contexts_i.push_back(walk[i]);
+                contexts_j.push_back(walk[j]);
+            }
+            if (labels[j] > labels[i])
+            {
+                vertices.push_back(walk[0]);
+                contexts_i.push_back(walk[j]);
+                contexts_j.push_back(walk[i]);
+            }
+        }
+    }
+    */
+
+    wraper.push_back(vertices);
+    wraper.push_back(contexts_i);
+    wraper.push_back(contexts_j);
+    
+    return wraper; // [ [vertices], [contexts_i], [contexts_j] ]
+}
+
+
 
 vector< vector< long > > proNet::ScaleSkipGrams(vector< long > &walk, int window_min, int window_max, int negative_samples){
 
@@ -773,21 +888,20 @@ void proNet::Opt_BPRSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_
     
     for (d=0; d<dimension; ++d) // prediciton
         f += w_vertex_ptr[d] * w_context_ptr[d];
+    
+    //g = (1.0 - f)* alpha; // gradient
     g = fastSigmoid(0.0-f) * alpha; // gradient
-    //g = (0.0-f) * alpha; // gradient
     for (d=0; d<dimension; ++d) // store the back propagation error
         loss_vertex_ptr[d] += g * w_context_ptr[d];
     for (d=0; d<dimension; ++d) // update context
         loss_context_ptr[d] += g * w_vertex_ptr[d];
-
 }
 
 
-void proNet::Opt_SigmoidSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
+void proNet::Opt_SigmoidSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, int dimension, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
     
     int d = 0;
     double f = 0, g = 0;
-    int dimension = w_vertex_ptr.size();
     
     for (d=0; d<dimension; ++d) // prediciton
         f += w_vertex_ptr[d] * w_context_ptr[d];
@@ -836,23 +950,61 @@ void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<do
 
     int d;
     double f=0.0;
+    long nvid;
+    
+    for (int n=0; n<1; n++)
+    {
+        
+        if (n!=0) context_j = NegativeSample();
 
-    for (int d=0; d<dimension; d++)
-        context_vec[d] = w_context[context_i][d] - w_context[context_j][d];
-    Opt_BPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err);
+        for (int d=0; d<dimension; d++)
+        {
+            context_err[d] = 0.0;
+            context_vec[d] = w_context[context_i][d] - w_context[context_j][d];
+        }
+        Opt_BPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err);
+    
+        for (int d=0; d<dimension; d++)
+        {
+            //w_vertex[vertex][d] -= alpha*0.01*w_vertex[vertex][d];
+//            w_context[context_i][d] -= alpha*0.025*w_context[context_i][d];
+//            w_context[context_j][d] -= alpha*0.0025*w_context[context_j][d];
+        
+            //w_vertex[vertex][d] += vertex_err[d];
+            w_context[context_i][d] += context_err[d];
+            w_context[context_j][d] -= context_err[d];
+        }
+    }
     
     for (int d=0; d<dimension; d++)
     {
-        w_vertex[vertex][d] -= alpha*0.01*w_vertex[vertex][d];
-        w_context[context_i][d] -= alpha*0.01*w_context[context_i][d];
-        w_context[context_j][d] -= alpha*0.001*w_context[context_j][d];
+//        w_vertex[vertex][d] -= alpha*0.025*w_vertex[vertex][d];
+        //w_context[context_i][d] -= alpha*0.01*w_context[context_i][d];
+        //w_context[context_j][d] -= alpha*0.001*w_context[context_j][d];
         
         w_vertex[vertex][d] += vertex_err[d];
-        w_context[context_i][d] += context_err[d];
-        w_context[context_j][d] -= context_err[d];
+        //w_context[context_i][d] += context_err[d];
+        //w_context[context_j][d] -= context_err[d];
     }
 
 }
+
+void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context_i, vector<long>& context_j, int dimension, double alpha){
+    
+    vector<long>::iterator it_v = vertex.begin();
+    vector<long>::iterator it_ci = context_i.begin();
+    vector<long>::iterator it_cj = context_j.begin();
+    
+    while( it_v != vertex.end() )
+    {
+        UpdateBPRPair(w_vertex, w_context, (*it_v), (*it_ci), (*it_cj), dimension, alpha);
+        ++it_v;
+        ++it_ci;
+        ++it_cj;
+    }
+
+}
+
 
 
 void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
@@ -864,14 +1016,14 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
     double label=1.0;
 
     // positive
-    Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, back_err, w_context[context]);
+    Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
 
     // negative
     label = 0.0;
     for (int neg=0; neg!=negative_samples; ++neg)
     {
         context = NegativeSample();
-        Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, alpha, back_err, w_context[context]);
+        Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
     }
     for (d=0; d<dimension; ++d)
         w_vertex[vertex][d] += back_err[d];
@@ -1208,6 +1360,7 @@ void proNet::UpdateCBOW(vector< vector<double> >& w_vertex, vector< vector<doubl
     // positive training
     label = 1.0;
     Opt_SigmoidRegSGD(w_avg, w_context[context], label, alpha, reg, back_err, w_context[context]);
+    //Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
 
     // negative sampling
     label = 0.0;
@@ -1215,6 +1368,7 @@ void proNet::UpdateCBOW(vector< vector<double> >& w_vertex, vector< vector<doubl
     {
         neg_context = NegativeSample();
         Opt_SigmoidRegSGD(w_avg, w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
+        //Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
     }
 
     for (auto v: vertices)
@@ -1227,6 +1381,21 @@ void proNet::UpdateCBOW(vector< vector<double> >& w_vertex, vector< vector<doubl
     }
 
 }
+
+void proNet::UpdateCBOWs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
+    
+    vector<long>::iterator it_v = vertex.begin();
+    vector<long>::iterator it_c = context.begin();
+    
+    while( it_v != vertex.end() )
+    {
+        UpdateCBOW(w_vertex, w_context, (*it_v), (*it_c), dimension, reg, walk_steps, negative_samples, alpha);
+        ++it_v;
+        ++it_c;
+    }
+
+}
+
 
 
 void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
