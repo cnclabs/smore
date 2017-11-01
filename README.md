@@ -7,6 +7,8 @@
 [travis-url]: https://travis-ci.org/chihming/proNet-core
 [MIT-licence]: https://img.shields.io/github/license/mashape/apistatus.svg
 
+This project will be transfered to https://github.com/cnclabs/proNet-core.
+
 # proNet-core
 <img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/pronet.png" width="480">
 
