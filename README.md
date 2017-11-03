@@ -107,3 +107,13 @@ Changing the number of threads in *train_youtube.sh* could speedup the process.
 
 # Related Work
 You can find related work from [awesome-network-embedding](https://github.com/chihming/awesome-network-embedding).
+
+# Citation
+```
+@article{pronet2017,
+  title={Vertex-Context Sampling for Weighted Network Embedding},
+  author={Chih-Ming Chen and Yi-Hsuan Yang and Yian Chen and Ming-Feng Tsai},
+  journal={arXiv preprint arXiv:{1711.00227}},
+  year={2017}
+}
+```
