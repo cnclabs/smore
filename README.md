@@ -3,7 +3,7 @@
 [![Gitter chat for developers at https://gitter.im/dmlc/xgboost][gitter-image]](https://gitter.im/proNet-core/Lobby)
 
 [gitter-image]: https://badges.gitter.im/Join%20Chat.svg
-[travis-image]: https://img.shields.io/travis/chihming/proNet-core.svg
+[travis-image]: https://img.shields.io/travis/cnclabs/proNet-core.svg
 [travis-url]: https://travis-ci.org/cnclabs/proNet-core
 [MIT-licence]: https://img.shields.io/github/license/mashape/apistatus.svg
 
@@ -32,7 +32,7 @@ In the near future, we will redesign the framework making some solid APIs for fa
 
 # Compilation
 ```
-$ git clone https://github.com/chihming/proNet-core
+$ git clone https://github.com/cnclabs/proNet-core
 $ cd proNet-core
 $ make
 ```
