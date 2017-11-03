@@ -5,7 +5,7 @@
 [gitter-image]: https://badges.gitter.im/Join%20Chat.svg
 [travis-image]: https://img.shields.io/travis/cnclabs/proNet-core.svg
 [travis-url]: https://travis-ci.org/cnclabs/proNet-core
-[MIT-licence]: https://img.shields.io/github/license/mashape/apistatus.svg
+[MIT-licence]: https://img.shields.io/badge/License-MIT-yellow.svg
 
 # proNet-core
 <img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/pronet.png" width="480">
