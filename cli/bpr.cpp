@@ -31,6 +31,8 @@ int main(int argc, char **argv){
         printf("\t\tNumber of training samples *Million; default is 10\n");
         printf("\t-threads <int>\n");
         printf("\t\tNumber of training threads; default is 1\n");
+        printf("\t-reg <float>\n");
+        printf("\t\tThe regularization term; default is 0.01\n");
         printf("\t-alpha <float>\n");
         printf("\t\tInit learning rate; default is 0.025\n");
 
@@ -49,6 +51,7 @@ int main(int argc, char **argv){
     if ((i = ArgPos((char *)"-save", argc, argv)) > 0) strcpy(rep_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-dimensions", argc, argv)) > 0) dimensions = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-sample_times", argc, argv)) > 0) sample_times = atoi(argv[i + 1]);
+    if ((i = ArgPos((char *)"-reg", argc, argv)) > 0) reg = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-alpha", argc, argv)) > 0) init_alpha = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-threads", argc, argv)) > 0) threads = atoi(argv[i + 1]);
     
