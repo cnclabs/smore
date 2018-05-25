@@ -254,7 +254,7 @@ void proNet::LoadPreTrain(string filename, int tar_dim) {
 		pch = strtok(NULL," ");
 	}
 	cout << max_line << ", " << dim << endl;
-    cout << "# of Pre-train data:\t" << max_line << "\tDimensions:\t" << dim << endl;
+    cout << "\t # of Pre-train data:\t" << max_line << "\tDimensions:\t" << dim << endl;
 	if (dim != tar_dim){
 		cout << "Dimension not matched, Skip Loading Pre-train model.";
 		fclose(fin);
