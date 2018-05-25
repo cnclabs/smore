@@ -1,32 +1,38 @@
 [![Build Status][travis-image]][travis-url]
-[![license][MIT-licence]](https://raw.githubusercontent.com/chihming/proNet-core/master/LICENSE)
+[![license][MIT-licence]](https://raw.githubusercontent.com/cnclabs/proNet-core/master/LICENSE)
 [![Gitter chat for developers at https://gitter.im/dmlc/xgboost][gitter-image]](https://gitter.im/proNet-core/Lobby)
 
 [gitter-image]: https://badges.gitter.im/Join%20Chat.svg
-[travis-image]: https://img.shields.io/travis/chihming/proNet-core.svg
-[travis-url]: https://travis-ci.org/chihming/proNet-core
-[MIT-licence]: https://img.shields.io/github/license/mashape/apistatus.svg
+[travis-image]: https://img.shields.io/travis/cnclabs/proNet-core.svg
+[travis-url]: https://travis-ci.org/cnclabs/proNet-core
+[MIT-licence]: https://img.shields.io/badge/License-MIT-yellow.svg
 
 # proNet-core
 <img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/pronet.png" width="480">
 
 This is a C++ framework for variant **weighted** network embedding techniques. We currently release the command line interface for following models:
-- [DeepWalk](http://dl.acm.org/citation.cfm?id=2623732)
-- [Walklets](https://arxiv.org/abs/1605.02115)
-- [LINE](http://dl.acm.org/citation.cfm?id=2741093) (**L**arge-scale **I**nformation **N**etwork **E**mbedding)
-- [HPE](http://dl.acm.org/citation.cfm?id=2959169) (**H**eterogeneous **P**reference **E**mbedding)
-- [APP](https://aaai.org/ocs/index.php/AAAI/AAAI17/paper/view/14696) (**A**symmetric **P**roximity **P**reserving graph embedding)
+- DeepWalk
+  - [DeepWalk: online learning of social representations](http://dl.acm.org/citation.cfm?id=2623732)
+- Walklets
+  - [Don't Walk, Skip! Online Learning of Multi-scale Network Embeddings](https://arxiv.org/abs/1605.02115)
+- LINE(**L**arge-scale **I**nformation **N**etwork **E**mbedding)
+  - [LINE: Large-scale Information Network Embedding](http://dl.acm.org/citation.cfm?id=2741093) 
+- HPE (**H**eterogeneous **P**reference **E**mbedding)
+  - [Query-based Music Recommendations via Preference Embedding](http://dl.acm.org/citation.cfm?id=2959169)
+- APP (**A**symmetric **P**roximity **P**reserving graph embedding)
+  - [Scalable Graph Embedding for Asymmetric Proximity](https://aaai.org/ocs/index.php/AAAI/AAAI17/paper/view/14696)
 - MF (**M**atrix **F**actorization)
-- [BPR](https://dl.acm.org/citation.cfm?id=1795167) (**B**ayesian **P**ersonalized **R**anking)
+- BPR (**B**ayesian **P**ersonalized **R**anking)
+  - [BPR: Bayesian personalized ranking from implicit feedback](https://dl.acm.org/citation.cfm?id=1795167)
 
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
 
 # Developed Environment
-- g++ > 4.9 (In macOS, it needs OpenMP-enabled compilers. Try ```brew install gcc --without-multilib```)
+- g++ > 4.9 (In macOS, it needs OpenMP-enabled compilers. or try installing lateast version of gcc)
 
 # Compilation
 ```
-$ git clone https://github.com/chihming/proNet-core
+$ git clone https://github.com/cnclabs/proNet-core
 $ cd proNet-core
 $ make
 ```
@@ -99,3 +105,13 @@ Changing the number of threads in *train_youtube.sh* could speedup the process.
 
 # Related Work
 You can find related work from [awesome-network-embedding](https://github.com/chihming/awesome-network-embedding).
+
+# Citation
+```
+@article{pronet2017,
+  title={Vertex-Context Sampling for Weighted Network Embedding},
+  author={Chih-Ming Chen and Yi-Hsuan Yang and Yian Chen and Ming-Feng Tsai},
+  journal={arXiv preprint arXiv:{1711.00227}},
+  year={2017}
+}
+```
