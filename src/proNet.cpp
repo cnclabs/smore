@@ -1339,7 +1339,8 @@ void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<d
     
     while( it_v != vertex.end() )
     {
-        UpdateBPRPair(w_vertex, w_context, (*it_v), (*it_ci), (*it_cj), dimension, alpha);
+	// FIXME: reg=0.025
+        UpdateBPRPair(w_vertex, w_context, (*it_v), (*it_ci), (*it_cj), dimension, 0.025, alpha);
         ++it_v;
         ++it_ci;
         ++it_cj;
