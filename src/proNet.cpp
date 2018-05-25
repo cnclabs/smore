@@ -1223,7 +1223,7 @@ void proNet::UpdateWARPPair(vector< vector<double> >& w_vertex, vector< vector<d
 }
 
 
-void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context_i, long context_j, int dimension, double alpha){
+void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context_i, long context_j, int dimension, double reg, double alpha){
     
     vector< double > vertex_err;
     vector< double > context_err;
@@ -1251,8 +1251,8 @@ void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<do
         for (int d=0; d<dimension; d++)
         {
             //w_vertex[vertex][d] -= alpha*0.01*w_vertex[vertex][d];
-            w_context[context_i][d] -= alpha*0.025*w_context[context_i][d];
-            w_context[context_j][d] -= alpha*0.025*w_context[context_j][d];
+            w_context[context_i][d] -= alpha*reg*w_context[context_i][d];
+            w_context[context_j][d] -= alpha*reg*w_context[context_j][d];
         
             //w_vertex[vertex][d] += vertex_err[d];
             w_context[context_i][d] += context_err[d];
@@ -1262,7 +1262,7 @@ void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<do
     
     for (int d=0; d<dimension; d++)
     {
-        w_vertex[vertex][d] -= alpha*0.025*w_vertex[vertex][d];
+        w_vertex[vertex][d] -= alpha*reg*w_vertex[vertex][d];
         //w_context[context_i][d] -= alpha*0.01*w_context[context_i][d];
         //w_context[context_j][d] -= alpha*0.001*w_context[context_j][d];
         
