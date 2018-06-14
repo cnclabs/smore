@@ -116,8 +116,11 @@ You can find related work from [awesome-network-embedding](https://github.com/ch
 }
 ```
 
+# Code & Data Structure
+[Slides](http://cherry.cs.nccu.edu.tw/~g10018/portfolio/slides/pronet.pdf)
+
 # Upcoming
-A new version will be released in ~~March~~ May with following new features
+A new version will be released with ew features
 - faster speed, around 20% improvements
 - new models
   - [node2vec](http://snap.stanford.edu/node2vec/)
