@@ -119,15 +119,5 @@ You can find related work from [awesome-network-embedding](https://github.com/ch
 # Code & Data Structure
 [Slides](http://cherry.cs.nccu.edu.tw/~g10018/portfolio/slides/pronet.pdf)
 
-# Upcoming
-A new version will be released with ew features
-- faster speed, around 20% improvements
-- new models
-  - [node2vec](http://snap.stanford.edu/node2vec/)
-  - [NERM](https://link.springer.com/chapter/10.1007/978-3-319-48051-0_17)
-  - [coFactor](http://dawenl.github.io/publications/LiangACB16-cofactor.pdf)
-- new rank loss
-  - BPR with batch
-  - [WARP loss](http://www.thespermwhale.com/jaseweston/papers/wsabie-ijcai.pdf)
-  - [k-order statistic loss](http://www.ee.columbia.edu/~ronw/pubs/recsys2013-kaos.pdf)
-- some of our on-going work
+# News
+We're noe refactoring the project. More solid functions/features will be available in the future.
