@@ -4,7 +4,7 @@ using namespace std;
 
 double random_gen(const int & min, const int & max) {
     
-    static random_device rd;
+    static thread_local random_device rd;
     static thread_local mt19937* generator = new mt19937( rd() );
     uniform_real_distribution<double> distribution(min, max);
     

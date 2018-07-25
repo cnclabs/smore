@@ -1,37 +1,37 @@
-#ifndef LINE_H
-#define LINE_H
+#ifndef NEMF_H
+#define NEMF_H
 
 #include "../proNet.h"
 
 /*****
- * LINE
+ * NEMF
  * **************************************************************/
 
-class LINE {
+class NEMF {
 
     public:
         
-        LINE();
-        ~LINE();
+        NEMF();
+        ~NEMF();
         
         proNet pnet;
 
         // parameters
         int dim;                // representation dimensions
-        int order=2;
-        vector< vector<double> > w_vertex_o1;
-        vector< vector<double> > w_vertex;
-        vector< vector<double> > w_context;
-        
-        double *w_vertex1, *w_context1;
-
+        vector< vector<double> > w_vertexU;
+        vector< vector<double> > w_vertexI;
+        vector< vector<double> > w_contextU;
+        vector< vector<double> > w_contextI;
+        vector< vector<double> > w_contextUU;
+        vector< vector<double> > w_contextII;
 
         // data function
         void LoadEdgeList(string, bool);
+        void LoadFieldMeta(string);
         void SaveWeights(string);
         
         // model function
-        void Init(int, int);
+        void Init(int);
         void Train(int, int, double, int);
 
 };
