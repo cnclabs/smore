@@ -206,7 +206,7 @@ class proNet {
         void UpdateFreezePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
-        void UpdateBPRPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double);
+        void UpdateBPRPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double, double);
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateWARPPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double);
 
