@@ -1,18 +1,18 @@
-#include "MF.h"
+#include "WARP.h"
 #include <omp.h>
 
-MF::MF() {
+WARP::WARP() {
     char method[15] = "no_degrees";
     pnet.SetNegativeMethod(method);
 }
-MF::~MF() {
+WARP::~WARP() {
 }
 
-void MF::LoadEdgeList(string filename, bool undirect) {
+void WARP::LoadEdgeList(string filename, bool undirect) {
     pnet.LoadEdgeList(filename, undirect);
 }
 
-void MF::SaveWeights(string model_name){
+void WARP::SaveWeights(string model_name){
     
     cout << "Save Model:" << endl;
     ofstream model(model_name);
@@ -34,7 +34,7 @@ void MF::SaveWeights(string model_name){
     }
 }
 
-void MF::Init(int dim) {
+void WARP::Init(int dim) {
    
     this->dim = dim;
     cout << "Model Setting:" << endl;
@@ -52,16 +52,15 @@ void MF::Init(int dim) {
 }
 
 
-void MF::Train(int sample_times, int negative_samples, double alpha, double reg, int workers){
+void WARP::Train(int sample_times, int negative_samples, double alpha, double reg, int workers){
     
     omp_set_num_threads(workers);
 
     cout << "Model:" << endl;
-    cout << "\t[MF]" << endl;
+    cout << "\t[WARP]" << endl;
 
     cout << "Learning Parameters:" << endl;
     cout << "\tsample_times:\t\t" << sample_times << endl;
-    cout << "\tnegative_samples:\t" << negative_samples << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
     cout << "\tregularization:\t\t" << reg << endl;
     cout << "\tworkers:\t\t" << workers << endl;
@@ -79,7 +78,7 @@ void MF::Train(int sample_times, int negative_samples, double alpha, double reg,
     for (int worker=0; worker<workers; ++worker)
     {
         
-        long v1, v2;
+        long v1, v2, v3;
         unsigned long long count = 0;
         double _alpha = alpha;
         
@@ -87,7 +86,9 @@ void MF::Train(int sample_times, int negative_samples, double alpha, double reg,
         {
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
-            pnet.UpdateFactorizedPair(w_vertex, w_vertex, v1, v2, dim, reg, negative_samples, _alpha);
+            v3 = pnet.NegativeSample();
+            
+            pnet.UpdateWARPPair(w_vertex, w_vertex, v1, v2, v3, dim, _alpha);
 
             count ++;
             if (count % MONITOR == 0)

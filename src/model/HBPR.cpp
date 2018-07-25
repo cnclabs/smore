@@ -1,18 +1,22 @@
-#include "MF.h"
+#include "HBPR.h"
 #include <omp.h>
 
-MF::MF() {
+HBPR::HBPR() {
     char method[15] = "no_degrees";
     pnet.SetNegativeMethod(method);
 }
-MF::~MF() {
+HBPR::~HBPR() {
 }
 
-void MF::LoadEdgeList(string filename, bool undirect) {
+void HBPR::LoadEdgeList(string filename, bool undirect) {
     pnet.LoadEdgeList(filename, undirect);
 }
 
-void MF::SaveWeights(string model_name){
+void HBPR::LoadFieldMeta(string filename) {
+    pnet.LoadFieldMeta(filename);
+}
+
+void HBPR::SaveWeights(string model_name){
     
     cout << "Save Model:" << endl;
     ofstream model(model_name);
@@ -34,36 +38,39 @@ void MF::SaveWeights(string model_name){
     }
 }
 
-void MF::Init(int dim) {
+void HBPR::Init(int dim) {
    
     this->dim = dim;
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dim << endl;
 
     w_vertex.resize(pnet.MAX_vid);
+    w_context.resize(pnet.MAX_vid);
 
     for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
         w_vertex[vid].resize(dim);
         for (int d=0; d<dim;++d)
             w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+        w_context[vid].resize(dim);
+        for (int d=0; d<dim;++d)
+            w_context[vid][d] = 0.0;
     }
 
 }
 
 
-void MF::Train(int sample_times, int negative_samples, double alpha, double reg, int workers){
+void HBPR::Train(int sample_times, int walk_steps, double alpha, int workers){
     
     omp_set_num_threads(workers);
 
     cout << "Model:" << endl;
-    cout << "\t[MF]" << endl;
+    cout << "\t[HBPR]" << endl;
 
     cout << "Learning Parameters:" << endl;
     cout << "\tsample_times:\t\t" << sample_times << endl;
-    cout << "\tnegative_samples:\t" << negative_samples << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
-    cout << "\tregularization:\t\t" << reg << endl;
+    cout << "\twalk steps:\t\t" << walk_steps << endl;
     cout << "\tworkers:\t\t" << workers << endl;
 
     cout << "Start Training:" << endl;
@@ -79,15 +86,32 @@ void MF::Train(int sample_times, int negative_samples, double alpha, double reg,
     for (int worker=0; worker<workers; ++worker)
     {
         
-        long v1, v2;
+        long vid, cid1, cid2, cid3, cid4, cid5, cid6, nid;
         unsigned long long count = 0;
         double _alpha = alpha;
+        double margin;
         
         while (count<jobs)
-        {
-            v1 = pnet.SourceSample();
-            v2 = pnet.TargetSample(v1);
-            pnet.UpdateFactorizedPair(w_vertex, w_vertex, v1, v2, dim, reg, negative_samples, _alpha);
+        {          
+
+            vid = pnet.SourceSample();
+            while (pnet.field[vid].fields[0]!=0)
+                vid = pnet.SourceSample();
+            cid1 = pnet.TargetSample(vid);
+           
+            margin = 1.0;            
+            for (int w=1; w<=walk_steps; w++)
+            {
+                if (w!=1)
+                {
+                    cid1 = pnet.TargetSample(cid1);
+                    cid1 = pnet.TargetSample(cid1);
+                }
+                nid = pnet.NegativeSample();
+                while (pnet.field[nid].fields[0]!=pnet.field[cid1].fields[0])
+                    nid = pnet.NegativeSample();
+                pnet.UpdateFBPRPair(w_vertex, w_vertex, vid, cid1, nid, dim, _alpha/w, margin/w);
+            }
 
             count ++;
             if (count % MONITOR == 0)

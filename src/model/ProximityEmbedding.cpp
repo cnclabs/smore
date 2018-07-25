@@ -104,8 +104,8 @@ void PE::Train(int sample_times, int walk_steps, int negative_samples, double bf
             
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
-            pnet.UpdateDCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, bfs, _alpha);
-            //pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
+            //pnet.UpdateDCommunity(w_vertex, w_context, v1, v2, dim, negative_samples, bfs, _alpha);
+            pnet.UpdatePair(w_vertex, w_context, v2, v1, dim, negative_samples, _alpha);
         }
 
     }

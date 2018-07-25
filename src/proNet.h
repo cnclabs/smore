@@ -146,8 +146,9 @@ class proNet {
 
         // Key Process
         HashTable vertex_hash;
-		// Pretrain
-		unordered_map< long, vector< double >> pretrain;
+
+		    // Pretrain
+		    unordered_map< long, vector< double >> pretrain;
         //HashTable2 vertex_hash;
         unsigned int BKDRHash(char*);
         void InsertHashTable(HashTable&, char*);
@@ -189,6 +190,7 @@ class proNet {
         // vertex representation, context representation, label, alpha, vertex loss, context loss, alpha
         void Opt_SigmoidSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
         void Opt_CosineSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
+        void Opt_LengthSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
         void Opt_SigmoidSGD1(double*, double*, double, int, double, double*, double*);
 
         // vertex representation, context representation, label, alpha, regularization, vertex loss, context loss, alpha
@@ -198,8 +200,8 @@ class proNet {
         
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
-        void UpdateFPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
         void UpdateCosinePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
+        void UpdateLengthPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
         void UpdatePair1(double*, double*, long, long, int, int, double);
         void UpdateFreezePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
 
@@ -218,6 +220,8 @@ class proNet {
 
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
         void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
+        void UpdateChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
+        void UpdateRAWChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
         void UpdateGroupingPair(vector< vector<double> >&, vector< vector<double> >&, long, long, double, int, double, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, walk steps, negative samples, alpha
@@ -228,8 +232,7 @@ class proNet {
         void UpdatePairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, int, int, double);
 
         // user vertex vector, item vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
-        void UpdateUINEPair(vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
-        void UpdateUIRankPair(vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
+        void UpdateUIPair(vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
       
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
         void UpdateCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);

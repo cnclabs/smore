@@ -1,24 +1,23 @@
-#ifndef MF_H
-#define MF_H
+#ifndef WARP_H
+#define WARP_H
 
 #include "../proNet.h"
 
 /*****
- * MF
+ * WARP
  * **************************************************************/
 
-class MF {
+class WARP {
 
     public:
         
-        MF();
-        ~MF();
+        WARP();
+        ~WARP();
         
         proNet pnet;
 
         // parameters
         int dim;                // representation dimensions
-        int dimf;                // representation dimensions
         vector< vector<double> > w_vertex;
 
         // data function

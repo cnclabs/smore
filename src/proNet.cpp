@@ -1064,10 +1064,69 @@ void proNet::Opt_SigmoidSGD1(double* w_vertex_ptr, double* w_context_ptr, double
 }
 
 
+void proNet::Opt_LengthSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, int dimension, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
+    
+    int d = 0;
+    double f = 0, before, after, fp;
+    double v_len=0.0, c_len=0.0, vc_len, vc_len_diff, cv_len_diff;
+    vector<double> g_v, g_c;
+    g_v.resize(dimension, 0.0);
+    g_c.resize(dimension, 0.0);
+    
+    v_len=0.0;
+    c_len=0.0;
+    for (d=0; d<dimension; ++d)
+    {
+        v_len += w_vertex_ptr[d]*w_vertex_ptr[d];
+        c_len += w_context_ptr[d]*w_context_ptr[d];
+    }
+    v_len = sqrt(v_len);
+    c_len = sqrt(c_len);
+    vc_len = v_len * c_len;
+    //vc_len_diff = v_len * c_len;
+    //cv_len_diff = c_len * v_len;
+    
+    //g = (label - f) * alpha; // gradient
+    
+    /*
+    if (label == 0)
+    {
+        if (vc_len_diff < 0.8) return;
+        if (vc_len_diff > 1.2) return;
+        if (vc_len_diff < 1) label = 0.8;
+        if (vc_len_diff > 1) label = 1.2;
+    }
+    */
+    if (label == -1.0)
+    {
+        label = 0.0;
+    }
+   
+    for (d=0; d<dimension; ++d)
+    {
+        g_v[d] = 2*w_vertex_ptr[d]*c_len*(vc_len-label) / v_len;
+        g_c[d] = 2*w_context_ptr[d]*v_len*(vc_len-label) / c_len;
+        //g_v[d] = 2*w_vertex_ptr[d]*(vc_len_diff-label) / v_len;
+        //g_c[d] = 2*w_context_ptr[d]*(vc_len_diff-label) / c_len;
+        //g_v[d] = 2*w_vertex_ptr[d]*(vc_len_diff - label) / vc_len;
+        //g_c[d] = 2*w_context_ptr[d]*(cv_len_diff - label) / vc_len;
+    }
+
+    for (d=0; d<dimension; ++d)
+    {
+        //loss_vertex_ptr[d] -= 0.0025* w_vertex_ptr[d]*alpha;
+        //loss_context_ptr[d] -= 0.0025* w_context_ptr[d]*alpha;
+        loss_vertex_ptr[d] -= g_v[d]*alpha;
+        loss_context_ptr[d] -= g_c[d]*alpha;
+    }
+
+}
+
+
 void proNet::Opt_CosineSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double label, int dimension, double alpha, vector<double>& loss_vertex_ptr, vector<double>& loss_context_ptr){
     
     int d = 0;
-    double f = 0, before, after;
+    double f = 0, before, after, fp;
     double v_len=0.0, c_len=0.0, vc_len;
     vector<double> g_v, g_c;
     g_v.resize(dimension, 0.0);
@@ -1086,6 +1145,7 @@ void proNet::Opt_CosineSGD(vector<double>& w_vertex_ptr, vector<double>& w_conte
     
     for (d=0; d<dimension; ++d) // prediciton
         f += w_vertex_ptr[d] * w_context_ptr[d];
+    fp = f;
     f /= vc_len;
     //f = fastSigmoid(f); // fast sigmoid(prediction)
 
@@ -1093,8 +1153,8 @@ void proNet::Opt_CosineSGD(vector<double>& w_vertex_ptr, vector<double>& w_conte
     
     for (d=0; d<dimension; ++d)
     {
-        g_v[d] = (label-f) * ( ((w_context_ptr[d]*v_len) - (w_vertex_ptr[d]*f/v_len)) / (c_len * v_len * v_len)) * alpha;
-        g_c[d] = (label-f) * ( ((w_vertex_ptr[d]*c_len) - (w_context_ptr[d]*f/c_len)) / (v_len * c_len * c_len)) * alpha;
+        g_v[d] = (label-f) * ( ((w_context_ptr[d]*v_len) - (w_vertex_ptr[d]*f*v_len)) / (c_len * v_len * v_len)) * alpha;
+        g_c[d] = (label-f) * ( ((w_vertex_ptr[d]*c_len) - (w_context_ptr[d]*f*c_len)) / (v_len * c_len * c_len)) * alpha;
     }
 
     for (d=0; d<dimension; ++d)
@@ -1235,7 +1295,7 @@ void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<do
     int d;
     double f=0.0;
     
-    for (int n=0; n<1; n++)
+    for (int n=0; n<5; n++)
     {
         
         if (n!=0) context_j = NegativeSample();
@@ -1251,8 +1311,8 @@ void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<do
         for (int d=0; d<dimension; d++)
         {
             //w_vertex[vertex][d] -= alpha*0.01*w_vertex[vertex][d];
-            w_context[context_i][d] -= alpha*reg*w_context[context_i][d];
-            w_context[context_j][d] -= alpha*reg*w_context[context_j][d];
+            w_context[context_i][d] -= alpha*0.0025*w_context[context_i][d];
+            w_context[context_j][d] -= alpha*0.0025*w_context[context_j][d];
         
             //w_vertex[vertex][d] += vertex_err[d];
             w_context[context_i][d] += context_err[d];
@@ -1262,7 +1322,7 @@ void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<do
     
     for (int d=0; d<dimension; d++)
     {
-        w_vertex[vertex][d] -= alpha*reg*w_vertex[vertex][d];
+        w_vertex[vertex][d] -= alpha*0.025*w_vertex[vertex][d];
         //w_context[context_i][d] -= alpha*0.01*w_context[context_i][d];
         //w_context[context_j][d] -= alpha*0.001*w_context[context_j][d];
         
@@ -1275,6 +1335,81 @@ void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<do
 
 
 void proNet::UpdateFBPRPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context_i, long context_j, int dimension, double alpha, double margin){
+    
+    vector< double > vertex_err;
+    vector< double > context_err;
+    vector< double > batch_context_err;
+    vector< double > context_vec;
+    vertex_err.resize(dimension, 0.0);
+    context_err.resize(dimension, 0.0);
+    batch_context_err.resize(dimension, 0.0);
+    context_vec.resize(dimension, 0.0);
+
+    int d;
+    double f=0.0;
+    double up = 0.0;
+    for (int w=0; w<5; w++)
+    {
+        if (w!=0)
+        {
+            //context_j = NegativeSample();
+            context_j = random_gen(0, MAX_vid);
+            while(field[context_i].fields[0]!=field[context_j].fields[0])
+            {
+                //context_j = NegativeSample();
+                context_j = random_gen(0, MAX_vid);
+            }
+        }
+
+        for (int d=0; d<dimension; d++)
+        {
+            //vertex_err[d] = 0.0;
+            context_err[d] = 0.0;
+            context_vec[d] = w_context[context_i][d] - w_context[context_j][d];
+        }
+        
+        if (Opt_FBPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err, margin))
+        {
+            up++;
+            for (int d=0; d<dimension; d++)
+            {
+                w_context[context_i][d] -= alpha*0.0025*w_context[context_i][d];
+                w_context[context_j][d] -= alpha*0.0025*w_context[context_j][d];
+                //w_vertex[vertex][d] -= alpha*0.025*w_vertex[vertex][d];
+        
+                w_context[context_i][d] += context_err[d];
+                w_context[context_j][d] -= context_err[d];
+                //w_vertex[vertex][d] += vertex_err[d];
+            }
+        }
+    }
+    
+    if (up)
+    for (int d=0; d<dimension; d++)
+    {
+        w_vertex[vertex][d] -= alpha*0.025*w_vertex[vertex][d];
+        w_vertex[vertex][d] += vertex_err[d]/up;
+    }
+
+}
+
+void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context_i, vector<long>& context_j, int dimension, double alpha){
+    
+    vector<long>::iterator it_v = vertex.begin();
+    vector<long>::iterator it_ci = context_i.begin();
+    vector<long>::iterator it_cj = context_j.begin();
+    
+    while( it_v != vertex.end() )
+    {
+        UpdateBPRPair(w_vertex, w_context, (*it_v), (*it_ci), (*it_cj), dimension, alpha);
+        ++it_v;
+        ++it_ci;
+        ++it_cj;
+    }
+
+}
+
+void proNet::UpdateFreezePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
     vector< double > vertex_err;
     vector< double > context_err;
@@ -1399,6 +1534,84 @@ void proNet::UpdatePair1(double* w_vertex, double* w_context, long vertex, long 
 
 }
 
+void proNet::UpdateLengthPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
+    
+    vector< double > back_err;
+    double label;
+    back_err.resize(dimension, 0.0);
+
+    long neg_context;
+    double before, after;
+    double v_len=0.0, c_len=0.0, vc_len_diff;
+    
+    before = 0.0;
+    v_len=0.0;
+    c_len=0.0;
+    for (int d=0; d<dimension; ++d)
+    {
+        v_len += w_vertex[vertex][d]*w_vertex[vertex][d];
+        c_len += w_context[context][d]*w_context[context][d];
+    }
+    v_len = sqrt(v_len);
+    c_len = sqrt(c_len);
+    before = v_len * c_len;
+    
+    // positive
+    label = 1.0;
+    //Opt_CosineSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
+    Opt_LengthSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, w_vertex[vertex], w_context[context]);
+
+    v_len=0.0;
+    c_len=0.0;
+    for (int d=0; d<dimension; ++d)
+    {
+        v_len += w_vertex[vertex][d]*w_vertex[vertex][d];
+        c_len += w_context[context][d]*w_context[context][d];
+    }
+    v_len = sqrt(v_len);
+    c_len = sqrt(c_len);
+    after = v_len * c_len;
+    
+//    cout << "[POS]: " << before << ", " << after << '\t' << v_len << ", " << c_len << endl;
+    before = after;
+
+
+    // negative
+    label = -1.0;
+    for (int neg=0; neg!=negative_samples; ++neg)
+    {
+        neg_context = NegativeSample();
+
+    v_len=0.0;
+    c_len=0.0;
+    for (int d=0; d<dimension; ++d)
+    {
+        v_len += w_vertex[vertex][d]*w_vertex[vertex][d];
+        c_len += w_context[neg_context][d]*w_context[neg_context][d];
+    }
+    v_len = sqrt(v_len);
+    c_len = sqrt(c_len);
+    before = v_len * c_len;
+
+        //Opt_CosineSGD(w_vertex[vertex], w_context[neg_context], label, dimension, alpha, back_err, w_context[neg_context]);
+        Opt_LengthSGD(w_vertex[vertex], w_context[neg_context], label, dimension, alpha, w_vertex[vertex], w_context[neg_context]);
+
+    v_len=0.0;
+    c_len=0.0;
+    for (int d=0; d<dimension; ++d)
+    {
+        v_len += w_vertex[vertex][d]*w_vertex[vertex][d];
+        c_len += w_context[neg_context][d]*w_context[neg_context][d];
+    }
+    v_len = sqrt(v_len);
+    c_len = sqrt(c_len);
+    after = v_len * c_len;
+    
+//    cout << "[NEG]: " << before << ", " << after << '\t' << v_len << ", " << c_len << endl;
+
+    }
+
+}
 
 void proNet::UpdateCosinePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
@@ -1468,31 +1681,6 @@ void proNet::UpdateCosinePair(vector< vector<double> >& w_vertex, vector< vector
 
 }
 
-void proNet::UpdateFPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
-    
-    vector< double > back_err;
-    long neg_context;
-    double label;
-    back_err.resize(dimension, 0.0);
-
-
-    // positive
-    label=1.0;
-    Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
-
-    // negative
-    label = 0.0;
-    for (int neg=0; neg!=negative_samples; ++neg)
-    {
-        neg_context = NegativeSample();
-        while (field[neg_context].fields[0]!=field[context].fields[0])
-            neg_context = NegativeSample();
-        Opt_SigmoidSGD(w_vertex[vertex], w_context[neg_context], label, dimension, alpha, back_err, w_context[neg_context]);
-    }
-    for (int d=0; d<dimension; ++d)
-        w_vertex[vertex][d] += back_err[d];
-
-}
 
 
 void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
@@ -1594,6 +1782,199 @@ void proNet::UpdateGroupingPair(vector< vector<double> >& w_vertex, vector< vect
 
 }
 
+void proNet::UpdateRAWChoice(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int negative_samples, double alpha){
+    
+    vector<long> neg_items;
+    vector<double> neg_scores;
+    int d;
+    long neg_item;
+    double pos_score, neg_score, sum_score;
+
+    vector<double> debug_scores;
+    debug_scores.resize(negative_samples, 0.0);
+    double debug_score1, debug_score2;
+
+    pos_score = 0.0;
+    sum_score = 0.0;
+    for (d=0; d<dimension; ++d)
+        pos_score += w_vertex[vertex][d]*w_context[context][d];
+    //debug_score1 = pos_score - log(sum_score);
+    //cout << pos_score << "\t" << debug_scores[0] << "\t" << debug_scores[1] << "\t" << debug_scores[2] << endl;
+    pos_score = fastSigmoid(0.0-pos_score);
+    sum_score += pos_score;
+
+    int choice = 1;
+    for (int n=0; n!=negative_samples; ++n)
+    {
+        neg_item = NegativeSample();
+        neg_items.push_back( neg_item );
+        neg_score = 0.0;
+        for (d=0; d<dimension; ++d)
+            neg_score += w_vertex[vertex][d]*w_context[neg_item][d];
+        neg_score = fastSigmoid(0.0-neg_score);
+        //if (neg_score > pos_score)
+        //    choice = 0;
+        neg_scores.push_back(neg_score);
+        sum_score += neg_score;
+    }
+    //if (choice==1)
+    //    return;
+    //cout << pos_score << "\t" << neg_scores[0] << "\t" << neg_scores[1] << "\t" << neg_scores[2] << endl;
+
+    double dev;
+    vector<double> back_v, back_c;
+    back_v.resize(dimension, 0.0);
+    back_c.resize(dimension, 0.0);
+
+    // update u
+    for (d=0; d<dimension; ++d)
+    {
+        dev = w_context[context][d] * pos_score;
+        for (int n=0; n!=negative_samples; ++n)
+        {
+            neg_item = neg_items[n];
+            dev += w_context[neg_item][d] * neg_scores[n];
+        }
+        w_vertex[vertex][d] += alpha*(w_context[context][d]*pos_score - dev - reg*w_vertex[vertex][d]);
+        //back_v[d] = alpha*(w_context[context][d]/pos_score - dev / sum_score - reg*w_vertex[vertex][d]);
+    }
+    
+    // update pos
+    for (d=0; d<dimension; ++d)
+    {
+        //w_context[context][d] += alpha*(w_vertex[vertex][d]/pos_score - (w_vertex[vertex][d]) / sum_score - reg*w_context[context][d]);
+        back_c[d] = alpha*(w_vertex[vertex][d]*pos_score - w_vertex[vertex][d]*sum_score - reg*w_context[context][d]);
+    }
+
+    // update negs
+    for (int n=0; n!=negative_samples; ++n)
+    {
+        neg_item = neg_items[n];
+        for (d=0; d<dimension; ++d)
+            w_context[neg_item][d] -= alpha*(w_vertex[vertex][d]*sum_score + reg*w_context[neg_item][d]);
+    }
+    for (d=0; d<dimension; ++d)
+    {
+        w_vertex[vertex][d] += back_v[d];
+        w_context[context][d] += back_c[d];
+    }
+
+    pos_score = 0.0;
+    for (d=0; d<dimension; ++d)
+        pos_score += w_vertex[vertex][d]*w_context[context][d];
+/*
+    sum_score = 0.0;
+    for (int n=0; n!=negative_samples; ++n)
+    {
+        neg_item = neg_items[n];
+        neg_score = 0.0;
+        for (d=0; d<dimension; ++d)
+            neg_score += w_vertex[vertex][d]*w_context[neg_item][d];
+        neg_scores[n] = neg_score;
+    }
+
+    cout << pos_score << "\t" << neg_scores[0] << "\t" << neg_scores[1] << "\t" << neg_scores[2] << endl;
+    cout << endl;
+*/
+}
+
+void proNet::UpdateChoice(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int negative_samples, double alpha){
+    
+    vector<long> neg_items;
+    vector<double> neg_scores;
+    int d;
+    long neg_item;
+    double pos_score, neg_score, sum_score;
+
+    double dev;
+    vector<double> back_v, back_c;
+    back_v.resize(dimension, 0.0);
+    back_c.resize(dimension, 0.0);
+
+    for (int b=0; b<5; b++)
+    {
+        context = TargetSample(vertex);
+
+        pos_score = 0.0;
+        for (d=0; d<dimension; ++d)
+            pos_score += w_vertex[vertex][d]*w_context[context][d];
+
+        sum_score = 0.0;
+        neg_items.clear();
+        neg_scores.clear();
+        for (int n=0; n!=negative_samples; ++n)
+        {
+            neg_item = NegativeSample();
+            neg_items.push_back( neg_item );
+            neg_score = 0.0;
+            for (d=0; d<dimension; ++d)
+                neg_score += w_vertex[vertex][d]*w_context[neg_item][d];
+            neg_score = exp(neg_score);
+            neg_scores.push_back(neg_score);
+            sum_score += neg_score;
+        }
+        
+
+        pos_score = exp(pos_score);
+        //cout << pos_score << "\t" << sum_score << "\t" << pos_score-sum_score << endl;
+        sum_score += pos_score;
+
+        // update u
+        for (d=0; d<dimension; ++d)
+        {
+            dev = w_context[context][d]*pos_score;
+            for (int n=0; n!=negative_samples; ++n)
+            {
+                neg_item = neg_items[n];
+                dev += w_context[neg_item][d]*neg_scores[n];
+            }
+            back_v[d] += alpha*(w_context[context][d] - dev / sum_score - reg*w_vertex[vertex][d]);
+        }
+    
+        // update pos
+        for (d=0; d<dimension; ++d)
+        {
+            //back_c[d] += alpha*(w_vertex[vertex][d] - (w_vertex[vertex][d]*pos_score) / sum_score - reg*w_context[context][d]);
+            w_context[context][d] += alpha*(w_vertex[vertex][d] - (w_vertex[vertex][d]*pos_score) / sum_score - reg*w_context[context][d]);
+        }
+    
+        // update negs
+        for (int n=0; n!=negative_samples; ++n)
+        {
+            neg_item = neg_items[n];
+            //cout << pos_score << "\t" << neg_scores[n] << endl;
+            for (d=0; d<dimension; ++d)
+                w_context[neg_item][d] -= alpha*((w_vertex[vertex][d]*neg_scores[n]) / sum_score + reg*w_context[neg_item][d]);
+        }
+    }
+    for (d=0; d<dimension; ++d)
+    {
+        w_vertex[vertex][d] += back_v[d];
+        //w_context[context][d] += back_c[d];
+    }
+
+    /*
+    pos_score = 0.0;
+    for (d=0; d<dimension; ++d)
+        pos_score += w_vertex[vertex][d]*w_context[context][d];
+
+    sum_score = 0.0;
+    for (int n=0; n!=negative_samples; ++n)
+    {
+        neg_item = neg_items[n];
+        neg_score = 0.0;
+        for (d=0; d<dimension; ++d)
+            neg_score += w_vertex[vertex][d]*w_context[neg_item][d];
+        debug_scores[n] = neg_score;
+        neg_score = exp(neg_score);
+        sum_score += neg_score;
+    }
+
+    cout << pos_score << "\t" << debug_scores[0] << "\t" << debug_scores[1] << "\t" << debug_scores[2] << endl;
+    cout << endl;
+    */
+}
+
 
 void proNet::UpdateFactorizedPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int negative_samples, double alpha){
     
@@ -1618,7 +1999,11 @@ void proNet::UpdateFactorizedPair(vector< vector<double> >& w_vertex, vector< ve
 
 }
 
-void proNet::UpdateUIRankPair(vector< vector<double> >& w_vertexU, vector< vector<double> >& w_vertexI, vector< vector<double> >& w_context, vector< vector<double> >& w_contextI, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
+void proNet::UpdateUIPair(vector< vector<double> >& w_vertexU, vector< vector<double> >& w_vertexI, vector< vector<double> >& w_context, vector< vector<double> >& w_contextI, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
+    
+    vector<double> back_err;
+    back_err.resize(dimension, 0.0);
+    //back_err2.resize(dimension, 0.0);
     
     vector< double > context_vec, vertex_err, context_err;
     context_vec.resize(dimension, 0.0);
@@ -1628,9 +2013,9 @@ void proNet::UpdateUIRankPair(vector< vector<double> >& w_vertexU, vector< vecto
     int d;
     long pos_context, neg_context, pos_vertex, neg_vertex;
     double label, f;
-    
-    // WARP
-    for (int n=0; n<10; n++)
+    int update = 0;
+
+    for (int n=0; n<16; n++)
     {
         f = 0.0;
         //neg_context = NegativeSample();
@@ -1647,7 +2032,7 @@ void proNet::UpdateUIRankPair(vector< vector<double> >& w_vertexU, vector< vecto
         
         if (f < 1.0)
         {
-            //alpha *= (10.0-n)/10.0;
+            //update++;
             Opt_BPRSGD(w_vertexU[vertex], context_vec, alpha, vertex_err, context_err);
             for (int d=0; d<dimension; d++)
             {
@@ -1662,27 +2047,43 @@ void proNet::UpdateUIRankPair(vector< vector<double> >& w_vertexU, vector< vecto
             break;
         }
     }
-}
-
-
-
-void proNet::UpdateUINEPair(vector< vector<double> >& w_vertexU, vector< vector<double> >& w_vertexI, vector< vector<double> >& w_context, vector< vector<double> >& w_contextI, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
+/*
+    if (update)
+    for (d=0; d<dimension; ++d)
+    {
+        w_vertexU[vertex][d] += back_err[d];
+//        w_vertexU[vertex][d] += back_err[d] - alpha*reg*w_vertexU[vertex][d];
+//        w_vertexU[vertex][d] += back_err[d] + back_err2[d];
+    }
+*/
+    // BPR
+    /*
+    for (int neg=0; neg!=negative_samples; ++neg)
+    {
+        neg_context = NegativeSample();
+        while (field[neg_context].fields[0]!=field[context].fields[0])
+            neg_context = NegativeSample();
+        for (int d=0; d<dimension; d++)
+        {
+            context_vec[d] = w_vertexI[context][d] - w_vertexI[neg_context][d];
+        }
+        Opt_BPRSGD(w_vertexU[vertex], context_vec, alpha, back_err, context_err);
     
-    vector<double> back_err, back_err2;
-    back_err.resize(dimension, 0.0);
-    back_err2.resize(dimension, 0.0);
-    
-    vector< double > context_vec, vertex_err, context_err;
-    context_vec.resize(dimension, 0.0);
-    vertex_err.resize(dimension, 0.0);
-    context_err.resize(dimension, 0.0);
-
-    int d;
-    long pos_context, neg_context, pos_vertex, neg_vertex;
-    double label, f;
-                
+        for (int d=0; d<dimension; d++)
+        {
+            w_vertexI[context][d] -= alpha*0.025*w_vertexI[context][d];
+            w_vertexI[neg_context][d] -= alpha*0.025*w_vertexI[neg_context][d];
+            w_vertexI[context][d] += context_err[d];
+            w_vertexI[neg_context][d] -= context_err[d];
+            context_err[d] = 0.0;
+            //back_err[d] -= alpha*0.025*w_vertexU[vertex][d];
+        }
+    }
+    */
+            
     // [MF]
     // positive
+    /*
     label = 1.0;
     Opt_SigmoidRegSGD(w_vertexU[vertex], w_vertexI[context], label, alpha, reg, back_err, w_vertexI[context]);
 
@@ -1695,13 +2096,32 @@ void proNet::UpdateUINEPair(vector< vector<double> >& w_vertexU, vector< vector<
             neg_context = NegativeSample();
         Opt_SigmoidRegSGD(w_vertexU[vertex], w_vertexI[neg_context], label, alpha, reg, back_err, w_vertexI[neg_context]);
     }
-        
-    for (d=0; d<dimension; ++d)
+    */
+    
+    // [NE]
+    /*
+    pos_context = context;
+    for (int s = 0; s < walk_steps; s++)
     {
-        w_vertexU[vertex][d] += back_err[d] - alpha*reg*w_vertexU[vertex][d];
-//        w_vertexU[vertex][d] += back_err[d] + back_err2[d];
-    }
+        if (s!=0)
+        {
+            pos_context = TargetSample(pos_context);
+            if (pos_context==-1) break;
+        }
 
+        // positive training
+        label = 1.0;
+        Opt_SigmoidRegSGD(w_vertexU[vertex], w_context[pos_context], label, alpha, 0.0, back_err2, w_context[pos_context]);
+
+        // negative sampling
+        label = 0.0;
+        for (int neg=0; neg!=negative_samples; ++neg)
+        {
+            neg_context = NegativeSample();
+            Opt_SigmoidRegSGD(w_vertexU[vertex], w_context[neg_context], label, alpha, 0.0, back_err2, w_context[neg_context]);
+        }
+    }
+    */
 }
 
 void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context, int dimension, int negative_samples, double alpha){
@@ -1825,45 +2245,6 @@ void proNet::UpdateFCommunity(vector< vector<double> >& w_vertex, vector< vector
             neg_context = NegativeSample();
             while(field[context].fields[0]!=field[neg_context].fields[0])
                 neg_context = NegativeSample();
-            Opt_SigmoidRegSGD(w_vertex[vertex], w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
-        }
-        for (d=0; d<dimension; ++d)
-            w_vertex[vertex][d] += back_err[d];
-    }
-
-}
-
-
-void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
-
-    vector<double> back_err;
-    back_err.resize(dimension, 0.0);
-
-    int d;
-    long neg_context;
-    double label;
-    
-    // 0 for postive sample, others for negative sample
-    for (int s = 0; s < walk_steps; s++)
-    {
-        if (s != 0)
-        {
-            context = TargetSample(context);
-            if (context==-1) break;
-        }
-
-        for (d=0; d<dimension; ++d)
-            back_err[d] = 0.0;
-
-        // positive training
-        label = 1.0;
-        Opt_SigmoidRegSGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
-
-        // negative sampling
-        label = 0.0;
-        for (int neg=0; neg!=negative_samples; ++neg)
-        {
-            neg_context = NegativeSample();
             Opt_SigmoidRegSGD(w_vertex[vertex], w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
         }
         for (d=0; d<dimension; ++d)
