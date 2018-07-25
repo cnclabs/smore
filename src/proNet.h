@@ -216,7 +216,7 @@ class proNet {
         void UpdateFBPRPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
-        void UpdateBPRPairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, vector<long>&, int, double);
+        void UpdateBPRPairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, vector<long>&, int, double, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
         void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);

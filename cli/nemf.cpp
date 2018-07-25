@@ -1,5 +1,5 @@
 #define _GLIBCXX_USE_CXX11_ABI 1
-#include "../src/model/HBPR.h"
+#include "../src/model/NEMF.h"
 
 int ArgPos(char *str, int argc, char **argv) {
     int a;
@@ -19,7 +19,7 @@ int main(int argc, char **argv){
 
     if (argc == 1) {
         printf("[proNet-core]\n");
-        printf("\tcommand hbpr interface for proNet-core\n\n");
+        printf("\tcommand nemf interface for proNet-core\n\n");
         printf("Options Description:\n");
         printf("\t-train <string>\n");
         printf("\t\tTrain the Network data\n");
@@ -39,8 +39,8 @@ int main(int argc, char **argv){
         printf("\t\tInit learning rate; default is 0.025\n");
 
         printf("Usage:\n");
-        printf("\n[HBPR]\n");
-        printf("./hbpr -train net.txt -save rep.txt -dimensions 64 -sample_times 10 -alpha 0.025 -threads 1\n");
+        printf("\n[NEMF]\n");
+        printf("./nemf -train net.txt -save rep.txt -dimensions 64 -sample_times 10 -alpha 0.025 -threads 1\n");
 
         return 0;
     }
@@ -58,13 +58,13 @@ int main(int argc, char **argv){
     if ((i = ArgPos((char *)"-alpha", argc, argv)) > 0) init_alpha = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-threads", argc, argv)) > 0) threads = atoi(argv[i + 1]);
     
-    HBPR *hbpr;
-    hbpr = new HBPR();
-    hbpr->LoadEdgeList(network_file, 1);
-    hbpr->LoadFieldMeta(field_file);
-    hbpr->Init(dimensions);
-    hbpr->Train(sample_times, walk_steps, init_alpha, threads);
-    hbpr->SaveWeights(rep_file);
+    NEMF *nemf;
+    nemf = new NEMF();
+    nemf->LoadEdgeList(network_file, 1);
+    nemf->LoadFieldMeta(field_file);
+    nemf->Init(dimensions);
+    nemf->Train(sample_times, walk_steps, init_alpha, threads);
+    nemf->SaveWeights(rep_file);
 
     return 0;
 

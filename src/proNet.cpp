@@ -239,46 +239,47 @@ void proNet::LoadPreTrain(string filename, int tar_dim) {
 
     FILE *fin;
     char c_line[1000];
-	char* pch;
-	int tok_cnt=0, dim=0, i=0;
+    char* pch;
+    int tok_cnt=0, dim=0, i=0;
     unsigned long long max_line=0;
     cout << "Pretrain Data Loading:" << endl;
     fin = fopen(filename.c_str(), "rb");
-	fgets(c_line, sizeof(c_line), fin);
-	pch = strtok(c_line," ");
-	while(pch != NULL){
-		string tmp = pch;
-		if(tok_cnt == 0) max_line = atoi(tmp.c_str());
-		else dim = atoi(tmp.c_str());
-		tok_cnt += 1;
-		pch = strtok(NULL," ");
-	}
-	cout << max_line << ", " << dim << endl;
+    if (fgets(c_line, sizeof(c_line), fin) == NULL)
+        return ;
+    pch = strtok(c_line," ");
+    while(pch != NULL){
+        string tmp = pch;
+        if(tok_cnt == 0) max_line = atoi(tmp.c_str());
+        else dim = atoi(tmp.c_str());
+        tok_cnt += 1;
+        pch = strtok(NULL," ");
+    }
+    cout << max_line << ", " << dim << endl;
     cout << "\t # of Pre-train data:\t" << max_line << "\tDimensions:\t" << dim << endl;
-	if (dim != tar_dim){
-		cout << "Dimension not matched, Skip Loading Pre-train model.";
-		fclose(fin);
-	}else{
-		while (fgets(c_line, sizeof(c_line), fin)){
-		//get each line
-			tok_cnt = 0;
-			char v[160];
-			vector <double> emb;
-			pch = strtok(c_line," ");
-			//each line processing
-			while(pch != NULL){
-				string tmp = pch;
-				if(tok_cnt == 0) strcpy(v, tmp.c_str());
-				else emb.push_back(atof(tmp.c_str()));
-				tok_cnt += 1;
-				pch = strtok(NULL," ");
-			}
-			long vid = SearchHashTable(vertex_hash,v);
-			if(vid != -1) pretrain[vid] = emb;
-			else continue;
-		}	
-		fclose(fin);
-	}
+    if (dim != tar_dim){
+        cout << "Dimension not matched, Skip Loading Pre-train model.";
+        fclose(fin);
+    }else{
+        while (fgets(c_line, sizeof(c_line), fin)){
+            //get each line
+            tok_cnt = 0;
+            char v[160];
+            vector <double> emb;
+            pch = strtok(c_line," ");
+            //each line processing
+            while(pch != NULL){
+                string tmp = pch;
+                if(tok_cnt == 0) strcpy(v, tmp.c_str());
+                else emb.push_back(atof(tmp.c_str()));
+                tok_cnt += 1;
+                pch = strtok(NULL," ");
+            }
+            long vid = SearchHashTable(vertex_hash,v);
+            if(vid != -1) pretrain[vid] = emb;
+            else continue;
+        }
+        fclose(fin);
+    }
 }
 
 void proNet::LoadWalkMeta(string filename) {
@@ -1393,7 +1394,7 @@ void proNet::UpdateFBPRPair(vector< vector<double> >& w_vertex, vector< vector<d
 
 }
 
-void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context_i, vector<long>& context_j, int dimension, double alpha){
+void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context_i, vector<long>& context_j, int dimension, double reg, double alpha){
     
     vector<long>::iterator it_v = vertex.begin();
     vector<long>::iterator it_ci = context_i.begin();
@@ -1401,7 +1402,7 @@ void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<d
     
     while( it_v != vertex.end() )
     {
-        UpdateBPRPair(w_vertex, w_context, (*it_v), (*it_ci), (*it_cj), dimension, alpha);
+        UpdateBPRPair(w_vertex, w_context, (*it_v), (*it_ci), (*it_cj), dimension, reg, alpha);
         ++it_v;
         ++it_ci;
         ++it_cj;
@@ -1409,79 +1410,6 @@ void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<d
 
 }
 
-void proNet::UpdateFreezePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
-    
-    vector< double > vertex_err;
-    vector< double > context_err;
-    vector< double > batch_context_err;
-    vector< double > context_vec;
-    vertex_err.resize(dimension, 0.0);
-    context_err.resize(dimension, 0.0);
-    batch_context_err.resize(dimension, 0.0);
-    context_vec.resize(dimension, 0.0);
-
-    int d;
-    double f=0.0;
-    double up = 0.0;
-    for (int w=0; w<5; w++)
-    {
-        if (w!=0)
-        {
-            context_j = NegativeSample();
-            while(field[context_i].fields[0]!=field[context_j].fields[0])
-            {
-                context_j = NegativeSample();
-            }
-        }
-
-        for (int d=0; d<dimension; d++)
-        {
-            //vertex_err[d] = 0.0;
-            context_err[d] = 0.0;
-            context_vec[d] = w_context[context_i][d] - w_context[context_j][d];
-        }
-        
-        if (Opt_FBPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err, margin))
-        {
-            up++;
-            for (int d=0; d<dimension; d++)
-            {
-                w_context[context_i][d] -= alpha*0.0025*w_context[context_i][d];
-                w_context[context_j][d] -= alpha*0.0025*w_context[context_j][d];
-                //w_vertex[vertex][d] -= alpha*0.025*w_vertex[vertex][d];
-        
-                w_context[context_i][d] += context_err[d];
-                w_context[context_j][d] -= context_err[d];
-                //w_vertex[vertex][d] += vertex_err[d];
-            }
-        }
-    }
-    
-    if (up)
-    for (int d=0; d<dimension; d++)
-    {
-        w_vertex[vertex][d] -= alpha*0.025*w_vertex[vertex][d];
-        w_vertex[vertex][d] += vertex_err[d]/up;
-    }
-
-}
-
-void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context_i, vector<long>& context_j, int dimension, double alpha){
-    
-    vector<long>::iterator it_v = vertex.begin();
-    vector<long>::iterator it_ci = context_i.begin();
-    vector<long>::iterator it_cj = context_j.begin();
-    
-    while( it_v != vertex.end() )
-    {
-	// FIXME: reg=0.025
-        UpdateBPRPair(w_vertex, w_context, (*it_v), (*it_ci), (*it_cj), dimension, 0.025, alpha);
-        ++it_v;
-        ++it_ci;
-        ++it_cj;
-    }
-
-}
 
 void proNet::UpdateFreezePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
@@ -2209,6 +2137,45 @@ void proNet::UpdateCBOWs(vector< vector<double> >& w_vertex, vector< vector<doub
         UpdateCBOW(w_vertex, w_context, (*it_v), (*it_c), dimension, reg, walk_steps, negative_samples, alpha);
         ++it_v;
         ++it_c;
+    }
+
+}
+
+
+void proNet::UpdateCommunity(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
+
+    vector<double> back_err;
+    back_err.resize(dimension, 0.0);
+
+    int d;
+    long neg_context;
+    double label;
+    
+    // 0 for postive sample, others for negative sample
+    for (int s = 0; s < walk_steps; s++)
+    {
+        if (s != 0)
+        {
+            context = TargetSample(context);
+            if (context==-1) break;
+        }
+
+        for (d=0; d<dimension; ++d)
+            back_err[d] = 0.0;
+
+        // positive training
+        label = 1.0;
+        Opt_SigmoidRegSGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
+
+        // negative sampling
+        label = 0.0;
+        for (int neg=0; neg!=negative_samples; ++neg)
+        {
+            neg_context = NegativeSample();
+            Opt_SigmoidRegSGD(w_vertex[vertex], w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
+        }
+        for (d=0; d<dimension; ++d)
+            w_vertex[vertex][d] += back_err[d];
     }
 
 }
