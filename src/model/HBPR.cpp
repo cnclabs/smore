@@ -99,16 +99,7 @@ void HBPR::Train(int sample_times, int walk_steps, double alpha, int workers){
                 vid = pnet.SourceSample();
             cid1 = pnet.TargetSample(vid);
            
-            //cid2 = pnet.TargetSample(cid1);
-            //cid2 = pnet.TargetSample(cid2);
-            //cid3 = pnet.TargetSample(cid2);
-            //cid3 = pnet.TargetSample(cid3);
-            //nid = pnet.NegativeSample();
-            //while (pnet.field[nid].fields[0]!=pnet.field[cid1].fields[0])
-            //    nid = pnet.NegativeSample();
-
-            margin = 1.0;
-            
+            margin = 1.0;            
             for (int w=1; w<=walk_steps; w++)
             {
                 if (w!=1)
@@ -119,28 +110,8 @@ void HBPR::Train(int sample_times, int walk_steps, double alpha, int workers){
                 nid = pnet.NegativeSample();
                 while (pnet.field[nid].fields[0]!=pnet.field[cid1].fields[0])
                     nid = pnet.NegativeSample();
-                //cid1 = nid;
-                //nid = pnet.TargetSample(nid);
-                //nid = pnet.TargetSample(nid);
                 pnet.UpdateFBPRPair(w_vertex, w_vertex, vid, cid1, nid, dim, _alpha/w, margin/w);
             }
-
-            /*
-            
-            margin = 1.0;
-            for (int w=0; w<walk_steps; w++)
-            {
-                if (w!=0)
-                {
-                    cid1 = pnet.TargetSample(cid1);
-                    cid1 = pnet.TargetSample(cid1);
-                    nid = pnet.NegativeSample();
-                    while (pnet.field[nid].fields[0]!=pnet.field[cid1].fields[0])
-                        nid = pnet.NegativeSample();
-                }
-                pnet.UpdateFBPRPair(w_vertex, w_vertex, vid, cid1, nid, dim, _alpha, margin);
-            }
-            */
 
             count ++;
             if (count % MONITOR == 0)
