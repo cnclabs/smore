@@ -146,6 +146,9 @@ class proNet {
 
         // Key Process
         HashTable vertex_hash;
+
+		    // Pretrain
+		    unordered_map< long, vector< double >> pretrain;
         //HashTable2 vertex_hash;
         unsigned int BKDRHash(char*);
         void InsertHashTable(HashTable&, char*);
@@ -160,6 +163,7 @@ class proNet {
         
         vector< int > dynamic_walk;
         void LoadWalkMeta(string);
+        void LoadPreTrain(string,int);
 
         // Network Process
         long SourceSample();
@@ -232,6 +236,7 @@ class proNet {
       
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
         void UpdateCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
+        void UpdateFCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
         void UpdateBatchCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);

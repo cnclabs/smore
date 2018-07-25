@@ -115,3 +115,9 @@ You can find related work from [awesome-network-embedding](https://github.com/ch
   year={2017}
 }
 ```
+
+# Code & Data Structure
+[Slides](http://cherry.cs.nccu.edu.tw/~g10018/portfolio/slides/pronet.pdf)
+
+# News
+We're now refactoring the project. More solid functions/features will be available in the future.
