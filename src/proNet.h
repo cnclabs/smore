@@ -16,6 +16,7 @@ using namespace std;
 #include <cstdlib>
 #include <thread>
 #include <random>
+#include <array>
 #include <string>
 #include <string.h>
 #include <vector>
@@ -35,20 +36,40 @@ using namespace std;
 #define MAX_SIGMOID 8.0
 #define MAX_NEG 1e8
 
-struct cmp_char
-{
-    bool operator()(char const *a, char const *b)
-    {
+struct cmp_char {
+    bool operator()(char const *a, char const *b) {
         return strcmp(a, b) < 0;
     }
 };
 
+struct char_cmp {
+    bool operator()(char const *a, char const *b) const {
+        return strcmp(a, b) == 0;
+    }
+};
+
+struct bkdr_hash{
+    unsigned int operator()(char *key) const {
+        unsigned int seed = 131; // 31 131 1313 13131 131313 etc..
+        unsigned int hash = 0;
+        while(*key)
+            hash = hash * seed + (*key++);
+        return (hash % HASH_TABLE_SIZE);
+    }
+};
+
+
 class Vertex {
     public:
         long offset, branch;
-        double out_degree;
-        double in_degree;
+        double out_degree, in_degree;
         Vertex() { out_degree=0.0; in_degree=0.0; }
+};
+
+class devField {
+    public:
+        int field;
+        vector<long> offset, brnach;
 };
 
 class Context {
@@ -77,12 +98,20 @@ class HashTable {
         vector< char* > keys;
 };
 
+class HashTable2 {
+    public:
+        unordered_map<char*, long, bkdr_hash, char_cmp> table;
+        unordered_map<char*, long, bkdr_hash, char_cmp>::iterator it;
+        long Find(char*);
+        long Insert(char*);
+};
+
 class proNet {
 
     private:
 
         void InitSigmoid();
-        void InitNegTable();
+        //void InitNegTable();
         void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
         
     public:
@@ -91,8 +120,11 @@ class proNet {
         ~proNet();
         
         void SetNegativeMethod(char*);
+        void SetVertexMethod(char*);
 
         // MAX index number
+        char vertex_method[20];
+        char context_method[20];
         char negative_method[20];
         unsigned long long MAX_line;
         long MAX_vid;
@@ -106,7 +138,7 @@ class proNet {
         vector< AliasTable > context_AT;
         vector< AliasTable > negative_AT;
         vector< Field > field;
-        vector< long > neg_table;
+        //vector< long > neg_table;
 
         // cahce
         vector< double > cached_sigmoid;
@@ -114,6 +146,7 @@ class proNet {
 
         // Key Process
         HashTable vertex_hash;
+        //HashTable2 vertex_hash;
         unsigned int BKDRHash(char*);
         void InsertHashTable(HashTable&, char*);
         long SearchHashTable(HashTable&, char*);
@@ -148,9 +181,13 @@ class proNet {
 
         // vertex representation, context representation, alpha, vertex loss, context loss, alpha
         void Opt_BPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&);
+        int Opt_FBPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&, double);
 
         // vertex representation, context representation, label, alpha, vertex loss, context loss, alpha
         void Opt_SigmoidSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
+        void Opt_CosineSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
+        void Opt_LengthSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
+        void Opt_SigmoidSGD1(double*, double*, double, int, double, double*, double*);
 
         // vertex representation, context representation, label, alpha, regularization, vertex loss, context loss, alpha
         void Opt_SigmoidRegSGD(vector<double>&, vector<double>&, double, double, double, vector<double>&, vector<double>&);
@@ -159,15 +196,29 @@ class proNet {
         
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
+        void UpdateCosinePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
+        void UpdateLengthPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
+        void UpdatePair1(double*, double*, long, long, int, int, double);
+        void UpdateFreezePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateBPRPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double);
+        // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
+        void UpdateWARPPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double);
+
+        // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
+        void UpdateCBPRPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double, double);
+        // vertex vector, context vector, vertex, context, dimension, negative samples, margin
+        void UpdateFBPRPair(vector< vector<double> >&, vector< vector<double> >&, long, long, long, int, double, double);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateBPRPairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, vector<long>&, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
         void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
+        void UpdateChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
+        void UpdateRAWChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
+        void UpdateGroupingPair(vector< vector<double> >&, vector< vector<double> >&, long, long, double, int, double, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, walk steps, negative samples, alpha
         void UpdateCBOW(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
@@ -176,14 +227,16 @@ class proNet {
         // vertex vector, context vector, vertex series, context series, dimension, negative samples, alpha
         void UpdatePairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, int, int, double);
 
-        // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
-        void UpdateDirectedPair(vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
-       
+        // user vertex vector, item vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
+        void UpdateUIPair(vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
+      
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
         void UpdateCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
 
-        // vertex vector, context vector, vertex, context, dimension, negative samples, community walk steps, bfs, alpha
-        void UpdateDCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double, double);
+        // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
+        void UpdateBatchCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
+        // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha, u or i
+        void UpdateUICommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double, int);
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);

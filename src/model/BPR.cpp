@@ -2,8 +2,8 @@
 #include <omp.h>
 
 BPR::BPR() {
-    char method[15] = "in_degrees";
-    pnet.SetNegativeMethod(method);
+    char negative_method[15] = "no_degrees";
+    pnet.SetNegativeMethod(negative_method);
 }
 BPR::~BPR() {
 }
@@ -62,7 +62,7 @@ void BPR::Train(int sample_times, int negative_samples, double alpha, double reg
     cout << "Learning Parameters:" << endl;
     cout << "\tsample_times:\t\t" << sample_times << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
-    cout << "\tregularization:\t\t" << reg << endl;
+    //cout << "\tregularization:\t\t" << reg << endl;
     cout << "\tworkers:\t\t" << workers << endl;
 
     cout << "Start Training:" << endl;

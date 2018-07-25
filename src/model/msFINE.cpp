@@ -16,12 +16,12 @@ void msFINE::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
-        model << pnet.MAX_vid << " " << dim << endl;
+        model << pnet.MAX_vid << " " << dim*pnet.MAX_field << endl;
         for (long o_vid=0; o_vid!=pnet.MAX_vid; o_vid++)
         {
             model << pnet.vertex_hash.keys[o_vid];
-            for (int d=0; d<dim_1; ++d)
-                model << " " << w_vertex[o_vid][d];
+//            for (int d=0; d<dim_1; ++d)
+//                model << " " << w_vertex[o_vid][d];
 
             for (fid=0; fid<pnet.MAX_field; fid++)
             {
@@ -43,11 +43,13 @@ void msFINE::Init(int dimension) {
    
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dimension << endl;
-    dim = dimension;
-    dim_2 = int(dimension/(1+pnet.MAX_field));
-    dim_1 = int(dimension-dim_2*pnet.MAX_field);
+    dim = dimension/pnet.MAX_field;
+    dim_2 = dim;
+    dim_1 = dim;
+    //dim_2 = int(dimension/(1+pnet.MAX_field));
+    //dim_1 = int(dimension-dim_2*pnet.MAX_field);
     
-    w_vertex_o1.resize(pnet.MAX_vid);
+    //w_vertex_o1.resize(pnet.MAX_vid);
     //w_vertex_o1.resize(pnet.MAX_fvid);
     //w_vertex.resize(pnet.MAX_vid);
     //w_context.resize(pnet.MAX_vid);
@@ -56,11 +58,11 @@ void msFINE::Init(int dimension) {
 
     for (long vid=0; vid<pnet.MAX_vid; ++vid)
     {
-        w_vertex_o1[vid].resize(dim_1);
+        //w_vertex_o1[vid].resize(dim_1);
         //w_vertex[vid].resize(dim_2);
         //w_context[vid].resize(dim_2);
-        for (int d=0; d<dim_1;++d)
-            w_vertex_o1[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_1;
+        //for (int d=0; d<dim_1;++d)
+        //    w_vertex_o1[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_1;
         //for (int d=0; d<dim_2;++d)
         //    w_vertext[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim_2;
         //for (int d=0; d<dim_2;++d)
@@ -133,10 +135,10 @@ void msFINE::Train(int sample_times, int walk_steps, int negative_samples, doubl
             //pnet.UpdateFieldCommunity(w_vertex, w_context, v2, v1, dim_2, walk_steps, negative_samples, _alpha);
             //pnet.UpdateFieldCommunity(w_vertex, w_context, v1, v2, dim_2, 0, negative_samples, _alpha);
 
-            v1 = pnet.SourceSample();
-            v2 = pnet.TargetSample(v1);
+//            v1 = pnet.SourceSample();
+//            v2 = pnet.TargetSample(v1);
             //pnet.UpdateCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim_1, walk_steps, negative_samples, _alpha);
-            pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim_1, negative_samples, _alpha);
+//            pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim_1, negative_samples, _alpha);
             //pnet.UpdateFieldCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim_1, 0, negative_samples, _alpha);
             //pnet.UpdateFieldCommunity(w_vertex_o1, w_vertex_o1, v1, v2, dim, walk_steps, negative_samples, _alpha);
         }

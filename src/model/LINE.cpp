@@ -70,19 +70,28 @@ void LINE::Init(int dimension, int order) {
     {
         w_vertex.resize(pnet.MAX_vid);
         w_context.resize(pnet.MAX_vid);
+        int alignment;
+        //alignment = posix_memalign((void **)&w_vertex1, 128, pnet.MAX_vid * dim * sizeof(double));
+        //alignment = posix_memalign((void **)&w_context1, 128, pnet.MAX_vid * dim * sizeof(double));
+        w_vertex1 = (double *)malloc(pnet.MAX_vid * dim * sizeof(double));
+        w_context1 = (double *)malloc(pnet.MAX_vid * dim * sizeof(double));
         for (long vid=0; vid<pnet.MAX_vid; ++vid)
         {
             w_vertex[vid].resize(dim);
             for (int d=0; d<dim;++d)
             {
                 w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+                w_vertex1[vid*dim+d] = (rand()/(double)RAND_MAX - 0.5) / dim;
             }
         }
         for (long vid=0; vid<pnet.MAX_vid; ++vid)
         {
             w_context[vid].resize(dim);
             for (int d=0; d<dim;++d)
+            {
                 w_context[vid][d] = 0.0;
+                w_context1[vid*dim+d] = 0.0;
+            }
         }
     }
 }
@@ -129,6 +138,8 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
                 v1 = pnet.SourceSample();
                 v2 = pnet.TargetSample(v1);
                 pnet.UpdatePair(w_vertex_o1, w_vertex_o1, v1, v2, dim, negative_samples, _alpha);
+                //pnet.UpdateCosinePair(w_vertex_o1, w_vertex_o1, v1, v2, dim, negative_samples, _alpha);
+                //pnet.UpdateLengthPair(w_vertex_o1, w_vertex_o1, v1, v2, dim, negative_samples, _alpha);
 
                 count++;
                 if (count % MONITOR == 0)
@@ -161,6 +172,8 @@ void LINE::Train(int sample_times, int negative_samples, double alpha, int worke
                 v1 = pnet.SourceSample();
                 v2 = pnet.TargetSample(v1);
                 pnet.UpdatePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
+                //pnet.UpdateCosinePair(w_vertex, w_context, v1, v2, dim, negative_samples, _alpha);
+                //pnet.UpdatePair1(w_vertex1, w_context1, v1, v2, dim, negative_samples, _alpha);
 
                 count++;
                 if (count % MONITOR == 0)
