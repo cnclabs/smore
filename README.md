@@ -124,7 +124,7 @@ You can find related work from [awesome-network-embedding](https://github.com/ch
 ```
 
 # Note
-for certain algorithms, it is required to assign the field of each vertex in "<vertex> <field>" form:
+for certain algorithms, it is required to assign the field of each vertex in "vertex field" form:
 ```
 userA u
 userB u
