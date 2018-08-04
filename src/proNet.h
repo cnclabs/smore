@@ -182,6 +182,7 @@ class proNet {
 
         // vertex representation, context representation, label, alpha, regularization, vertex loss, context loss, alpha
         void Opt_SGD(vector<double>&, vector<double>&, double, double, double, vector<double>&, vector<double>&);
+        void Opt_PUSGD(vector<double>&, vector<double>&, double, double, double, vector<double>&, vector<double>&);
 
         // vertex representation, context representation, alpha, vertex loss, context loss, alpha
         void Opt_BPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&);
@@ -192,6 +193,7 @@ class proNet {
         void Opt_CosineSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
         void Opt_LengthSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
         void Opt_SigmoidSGD1(double*, double*, double, int, double, double*, double*);
+        void Opt_PUSigmoidSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
 
         // vertex representation, context representation, label, alpha, regularization, vertex loss, context loss, alpha
         void Opt_SigmoidRegSGD(vector<double>&, vector<double>&, double, double, double, vector<double>&, vector<double>&);
@@ -221,6 +223,7 @@ class proNet {
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
         void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
         void UpdateChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
+        void UpdateDChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
         void UpdateRAWChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
         void UpdateGroupingPair(vector< vector<double> >&, vector< vector<double> >&, long, long, double, int, double, int, double);
 

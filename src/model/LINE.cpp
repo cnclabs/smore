@@ -70,18 +70,18 @@ void LINE::Init(int dimension, int order) {
     {
         w_vertex.resize(pnet.MAX_vid);
         w_context.resize(pnet.MAX_vid);
-        int alignment;
+        //int alignment;
         //alignment = posix_memalign((void **)&w_vertex1, 128, pnet.MAX_vid * dim * sizeof(double));
         //alignment = posix_memalign((void **)&w_context1, 128, pnet.MAX_vid * dim * sizeof(double));
-        w_vertex1 = (double *)malloc(pnet.MAX_vid * dim * sizeof(double));
-        w_context1 = (double *)malloc(pnet.MAX_vid * dim * sizeof(double));
+        //w_vertex1 = (double *)malloc(pnet.MAX_vid * dim * sizeof(double));
+        //w_context1 = (double *)malloc(pnet.MAX_vid * dim * sizeof(double));
         for (long vid=0; vid<pnet.MAX_vid; ++vid)
         {
             w_vertex[vid].resize(dim);
             for (int d=0; d<dim;++d)
             {
                 w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
-                w_vertex1[vid*dim+d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+                //w_vertex1[vid*dim+d] = (rand()/(double)RAND_MAX - 0.5) / dim;
             }
         }
         for (long vid=0; vid<pnet.MAX_vid; ++vid)
@@ -90,7 +90,7 @@ void LINE::Init(int dimension, int order) {
             for (int d=0; d<dim;++d)
             {
                 w_context[vid][d] = 0.0;
-                w_context1[vid*dim+d] = 0.0;
+                //w_context1[vid*dim+d] = 0.0;
             }
         }
     }
