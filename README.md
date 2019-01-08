@@ -24,7 +24,7 @@ This is a C++ framework for variant **weighted** network embedding techniques. W
 - MF (**M**atrix **F**actorization)
 - BPR (**B**ayesian **P**ersonalized **R**anking)
   - [BPR: Bayesian personalized ranking from implicit feedback](https://dl.acm.org/citation.cfm?id=1795167)
-- WARP
+- WARP-like
   - [WSABIE: Scaling Up To Large Vocabulary Image Annotation](https://dl.acm.org/citation.cfm?id=2283856)
   - [Learning to Rank Recommendations with the k-Order Statistic Loss](https://dl.acm.org/citation.cfm?id=2507157.2507210)
 - HOP-REC
