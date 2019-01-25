@@ -40,7 +40,7 @@ int main(int argc, char **argv){
 
         printf("Usage:\n");
         printf("\n[HBPR]\n");
-        printf("./hoprec -train net.txt -save rep.txt -dimensions 64 -sample_times 10 -alpha 0.025 -threads 1\n");
+        printf("./hoprec -train net.txt -field field.txt -save rep.txt -dimensions 64 -sample_times 10 -alpha 0.025 -threads 1\n");
 
         return 0;
     }
