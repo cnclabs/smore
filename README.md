@@ -28,7 +28,9 @@ This is a C++ framework for variant **weighted** network embedding techniques. W
   - [WSABIE: Scaling Up To Large Vocabulary Image Annotation](https://dl.acm.org/citation.cfm?id=2283856)
   - [Learning to Rank Recommendations with the k-Order Statistic Loss](https://dl.acm.org/citation.cfm?id=2507157.2507210)
 - HOP-REC
-  - [HOP-Rec: High-Order Proximity for Implicit Recommendation]()
+  - [HOP-Rec: High-Order Proximity for Implicit Recommendation](https://dl.acm.org/citation.cfm?id=3240381)
+- CSE
+  - [Collaborative Similarity Embedding for Recommender Systems]
 
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
 
@@ -124,7 +126,7 @@ You can find related work from [awesome-network-embedding](https://github.com/ch
 ```
 
 # Note
-for certain algorithms, it is required to assign the field of each vertex in "vertex field" form:
+for HOP-REC & CSE, it is required to assign the field of each vertex in "vertex field" form:
 ```
 userA u
 userB u
