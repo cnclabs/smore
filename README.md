@@ -30,7 +30,7 @@ This is a C++ framework for variant **weighted** network embedding techniques. W
 - HOP-REC
   - [HOP-Rec: High-Order Proximity for Implicit Recommendation](https://dl.acm.org/citation.cfm?id=3240381)
 - CSE
-  - [Collaborative Similarity Embedding for Recommender Systems]
+  - [Collaborative Similarity Embedding for Recommender Systems](https://arxiv.org/abs/1902.06188)
 
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
 
