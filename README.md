@@ -29,7 +29,7 @@ This is a C++ framework for variant **weighted** network embedding techniques. W
   - [Learning to Rank Recommendations with the k-Order Statistic Loss](https://dl.acm.org/citation.cfm?id=2507157.2507210)
 - HOP-REC
   - [HOP-Rec: High-Order Proximity for Implicit Recommendation](https://dl.acm.org/citation.cfm?id=3240381)
-- CSE
+- CSE (named nemf & nerank in cli)
   - [Collaborative Similarity Embedding for Recommender Systems](https://arxiv.org/abs/1902.06188)
 
 In the near future, we will redesign the framework making some solid APIs for fast development on different network embedding techniques.
