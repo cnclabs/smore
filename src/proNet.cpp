@@ -2213,10 +2213,11 @@ void proNet::UpdateDChoice(vector< vector<double> >& w_vertex, vector< vector<do
                 dev += w_vertex[neg_item][d]*neg_scores[n];
             }
 //            back_v[d] += alpha*(w_vertex[context][d] - dev / sum_score - reg*w_vertex[vertex][d]);
-            back_v[d] += alpha*( w_vertex[context][d] + w_vertex[context2][d] - 2.0*dev/sum_score - reg*w_vertex[vertex][d] );
+//            back_v[d] += alpha*( w_vertex[context][d] + w_vertex[context2][d] - 2.0*dev/sum_score - reg*w_vertex[vertex][d] );
 //            back_v[d] += alpha*( dev_p / (pos_score+pos_score2) - dev / sum_score - reg*w_vertex[vertex][d]);
 //            back_v[d] += alpha*( (dev_p1+dev_p2) / (pos_score+pos_score2) + w_vertex[context2][d] - dev / sum_score - (dev-dev_p1)/(sum_score-pos_score) - reg*w_vertex[vertex][d]);
 //            back_v[d] += alpha*( (dev_p1+dev_p2) / (pos_score+pos_score2) - dev / sum_score - reg*w_vertex[vertex][d] );
+            back_v[d] += alpha*( (2.0*dev_p1+dev_p2)/(2.0*pos_score+pos_score2) - dev/sum_score - reg*w_vertex[vertex][d] );
         }
     
         // update pos
@@ -2225,9 +2226,11 @@ void proNet::UpdateDChoice(vector< vector<double> >& w_vertex, vector< vector<do
 //            w_vertex[context][d] += alpha*(w_vertex[vertex][d] - (w_vertex[vertex][d]*pos_score) / sum_score - reg*w_vertex[context][d]);
 //            w_vertex[context][d] += alpha*( (w_vertex[vertex][d]*pos_score) / (pos_score+pos_score2) - (w_vertex[vertex][d]*pos_score) / sum_score - reg*w_vertex[context][d] );
 //            w_vertex[context2][d] += alpha*( (w_vertex[vertex][d]*pos_score2) / (pos_score+pos_score2) - (w_vertex[vertex][d]*pos_score2) / sum_score - reg*w_vertex[context2][d] );
-            w_vertex[context][d] += alpha*( w_vertex[vertex][d] - 2.0*(pos_score*w_vertex[vertex][d])/sum_score - reg*w_vertex[context][d]);
-            w_vertex[context2][d] += alpha*( w_vertex[vertex][d] - 2.0*(pos_score2*w_vertex[vertex][d])/sum_score - reg*w_vertex[context2][d]);
+//            w_vertex[context][d] += alpha*( w_vertex[vertex][d] - 2.0*(pos_score*w_vertex[vertex][d])/sum_score - reg*w_vertex[context][d]);
+//            w_vertex[context2][d] += alpha*( w_vertex[vertex][d] - 2.0*(pos_score2*w_vertex[vertex][d])/sum_score - reg*w_vertex[context2][d]);
 //            w_vertex[context2][d] += alpha*( (w_vertex[vertex][d]*pos_score2) / (pos_score+pos_score2) + w_vertex[vertex][d] - (w_vertex[vertex][d]*pos_score2) / sum_score - (w_vertex[vertex][d]*pos_score2)/(sum_score-pos_score) - reg*w_vertex[context2][d]);
+            w_vertex[context][d] += alpha*( (2.0*w_vertex[vertex][d]*pos_score)/(2.0*pos_score+pos_score2) - (w_vertex[vertex][d]*pos_score)/sum_score - reg*w_vertex[context][d] );
+            w_vertex[context2][d] += alpha*( (w_vertex[vertex][d]*pos_score2)/(2.0*pos_score+pos_score2) - (w_vertex[vertex][d]*pos_score2)/sum_score - reg*w_vertex[context2][d] );
         }
     
         // update negs
@@ -2235,7 +2238,7 @@ void proNet::UpdateDChoice(vector< vector<double> >& w_vertex, vector< vector<do
         {
             neg_item = neg_items[n];
             for (d=0; d<dimension; ++d)
-                w_vertex[neg_item][d] -= alpha*( 2.0*(w_vertex[vertex][d]*neg_scores[n])/sum_score + reg*w_vertex[neg_item][d]);
+                w_vertex[neg_item][d] -= alpha*( (w_vertex[vertex][d]*neg_scores[n])/sum_score + reg*w_vertex[neg_item][d]);
 //                w_vertex[neg_item][d] -= alpha*((w_vertex[vertex][d]*neg_scores[n]) / sum_score + (w_vertex[vertex][d]*neg_scores[n]) / (sum_score-pos_score) + reg*w_vertex[neg_item][d]);
         }
 
