@@ -147,8 +147,8 @@ class proNet {
         // Key Process
         HashTable vertex_hash;
 
-		    // Pretrain
-		    unordered_map< long, vector< double >> pretrain;
+        // Pretrain
+        unordered_map< long, vector< double >> pretrain;
         //HashTable2 vertex_hash;
         unsigned int BKDRHash(char*);
         void InsertHashTable(HashTable&, char*);
@@ -186,6 +186,7 @@ class proNet {
 
         // vertex representation, context representation, alpha, vertex loss, context loss, alpha
         void Opt_BPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&);
+        void Opt_PUBPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&);
         int Opt_FBPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&, double);
 
         // vertex representation, context representation, label, alpha, vertex loss, context loss, alpha
@@ -223,9 +224,11 @@ class proNet {
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
         void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
         void UpdateChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
-        void UpdateDChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
+        void UpdateDChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double, double);
+        void UpdateHOPChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
         void UpdateRAWChoice(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
         void UpdateGroupingPair(vector< vector<double> >&, vector< vector<double> >&, long, long, double, int, double, int, double);
+        void UpdateRecallRank(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, walk steps, negative samples, alpha
         void UpdateCBOW(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
