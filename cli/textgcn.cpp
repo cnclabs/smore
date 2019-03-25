@@ -1,5 +1,5 @@
 #define _GLIBCXX_USE_CXX11_ABI 1
-#include "../src/model/GCN.h"
+#include "../src/model/TEXTGCN.h"
 
 int ArgPos(char *str, int argc, char **argv) {
     int a;
@@ -66,8 +66,8 @@ int main(int argc, char **argv){
     if ((i = ArgPos((char *)"-alpha", argc, argv)) > 0) init_alpha = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-threads", argc, argv)) > 0) threads = atoi(argv[i + 1]);
 
-    GCN *textgcn;
-    textgcn = new GCN();
+    TEXTGCN *textgcn;
+    textgcn = new TEXTGCN();
     textgcn->LoadEdgeList(network_file, undirected);
     textgcn->LoadFieldMeta(field_file);
     textgcn->Init(dimensions);
