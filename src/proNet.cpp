@@ -2157,9 +2157,9 @@ void proNet::UpdateDChoice(vector< vector<double> >& w_vertex, vector< vector<do
     for (int b=0; b<5; b++)
     {
         context = TargetSample(vertex);
-        context2 = TargetSample(vertex);
-//        context=TargetSample(context2);
-//        context = TargetSample(context);
+//        context2 = TargetSample(vertex);
+        context2 = TargetSample(context);
+        context2 = TargetSample(context2);
         
         /*
         if (b!=0)
@@ -2189,7 +2189,7 @@ void proNet::UpdateDChoice(vector< vector<double> >& w_vertex, vector< vector<do
             neg_score = 0.0;
             for (d=0; d<dimension; ++d)
                 neg_score += w_vertex[vertex][d]*w_vertex[neg_item][d];
-            
+ 
             neg_items.push_back(neg_item);
             neg_score = exp(neg_score);
             neg_scores.push_back(neg_score);
@@ -2200,7 +2200,7 @@ void proNet::UpdateDChoice(vector< vector<double> >& w_vertex, vector< vector<do
         pos_score2 = exp(pos_score2);
         sum_score += pos_score;
         sum_score += pos_score2;
-        
+
         // update u
         for (d=0; d<dimension; ++d)
         {
@@ -2676,16 +2676,17 @@ void proNet::UpdateCBOW(vector< vector<double> >& w_vertex, vector< vector<doubl
     vector<double> w_avg, back_err;
     w_avg.resize(dimension, 0.0);
     back_err.resize(dimension, 0.0);
-    
-    vertices.push_back(vertex);
+    long vertex_context;
+
+    //vertices.push_back(vertex);
     for (int i=0; i!=walk_steps; ++i)
     {
-        vertex = TargetSample(vertex);
-        if (vertex==-1) break;
-        vertices.push_back(vertex);
+        vertex_context = TargetSample(vertex);
+        if (vertex_context==-1) break;
+        vertices.push_back(vertex_context);
     }
 
-    double decay = 1.0;
+    //double decay = 1.0;
     vector<double>* w_ptr;
     for (auto v: vertices)
     {
