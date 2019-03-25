@@ -9,7 +9,12 @@ void TEXTGCN::SaveWeights(string model_name){
     ofstream model(model_name);
     if (model)
     {
-        model << pnet.MAX_vid << " " << dim << endl;
+        int counter = 0;
+        for (long vid=0; vid!=pnet.MAX_vid; vid++)
+            if (pnet.field[vid].fields[0]!=1)
+                counter++;
+        model << counter << " " << dim << endl;
+
         for (long vid=0; vid!=pnet.MAX_vid; vid++)
         {
             if (pnet.field[vid].fields[0]==1)
