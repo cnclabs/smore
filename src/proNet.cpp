@@ -2670,6 +2670,71 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
     
 }
 
+void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
+
+    vector<long> vertices, neg_vertices;
+    vector<double> w_avg, back_err;
+    w_avg.resize(dimension, 0.0);
+    back_err.resize(dimension, 0.0);
+    long vertex_context;
+
+    //vertices.push_back(vertex);
+    for (int i=0; i!=walk_steps; ++i)
+    {
+        vertex_context = TargetSample(vertex);
+        if (vertex_context==-1) break;
+        vertices.push_back(vertex_context);
+    }
+
+    //double decay = 1.0;
+    vector<double>* w_ptr;
+    for (auto v: vertices)
+    {
+        w_ptr = &w_vertex[v];
+        for (int d=0; d!=dimension;++d)
+        {
+            w_avg[d] += (*w_ptr)[d];
+        }
+    }
+    /*
+    int num = vertices.size();
+    for (int d=0; d!=dimension;++d)
+    {
+        w_avg[d] /= num;
+    }
+    */
+
+    long neg_context;
+    double label;
+    
+    // positive training
+    label = 1.0;
+    Opt_SigmoidRegSGD(w_avg, w_context[context], label, alpha, reg, back_err, w_context[context]);
+    //Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
+
+    // negative sampling
+    label = 0.0;
+    for (int neg=0; neg!=negative_samples; ++neg)
+    {
+        neg_context = NegativeSample();
+        while(field[neg_context].fields[0]!=2)
+            neg_context = NegativeSample();
+        Opt_SigmoidRegSGD(w_avg, w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
+        //Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
+    }
+
+    for (auto v: vertices)
+    {
+        w_ptr = &w_vertex[v];
+        for (int d=0; d!=dimension;++d)
+        {
+            (*w_ptr)[d] += back_err[d];
+        }
+    }
+
+}
+
+
 void proNet::UpdateCBOW(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
 
     vector<long> vertices;
