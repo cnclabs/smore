@@ -2716,9 +2716,11 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     label = 0.0;
     for (int neg=0; neg!=negative_samples; ++neg)
     {
-        neg_context = NegativeSample();
-        while(field[neg_context].fields[0]!=2)
-            neg_context = NegativeSample();
+        neg_context = SourceSample();
+        //neg_context = NegativeSample();
+        while(field[neg_context].fields[0]!=0)
+            neg_context = SourceSample();
+            //neg_context = NegativeSample();
         Opt_SigmoidRegSGD(w_avg, w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
         //Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
     }
