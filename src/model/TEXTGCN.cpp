@@ -15,16 +15,34 @@ void TEXTGCN::SaveWeights(string model_name){
                 counter++;
         model << counter << " " << dim << endl;
 
+        vector<double> w_avg;
+        w_avg.resize(dim, 0.0);
+
+        long temp_vid;
         for (long vid=0; vid!=pnet.MAX_vid; vid++)
         {
             if (pnet.field[vid].fields[0]==1)
                 continue;
             
             model << pnet.vertex_hash.keys[vid];
-            
             if (pnet.field[vid].fields[0]==0)
+            {
+                for (int b=0; b<pnet.vertex[vid].branch; b++)
+                {
+                    temp_vid = pnet.context[pnet.vertex[vid].offset + b].vid;
+                    for (int d=0; d<dim; ++d)
+                    {
+                        w_avg[d] += w_vertex[temp_vid][d];
+                    }
+                }
                 for (int d=0; d<dim; ++d)
-                    model << " " << w_context[vid][d];
+                {
+                    model << " " << w_avg[d];
+                    w_avg[d] = 0.0;
+                }
+                //for (int d=0; d<dim; ++d)
+                //    model << " " << w_context[vid][d];
+            }
             if (pnet.field[vid].fields[0]==2)
                 for (int d=0; d<dim; ++d)
                     model << " " << w_vertex[vid][d];
