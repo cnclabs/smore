@@ -2673,15 +2673,17 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
 void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
 
     vector<long> vertices, neg_vertices;
-    vector<double> w_avg, back_err;
+    vector<double> w_avg, c_avg, back_err;
     w_avg.resize(dimension, 0.0);
+    c_avg.resize(dimension, 0.0);
     back_err.resize(dimension, 0.0);
     long vertex_context;
 
     //vertices.push_back(vertex);
     for (int i=0; i!=walk_steps; ++i)
     {
-        vertex_context = TargetSample(vertex);
+        vertex_context = TargetSample(context);
+        vertex_context = TargetSample(vertex_context);
         if (vertex_context==-1) break;
         vertices.push_back(vertex_context);
     }
@@ -2717,10 +2719,8 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     for (int neg=0; neg!=negative_samples; ++neg)
     {
         neg_context = SourceSample();
-        //neg_context = NegativeSample();
         while(field[neg_context].fields[0]!=0)
             neg_context = SourceSample();
-            //neg_context = NegativeSample();
         Opt_SigmoidRegSGD(w_avg, w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
         //Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
     }
