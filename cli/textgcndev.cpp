@@ -31,10 +31,10 @@ int main(int argc, char **argv){
         printf("\t\tDimension of vertex representation; default is 64\n");
         printf("\t-undirected <int>\n");
         printf("\t\tWhether the edge is undirected; default is 1\n");
-        printf("\t-negative_samples <int>\n");
-        printf("\t\tNumber of negative examples; default is 5\n");
-        printf("\t-walk_steps <int>\n");
-        printf("\t\tStep of random walk; default is 5\n");
+        printf("\t-num_events <int>\n");
+        printf("\t\tNumber of events; default is 1\n");
+        printf("\t-num_words <int>\n");
+        printf("\t\tNumber of words; default is 5\n");
         printf("\t-sample_times <int>\n");
         printf("\t\tNumber of training samples *Million; default is 5\n");
         printf("\t-threads <int>\n");
@@ -51,7 +51,7 @@ int main(int argc, char **argv){
     }
     
     char network_file[100], rep_file[100], field_file[100];
-    int dimensions=64, undirected=1, negative_samples=5, walk_steps=5, sample_times=10, threads=1;
+    int dimensions=64, undirected=1, num_events=1, num_words=5, sample_times=10, threads=1;
     double init_alpha=0.025, reg=0.01;
 
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);
@@ -59,8 +59,8 @@ int main(int argc, char **argv){
     if ((i = ArgPos((char *)"-field", argc, argv)) > 0) strcpy(field_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-undirected", argc, argv)) > 0) undirected = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-dimensions", argc, argv)) > 0) dimensions = atoi(argv[i + 1]);
-    if ((i = ArgPos((char *)"-negative_samples", argc, argv)) > 0) negative_samples = atoi(argv[i + 1]);
-    if ((i = ArgPos((char *)"-walk_steps", argc, argv)) > 0) walk_steps = atoi(argv[i + 1]);
+    if ((i = ArgPos((char *)"-num_events", argc, argv)) > 0) num_events = atoi(argv[i + 1]);
+    if ((i = ArgPos((char *)"-num_words", argc, argv)) > 0) num_words = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-sample_times", argc, argv)) > 0) sample_times = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-reg", argc, argv)) > 0) reg = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-alpha", argc, argv)) > 0) init_alpha = atof(argv[i + 1]);
@@ -71,7 +71,7 @@ int main(int argc, char **argv){
     textgcn->LoadEdgeList(network_file, undirected);
     textgcn->LoadFieldMeta(field_file);
     textgcn->Init(dimensions);
-    textgcn->Train(sample_times, walk_steps, negative_samples, reg, init_alpha, threads);
+    textgcn->Train(sample_times, num_events, num_words, reg, init_alpha, threads);
     textgcn->SaveWeights(rep_file);
 
    return 0;

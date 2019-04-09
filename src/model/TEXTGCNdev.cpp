@@ -68,7 +68,7 @@ void TEXTGCNdev::LoadFieldMeta(string filename) {
     pnet.LoadFieldMeta(filename);
 }
 
-void TEXTGCNdev::Train(int sample_times, int walk_steps, int negative_samples, double reg, double alpha, int workers){
+void TEXTGCNdev::Train(int sample_times, int num_events, int num_words, double reg, double alpha, int workers){
     
     omp_set_num_threads(workers);
 
@@ -77,8 +77,9 @@ void TEXTGCNdev::Train(int sample_times, int walk_steps, int negative_samples, d
 
     cout << "Learning Parameters:" << endl;
     cout << "\tsample_times:\t\t" << sample_times << endl;
-    cout << "\tnegative_samples:\t" << negative_samples << endl;
-    cout << "\twalk_steps:\t\t" << walk_steps << endl;
+    cout << "\tnegative_samples:\t" << "fixed" << endl;
+    cout << "\tnum_events:\t" << num_events << endl;
+    cout << "\tnum_words:\t" << num_words << endl;
     cout << "\tregularization:\t\t" << reg << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
     cout << "\tworkers:\t\t" << workers << endl;
@@ -97,15 +98,14 @@ void TEXTGCNdev::Train(int sample_times, int walk_steps, int negative_samples, d
     {
         unsigned long long count = 0;
         double _alpha = alpha;
-        long v1, v2;
+        long user, event;
         
         while (count<jobs)
         {            
-            v1 = pnet.SourceSample();
-            while (pnet.field[v1].fields[0]!=0)
-                v1 = pnet.SourceSample();
-            v2 = pnet.TargetSample(v1);
-            pnet.UpdateCBOWdev(w_vertex, w_context, v2, v1, dim, reg, walk_steps, negative_samples, _alpha);
+            user = pnet.SourceSample();
+            while (pnet.field[user].fields[0]!=0)
+                user = pnet.SourceSample();
+            pnet.UpdateCBOWdev(w_vertex, w_context, user, user, dim, reg, num_events, num_words, _alpha);
 
             count ++;
             if (count % MONITOR == 0)

@@ -2670,29 +2670,29 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
     
 }
 
-void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, double reg, int walk_steps, int negative_samples, double alpha){
+void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long user, long dontcare, int dimension, double reg, int num_events, int num_words, double alpha){
 
-    vector<long> vertices, neg_vertices;
-    vector<double> w_avg, c_avg, back_err;
+    vector<long> bags;
+    vector<double> w_avg, back_err;
     w_avg.resize(dimension, 0.0);
-    c_avg.resize(dimension, 0.0);
     back_err.resize(dimension, 0.0);
-    long vertex_context;
+    long event, word;
 
-    //vertices.push_back(vertex);
-    for (int i=0; i!=walk_steps; ++i)
+    for (int i=0; i!=num_events; ++i)
     {
-        vertex_context = TargetSample(context);
-        vertex_context = TargetSample(vertex_context);
-        if (vertex_context==-1) break;
-        vertices.push_back(vertex_context);
+        event = TargetSample(user);
+        for (int j=0; j!=num_words; ++j)
+        {
+            word = TargetSample(event);
+            if (word==-1) return;
+            bags.push_back(word);
+        }
     }
 
-    //double decay = 1.0;
     vector<double>* w_ptr;
-    for (auto v: vertices)
+    for (auto v: bags)
     {
-        w_ptr = &w_vertex[v];
+        w_ptr = &w_context[v];
         for (int d=0; d!=dimension;++d)
         {
             w_avg[d] += (*w_ptr)[d];
@@ -2706,28 +2706,27 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     }
     */
 
-    long neg_context;
+    long neg_user;
     double label;
     
     // positive training
     label = 1.0;
-    Opt_SigmoidRegSGD(w_avg, w_context[context], label, alpha, reg, back_err, w_context[context]);
-    //Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
+    Opt_SigmoidRegSGD(w_vertex[user], w_avg, label, alpha, reg, w_vertex[user], back_err);
 
     // negative sampling
     label = 0.0;
+    int negative_samples=5;
     for (int neg=0; neg!=negative_samples; ++neg)
     {
-        neg_context = SourceSample();
-        while(field[neg_context].fields[0]!=0)
-            neg_context = SourceSample();
-        Opt_SigmoidRegSGD(w_avg, w_context[neg_context], label, alpha, reg, back_err, w_context[neg_context]);
-        //Opt_SGD(w_vertex[vertex], w_context[context], label, alpha, reg, back_err, w_context[context]);
+        neg_user = random_gen(0, MAX_vid);
+        while(field[neg_user].fields[0]!=0)
+            neg_user = random_gen(0, MAX_vid);
+        Opt_SigmoidRegSGD(w_vertex[neg_user], w_avg, label, alpha, reg, w_vertex[neg_user], back_err);
     }
 
-    for (auto v: vertices)
+    for (auto v: bags)
     {
-        w_ptr = &w_vertex[v];
+        w_ptr = &w_context[v];
         for (int d=0; d!=dimension;++d)
         {
             (*w_ptr)[d] += back_err[d];
