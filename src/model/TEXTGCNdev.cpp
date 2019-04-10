@@ -24,10 +24,10 @@ void TEXTGCNdev::SaveWeights(string model_name){
             
             if (pnet.field[vid].fields[0]==0)
                 for (int d=0; d<dim; ++d)
-                    model << " " << w_context[vid][d];
+                    model << " " << w_vertex[vid][d];
             if (pnet.field[vid].fields[0]==2)
                 for (int d=0; d<dim; ++d)
-                    model << " " << w_vertex[vid][d];
+                    model << " " << w_context[vid][d];
             model << endl;
         }
         cout << "\tSave to <" << model_name << ">" << endl;
