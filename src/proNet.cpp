@@ -2677,7 +2677,8 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     w_avg.resize(dimension, 0.0);
     back_err.resize(dimension, 0.0);
     long event, word;
-
+    
+    // word gcn
     for (int i=0; i!=num_events; ++i)
     {
         event = TargetSample(user);
@@ -2688,7 +2689,7 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
             bags.push_back(word);
         }
     }
-
+    
     vector<double>* w_ptr;
     for (auto v: bags)
     {
@@ -2706,16 +2707,33 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     }
     */
 
-    long neg_user;
+    long neg_user, neg_event;
     double label;
+    int negative_samples=5;
     
+    // 1st for event-based
+    // positive training
+    label = 1.0;
+    Opt_SigmoidRegSGD(w_vertex[event], w_avg, label, alpha, reg, w_vertex[event], back_err);
+
+    // negative sampling
+    label = 0.0;
+    for (int neg=0; neg!=negative_samples; ++neg)
+    {
+        neg_event = random_gen(0, MAX_vid);
+        while(field[neg_event].fields[0]!=1)
+            neg_event = random_gen(0, MAX_vid);
+        Opt_SigmoidRegSGD(w_vertex[neg_event], w_avg, label, alpha, reg, w_vertex[neg_event], back_err);
+    }
+
+
+    // 2nd for user-based    
     // positive training
     label = 1.0;
     Opt_SigmoidRegSGD(w_vertex[user], w_avg, label, alpha, reg, w_vertex[user], back_err);
 
     // negative sampling
     label = 0.0;
-    int negative_samples=5;
     for (int neg=0; neg!=negative_samples; ++neg)
     {
         neg_user = random_gen(0, MAX_vid);
@@ -2724,6 +2742,7 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
         Opt_SigmoidRegSGD(w_vertex[neg_user], w_avg, label, alpha, reg, w_vertex[neg_user], back_err);
     }
 
+    // batch update
     for (auto v: bags)
     {
         w_ptr = &w_context[v];
