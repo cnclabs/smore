@@ -2673,12 +2673,13 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
 void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long user, long dontcare, int dimension, double reg, int num_events, int num_words, double alpha){
 
     vector<long> bags;
-    vector<double> w_avg, back_err;
+    vector<double> w_avg, back_err, user_err;
     w_avg.resize(dimension, 0.0);
     back_err.resize(dimension, 0.0);
+    user_err.resize(dimension, 0.0);
     long event, word;
     
-    // word gcn
+    // word collection
     for (int i=0; i!=num_events; ++i)
     {
         event = TargetSample(user);
@@ -2690,6 +2691,7 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
         }
     }
     
+    // summation
     vector<double>* w_ptr;
     for (auto v: bags)
     {
@@ -2699,47 +2701,66 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
             w_avg[d] += (*w_ptr)[d];
         }
     }
-    /*
-    int num = vertices.size();
+    
+    // average
+    int num = bags.size();
     for (int d=0; d!=dimension;++d)
     {
         w_avg[d] /= num;
     }
-    */
 
-    long neg_user, neg_event;
+    long neg_user, neg_event, neg_word;
     double label;
     int negative_samples=5;
     
     // 1st for event-based
-    // positive training
     label = 1.0;
-    Opt_SigmoidRegSGD(w_vertex[event], w_avg, label, alpha, reg, w_vertex[event], back_err);
-
-    // negative sampling
-    label = 0.0;
-    for (int neg=0; neg!=negative_samples; ++neg)
+    for (int i=0; i!=num_events; ++i)
     {
-        neg_event = random_gen(0, MAX_vid);
-        while(field[neg_event].fields[0]!=1)
+        event = TargetSample(user);
+        // positive (event, word)
+        Opt_SigmoidRegSGD(w_vertex[event], w_avg, label, alpha, reg, w_vertex[event], back_err);
+        // positive (event, user)
+        Opt_SigmoidRegSGD(w_context[event], w_vertex[user], label, alpha, reg, w_context[event], user_err);
+
+        // negative event sampling
+        label = 0.0;
+        for (int neg=0; neg!=negative_samples; ++neg)
+        {
+            // (neg_event, word)
             neg_event = random_gen(0, MAX_vid);
-        Opt_SigmoidRegSGD(w_vertex[neg_event], w_avg, label, alpha, reg, w_vertex[neg_event], back_err);
+            while(field[neg_event].fields[0]!=1)
+                neg_event = random_gen(0, MAX_vid);
+            Opt_SigmoidRegSGD(w_vertex[neg_event], w_avg, label, alpha, reg, w_vertex[neg_event], back_err);
+
+            // (neg_event, user)
+            neg_event = random_gen(0, MAX_vid);
+            while(field[neg_event].fields[0]!=1)
+                neg_event = random_gen(0, MAX_vid);
+            Opt_SigmoidRegSGD(w_context[neg_event], w_vertex[user], label, alpha, reg, w_context[neg_event], user_err);
+        }
     }
 
-
-    // 2nd for user-based    
-    // positive training
+    // 2nd for user-based, word-based
+    // positive (user, word)
     label = 1.0;
-    Opt_SigmoidRegSGD(w_vertex[user], w_avg, label, alpha, reg, w_vertex[user], back_err);
-
-    // negative sampling
+    Opt_SigmoidRegSGD(w_vertex[user], w_avg, label, alpha, reg, user_err, back_err);
+    
+    // negative user sampling
     label = 0.0;
     for (int neg=0; neg!=negative_samples; ++neg)
     {
+        // (neg_user, word)
         neg_user = random_gen(0, MAX_vid);
         while(field[neg_user].fields[0]!=0)
             neg_user = random_gen(0, MAX_vid);
         Opt_SigmoidRegSGD(w_vertex[neg_user], w_avg, label, alpha, reg, w_vertex[neg_user], back_err);
+
+        // (user, neg_word)
+        neg_word = random_gen(0, MAX_vid);
+        while(field[neg_word].fields[0]!=2)
+            neg_word = random_gen(0, MAX_vid);
+        Opt_SigmoidRegSGD(w_vertex[user], w_context[neg_word], label, alpha, reg, user_err, w_context[neg_word]);
     }
 
     // batch update
@@ -2748,6 +2769,7 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
         w_ptr = &w_context[v];
         for (int d=0; d!=dimension;++d)
         {
+            w_vertex[user][d] += user_err[d];
             (*w_ptr)[d] += back_err[d];
         }
     }
