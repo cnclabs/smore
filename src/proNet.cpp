@@ -2764,12 +2764,15 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     }
 
     // batch update
+    for (int d=0; d!=dimension;++d)
+    {
+        w_vertex[user][d] += user_err[d];
+    }
     for (auto v: bags)
     {
         w_ptr = &w_context[v];
         for (int d=0; d!=dimension;++d)
         {
-            w_vertex[user][d] += user_err[d];
             (*w_ptr)[d] += back_err[d];
         }
     }
