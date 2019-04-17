@@ -2703,11 +2703,11 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     }
     
     // average
-    int num = bags.size();
-    for (int d=0; d!=dimension;++d)
-    {
-        w_avg[d] /= num;
-    }
+    //int num = bags.size();
+    //for (int d=0; d!=dimension;++d)
+    //{
+    //    w_avg[d] /= num;
+    //}
 
     long neg_user, neg_event, neg_word;
     double label;
@@ -2717,10 +2717,11 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     label = 1.0;
     for (int i=0; i!=num_events; ++i)
     {
-        event = TargetSample(user);
         // positive (event, word)
+        event = TargetSample(user);
         Opt_SigmoidRegSGD(w_vertex[event], w_avg, label, alpha, reg, w_vertex[event], back_err);
         // positive (event, user)
+        event = TargetSample(user);
         Opt_SigmoidRegSGD(w_context[event], w_vertex[user], label, alpha, reg, w_context[event], user_err);
 
         // negative event sampling
@@ -2740,11 +2741,16 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
             Opt_SigmoidRegSGD(w_context[neg_event], w_vertex[user], label, alpha, reg, w_context[neg_event], user_err);
         }
     }
+    // batch update
+    for (int d=0; d!=dimension;++d)
+    {
+        w_vertex[user][d] += user_err[d];
+    }
 
     // 2nd for user-based, word-based
     // positive (user, word)
     label = 1.0;
-    Opt_SigmoidRegSGD(w_vertex[user], w_avg, label, alpha, reg, user_err, back_err);
+    Opt_SigmoidRegSGD(w_vertex[user], w_avg, label, alpha, reg, w_vertex[user], back_err);
     
     // negative user sampling
     label = 0.0;
@@ -2757,17 +2763,12 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
         Opt_SigmoidRegSGD(w_vertex[neg_user], w_avg, label, alpha, reg, w_vertex[neg_user], back_err);
 
         // (user, neg_word)
-        neg_word = random_gen(0, MAX_vid);
-        while(field[neg_word].fields[0]!=2)
-            neg_word = random_gen(0, MAX_vid);
-        Opt_SigmoidRegSGD(w_vertex[user], w_context[neg_word], label, alpha, reg, user_err, w_context[neg_word]);
+        //neg_word = random_gen(0, MAX_vid);
+        //while(field[neg_word].fields[0]!=2)
+        //    neg_word = random_gen(0, MAX_vid);
+        //Opt_SigmoidRegSGD(w_vertex[user], w_context[neg_word], label, alpha, reg, user_err, w_context[neg_word]);
     }
 
-    // batch update
-    for (int d=0; d!=dimension;++d)
-    {
-        w_vertex[user][d] += user_err[d];
-    }
     for (auto v: bags)
     {
         w_ptr = &w_context[v];
