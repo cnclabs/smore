@@ -2718,10 +2718,10 @@ void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<do
     for (int i=0; i!=num_events; ++i)
     {
         // positive (event, word)
-        event = TargetSample(user);
+        //event = TargetSample(user);
         Opt_SigmoidRegSGD(w_vertex[event], w_avg, label, alpha, reg, w_vertex[event], back_err);
         // positive (event, user)
-        event = TargetSample(user);
+        //event = TargetSample(user);
         Opt_SigmoidRegSGD(w_vertex[event], w_vertex[user], label, alpha, reg, w_vertex[event], user_err);
 
         // negative event sampling
