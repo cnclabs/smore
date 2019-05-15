@@ -7,6 +7,9 @@
 [travis-url]: https://travis-ci.org/cnclabs/proNet-core
 [MIT-licence]: https://img.shields.io/badge/License-MIT-yellow.svg
 
+# SMORe
+We're now refactoring the project. A complete version will be release in the near future.
+
 # proNet-core
 <img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/pronet.png" width="480">
 
@@ -140,6 +143,3 @@ by ``-field`` argument.
 
 # Code & Data Structure
 [Slides](http://cherry.cs.nccu.edu.tw/~g10018/portfolio/slides/pronet.pdf)
-
-# News
-We're now refactoring the project. More solid functions/features will be available in the future.
