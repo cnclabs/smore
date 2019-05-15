@@ -3,7 +3,7 @@
 [![Gitter chat for developers at https://gitter.im/dmlc/xgboost][gitter-image]](https://gitter.im/proNet-core/Lobby)
 
 [gitter-image]: https://badges.gitter.im/Join%20Chat.svg
-[travis-image]: https://img.shields.io/travis/cnclabs/proNet-core.svg
+[travis-image]: https://img.shields.io/travis/cnclabs/smore.svg
 [travis-url]: https://travis-ci.org/cnclabs/proNet-core
 [MIT-licence]: https://img.shields.io/badge/License-MIT-yellow.svg
 
