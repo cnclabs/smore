@@ -1,5 +1,5 @@
 [![Build Status][travis-image]][travis-url]
-[![license][MIT-licence]](https://raw.githubusercontent.com/cnclabs/proNet-core/master/LICENSE)
+[![license][MIT-licence]](https://raw.githubusercontent.com/cnclabs/smore/master/LICENSE)
 [![Gitter chat for developers at https://gitter.im/dmlc/xgboost][gitter-image]](https://gitter.im/proNet-core/Lobby)
 
 [gitter-image]: https://badges.gitter.im/Join%20Chat.svg
@@ -10,8 +10,7 @@
 # SMORe
 We're now refactoring the project. A complete version will be released in the near future.
 
-# proNet-core
-<img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/pronet.png" width="480">
+<img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/smore.png" width="480">
 
 This is a C++ framework for variant **weighted** network embedding techniques. We currently release the command line interface for following models:
 - DeepWalk
@@ -42,8 +41,8 @@ In the near future, we will redesign the framework making some solid APIs for fa
 
 # Compilation
 ```
-$ git clone https://github.com/cnclabs/proNet-core
-$ cd proNet-core
+$ git clone https://github.com/cnclabs/smore
+$ cd smore
 $ make
 ```
 
