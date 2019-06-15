@@ -32,9 +32,9 @@ void TEXTGCNdev::SaveWeights(string model_name){
                 branch=pnet.vertex[vid].branch;
                 for (long pos=offset; pos<offset+branch; ++pos)
                 {
-                    vid = pnet.context[pos].vid;
+                    long _vid = pnet.context[pos].vid;
                     for (int d=0; d<dim; ++d)
-                        w_sum[d] += w_vertex[vid][d];
+                        w_sum[d] += w_vertex[_vid][d];
                 }
                 for (int d=0; d<dim; ++d)
                     model << " " << w_sum[d];
