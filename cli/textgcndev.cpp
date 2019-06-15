@@ -51,7 +51,7 @@ int main(int argc, char **argv){
     }
     
     char network_file[100], rep_file[100], field_file[100];
-    int dimensions=64, undirected=1, num_events=1, num_words=5, sample_times=10, threads=1;
+    int dimensions=64, undirected=1, num_events=2, num_words=5, sample_times=10, threads=1;
     double init_alpha=0.025, reg=0.01;
 
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);

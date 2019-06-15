@@ -7,6 +7,9 @@ void TEXTGCNdev::SaveWeights(string model_name){
     
     cout << "Save Model:" << endl;
     ofstream model(model_name);
+    long offset, branch;
+    vector<double> w_sum;
+    w_sum.resize(this->dim);
     if (model)
     {
         int counter = 0;
@@ -23,8 +26,19 @@ void TEXTGCNdev::SaveWeights(string model_name){
             model << pnet.vertex_hash.keys[vid];
             
             if (pnet.field[vid].fields[0]==0)
+            {
+                std::fill(w_sum.begin(), w_sum.end(), 0.0);
+                offset=pnet.vertex[vid].offset;
+                branch=pnet.vertex[vid].branch;
+                for (long pos=offset; pos<offset+branch; ++pos)
+                {
+                    vid = pnet.context[pos].vid;
+                    for (int d=0; d<dim; ++d)
+                        w_sum[d] += w_vertex[vid][d];
+                }
                 for (int d=0; d<dim; ++d)
-                    model << " " << w_vertex[vid][d];
+                    model << " " << w_sum[d];
+            }
             if (pnet.field[vid].fields[0]==2)
                 for (int d=0; d<dim; ++d)
                     model << " " << w_context[vid][d];
@@ -78,8 +92,8 @@ void TEXTGCNdev::Train(int sample_times, int num_events, int num_words, double r
     cout << "Learning Parameters:" << endl;
     cout << "\tsample_times:\t\t" << sample_times << endl;
     cout << "\tnegative_samples:\t" << "fixed" << endl;
-    cout << "\tnum_events:\t" << num_events << endl;
-    cout << "\tnum_words:\t" << num_words << endl;
+    cout << "\tnum_events:\t\t" << num_events << endl;
+    cout << "\tnum_words:\t\t" << num_words << endl;
     cout << "\tregularization:\t\t" << reg << endl;
     cout << "\talpha:\t\t\t" << alpha << endl;
     cout << "\tworkers:\t\t" << workers << endl;

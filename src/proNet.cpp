@@ -2672,111 +2672,102 @@ void proNet::UpdatePairs(vector< vector<double> >& w_vertex, vector< vector<doub
 
 void proNet::UpdateCBOWdev(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long user, long dontcare, int dimension, double reg, int num_events, int num_words, double alpha){
 
-    vector<long> bags;
-    vector<double> w_avg, back_err, user_err;
-    w_avg.resize(dimension, 0.0);
-    back_err.resize(dimension, 0.0);
-    user_err.resize(dimension, 0.0);
+    // user-event event-word 
+    vector<long> event_bags, word_bags;
+    vector<double> w_e_avg, w_w_avg, back_e_err, back_w_err;
+    w_e_avg.resize(dimension, 0.0);
+    w_w_avg.resize(dimension, 0.0);
+    back_e_err.resize(dimension, 0.0);
+    back_w_err.resize(dimension, 0.0);
     long event, word;
     
-    // word collection
+//    std::cout << "0" << std::endl;
+    // user = event collection
     for (int i=0; i!=num_events; ++i)
     {
         event = TargetSample(user);
-        for (int j=0; j!=num_words; ++j)
+        if (event==-1) return;
+        event_bags.push_back(event);
+    }
+//    std::cout << "1" << std::endl;
+    // event = word collection
+    for (auto v: event_bags)
+    {
+        word = TargetSample(v);
+        if (word==-1) return;
+        word_bags.push_back(word);
+    }
+   
+//    std::cout << "2" << std::endl;
+    // vector summation
+    vector<double>* w_ptr;
+    for (auto v: event_bags)
+    {
+        w_ptr = &w_vertex[v];
+        for (int d=0; d!=dimension;++d)
         {
-            word = TargetSample(event);
-            if (word==-1) return;
-            bags.push_back(word);
+            w_e_avg[d] += (*w_ptr)[d];
         }
     }
-    
-    // summation
-    vector<double>* w_ptr;
-    for (auto v: bags)
+//    std::cout << "3" << std::endl;
+    for (auto v: word_bags)
     {
         w_ptr = &w_context[v];
         for (int d=0; d!=dimension;++d)
         {
-            w_avg[d] += (*w_ptr)[d];
+            w_w_avg[d] += (*w_ptr)[d];
         }
     }
-    
+   
+//    std::cout << "4" << std::endl;
     // average
-    //int num = bags.size();
-    //for (int d=0; d!=dimension;++d)
-    //{
-    //    w_avg[d] /= num;
-    //}
+    int num = event_bags.size();
+    for (int d=0; d!=dimension;++d)
+    {
+        w_e_avg[d] /= num;
+        w_w_avg[d] /= num;
+    }
 
-    long neg_user, neg_event, neg_word;
+    long neg_event, neg_word;
     double label;
     int negative_samples=5;
     
+//    std::cout << "5" << std::endl;
     // 1st for event-based
     label = 1.0;
-    for (int i=0; i!=num_events; ++i)
-    {
-        // positive (event, word)
-        //event = TargetSample(user);
-        Opt_SigmoidRegSGD(w_vertex[event], w_avg, label, alpha, reg, w_vertex[event], back_err);
-        // positive (event, user)
-        //event = TargetSample(user);
-        Opt_SigmoidRegSGD(w_vertex[event], w_vertex[user], label, alpha, reg, w_vertex[event], user_err);
+    // positive
+    Opt_SigmoidRegSGD(w_e_avg, w_w_avg, label, alpha, reg, back_e_err, back_w_err);
 
-        // negative event sampling
-        label = 0.0;
-        for (int neg=0; neg!=negative_samples; ++neg)
-        {
-            // (neg_event, word)
-            neg_event = random_gen(0, MAX_vid);
-            while(field[neg_event].fields[0]!=1)
-                neg_event = random_gen(0, MAX_vid);
-            Opt_SigmoidRegSGD(w_vertex[neg_event], w_avg, label, alpha, reg, w_vertex[neg_event], back_err);
-
-            // (neg_event, user)
-            neg_event = random_gen(0, MAX_vid);
-            while(field[neg_event].fields[0]!=1)
-                neg_event = random_gen(0, MAX_vid);
-            Opt_SigmoidRegSGD(w_vertex[neg_event], w_vertex[user], label, alpha, reg, w_vertex[neg_event], user_err);
-        }
-    }
-    // batch update
-    for (int d=0; d!=dimension;++d)
-    {
-        w_vertex[user][d] += user_err[d];
-    }
-
-    // 2nd for user-based, word-based
-    // positive (user, word)
-    /*
-    label = 1.0;
-    Opt_SigmoidRegSGD(w_vertex[user], w_avg, label, alpha, reg, w_vertex[user], back_err);
-    
-    // negative user sampling
-    label = 0.0;
-    for (int neg=0; neg!=negative_samples; ++neg)
-    {
-        // (neg_user, word)
-        neg_user = random_gen(0, MAX_vid);
-        while(field[neg_user].fields[0]!=0)
-            neg_user = random_gen(0, MAX_vid);
-        Opt_SigmoidRegSGD(w_vertex[neg_user], w_avg, label, alpha, reg, w_vertex[neg_user], back_err);
-
-        // (user, neg_word)
-        //neg_word = random_gen(0, MAX_vid);
-        //while(field[neg_word].fields[0]!=2)
-        //    neg_word = random_gen(0, MAX_vid);
-        //Opt_SigmoidRegSGD(w_vertex[user], w_context[neg_word], label, alpha, reg, user_err, w_context[neg_word]);
-    }
-    */
-
-    for (auto v: bags)
+//    std::cout << "6" << std::endl;
+    // update
+    for (auto v: word_bags)
     {
         w_ptr = &w_context[v];
         for (int d=0; d!=dimension;++d)
         {
-            (*w_ptr)[d] += back_err[d];
+            (*w_ptr)[d] += back_w_err[d];
+        }
+    }
+
+//    std::cout << "7" << std::endl;
+    // negative
+    label = 0.0;
+    for (int neg=0; neg!=negative_samples; ++neg)
+    {
+        neg_word = random_gen(0, MAX_vid);
+        while(field[neg_word].fields[0]!=2)
+            neg_word = random_gen(0, MAX_vid);
+        Opt_SigmoidRegSGD(w_e_avg, w_context[neg_word], label, alpha, reg, back_e_err, w_context[neg_word]);
+    }
+
+//    std::cout << "8" << std::endl;
+    // batch update
+    for (auto v: event_bags)
+    {
+        w_ptr = &w_vertex[v];
+        for (int d=0; d!=dimension;++d)
+        {
+            (*w_ptr)[d] += back_e_err[d];
         }
     }
 
