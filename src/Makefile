@@ -1,13 +1,16 @@
 CC = g++
 CPPFLAGS = -std=c++11 -fPIC -fopenmp -lm -Ofast
-OBJECTS = util.o random.o proNet.o ./model/DeepWalk.o ./model/Walklets.o ./model/LINE.o ./model/HPE.o ./model/APP.o ./model/MF.o ./model/BPR.o ./model/HBPR.o ./model/NEMF.o ./model/WARP.o ./model/NERANK.o ./model/ECO.o ./model/GCN.o ./model/TEXTGCN.o ./model/TEXTGCNdev.o
-all: $(OBJECTS)
-	mkdir -p ../bin
-	ar rcs ../bin/libproNet.a $(OBJECTS)
+UTIL_OBJECTS = util/util.o util/smore_graph.o util/hash.o util/random.o
+SAMPLER_OBJECTS = sampler/alias_sampler.o sampler/vc_sampler.o
 
-%.o:%.cpp
+all: $(UTIL_OBJECTS) $(SAMPLER_OBJECTS)
+	mkdir -p ../bin
+	ar rcs ../bin/libsmore.a $(UTIL_OBJECTS)
+	ar rcs ../bin/libsmore.a $(SAMPLER_OBJECTS)
+
+%.o: %.cpp %.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm $(OBJECTS)
-	rm ../bin/libproNet.a
+	rm $(UTIL_OBJECTS)
+	rm ../bin/libsmore.a
