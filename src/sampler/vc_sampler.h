@@ -4,32 +4,31 @@
 #include <cmath>
 #include <unordered_map>
 #include <vector>
-#include "../util/hash.h"
+#include "../util/file_graph.h"
 #include "../util/random.h"
-#include "../util/smore_graph.h"
-#include "alias_sampler.h"
+#include "alias_method.h"
 
 class VCSampler {
     /* VCSampler performs vertex-context-style sampling
      */
+    private:
+        void build_from_file_graph(FileGraph* file_graph);
+
     public:
-        VCSampler();
+        VCSampler(FileGraph* file_graph);
 
         // variables
         long vertex_size=0, context_size=0;
-        std::unordered_map<std::string, long index> 
-        AliasSampler vertex_sampler;
-        std::vector<AliasSampler> context_sampler;
-
-        // initialization
-        void build_from_edge_list(std::string path, bool undirected);
-        void build_from_adjacency_list(std::string path, bool undirected);
-        void build_from_stream_list(std::string path, bool undirected);
+        AliasMethod vertex_sampler;
+        AliasMethod negative_sampler;
+        std::unordered_map<long, AliasMethod> context_sampler;
+        std::unordered_map<long, std::vector<long>> adjacency; // context ref.
 
         // functions
         long draw_a_vertex();
         long draw_a_context(long vertex);
         long draw_a_negative();
+        std::vector<long> draw_a_vertex_sequence();
         std::vector<long> draw_a_walk(long vertex, const int walk_steps);
         std::vector<std::vector<long>> draw_skipgram_pairs(long vertex, const int walk_steps, const int window_size);
 };
