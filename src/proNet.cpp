@@ -1708,8 +1708,8 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
 
     // positive
     label=1.0;
-    //Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
-    Opt_PUSigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
+    Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
+    //Opt_PUSigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
     //Opt_PUSGD(w_vertex[vertex], w_context[context], label, alpha, 0.0, back_err, w_context[context]);
 
     // negative
@@ -1717,8 +1717,8 @@ void proNet::UpdatePair(vector< vector<double> >& w_vertex, vector< vector<doubl
     for (int neg=0; neg!=negative_samples; ++neg)
     {
         context = NegativeSample();
-        //Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
-        Opt_PUSigmoidSGD(w_vertex[vertex], w_context[context], -1.0, dimension, alpha, back_err, w_context[context]);
+        Opt_SigmoidSGD(w_vertex[vertex], w_context[context], label, dimension, alpha, back_err, w_context[context]);
+        //Opt_PUSigmoidSGD(w_vertex[vertex], w_context[context], -1.0, dimension, alpha, back_err, w_context[context]);
         //Opt_PUSGD(w_vertex[vertex], w_context[context], label, alpha, 0.0, back_err, w_context[context]);
     }
     for (int d=0; d<dimension; ++d)
