@@ -1393,8 +1393,8 @@ void proNet::UpdateBPRPair(vector< vector<double> >& w_vertex, vector< vector<do
             context_err[d] = 0.0;
             context_vec[d] = w_context[context_i][d] - w_context[context_j][d];
         }
-        //Opt_BPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err);
-        Opt_PUBPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err);
+        Opt_BPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err);
+        //Opt_PUBPRSGD(w_vertex[vertex], context_vec, alpha, vertex_err, context_err);
         //Opt_SGD(w_vertex[vertex], context_vec, 1.0, alpha, 0.01, vertex_err, context_err);
     
         for (int d=0; d<dimension; d++)
