@@ -11,7 +11,7 @@
 
 # SMORe
 
-We're now refactoring the project. A complete version will be released in the near future.
+** We're now refactoring the project. **
 
 <img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/smore.png" width="480">
 
@@ -121,6 +121,15 @@ Changing the number of threads in *train_youtube.sh* could speedup the process.
 You can find related work from [awesome-network-embedding](https://github.com/chihming/awesome-network-embedding).
 
 # Citation
+```
+@inproceedings{smore,
+author = {Chen, Chih-Ming and Wang, Ting-Hsiang and Wang, Chuan-Ju and Tsai, Ming-Feng},
+title = {SMORe: Modularize Graph Embedding for Recommendation},
+year = {2019},
+booktitle = {Proceedings of the 13th ACM Conference on Recommender Systems},
+series = {RecSys ’19}
+}
+```
 ```
 @article{pronet2017,
   title={Vertex-Context Sampling for Weighted Network Embedding},
