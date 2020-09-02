@@ -7,13 +7,9 @@
 [travis-url]: https://travis-ci.org/cnclabs/smore
 [MIT-licence]: https://img.shields.io/badge/License-MIT-yellow.svg
 
-## [RecSys'19 Slides Here](http://cherry.cs.nccu.edu.tw/~g10018/recsys19_smore.pdf)
+## [RecSys'19 Slides Here](https://www.slideshare.net/changecandy/recsys19-smore)
 
 # SMORe
-
-** We're now refactoring the project. **
-
-<img src="http://cherry.cs.nccu.edu.tw/~g10018/portfolio/images/smore.png" width="480">
 
 This is a C++ framework for variant **weighted** network embedding techniques. We currently release the command line interface for following models:
 - DeepWalk
