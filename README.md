@@ -147,6 +147,3 @@ itemC i
 itemD i
 ```
 by ``-field`` argument.
-
-# Code & Data Structure (Old version)
-[Slides](http://cherry.cs.nccu.edu.tw/~g10018/portfolio/slides/pronet.pdf)
