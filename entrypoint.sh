@@ -6,5 +6,6 @@ for ((i=0; i < $#; i++)) ;do
     args[${next_arg}]="data/"${args[${next_arg}]}
   fi
 done
+#TODO: Setting defaut save path to "data/*"
 set "${args[@]}"
 exec "./cli/$@"
