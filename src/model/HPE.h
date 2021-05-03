@@ -10,11 +10,11 @@
 class HPE: public LINE {
 
     public:
-        
+
         HPE();
         ~HPE();
 
-        void SaveWeights(string);
+        void SaveWeights(string, int);
 
         // model function
         void Init(int);

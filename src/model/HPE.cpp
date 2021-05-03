@@ -1,32 +1,62 @@
 #include "HPE.h"
+#include <msgpack.hpp>
 
 HPE::HPE() {}
 HPE::~HPE() {}
 
-void HPE::SaveWeights(string model_name){
-    
+void HPE::SaveWeights(string model_name, int save_binary){
+
     cout << "Save Model:" << endl;
-    ofstream model(model_name);
-    if (model)
+    if (save_binary)
     {
-        model << pnet.MAX_vid << " " << dim << endl;
-        for (long vid=0; vid!=pnet.MAX_vid; vid++)
+        std::string key_file_name = model_name + ".key";
+        std::string vec_file_name = model_name + ".vec";
+        FILE* key_file = fopen(key_file_name.c_str(), "wb");
+        FILE* vec_file = fopen(vec_file_name.c_str(), "wb");
+        if (key_file && vec_file)
         {
-            model << pnet.vertex_hash.keys[vid];
-            for (int d=0; d<dim; ++d)
-                model << " " << w_vertex[vid][d];
-            model << endl;
+            msgpack::sbuffer key_buffer;
+            msgpack::pack(key_buffer, pnet.vertex_hash.keys);
+            std::fwrite(key_buffer.data(), key_buffer.size(), 1, key_file);
+            fclose(key_file);
+            cout << "\tSave keys to <" << key_file_name << ">" << endl;
+
+            msgpack::sbuffer vec_buffer;
+            msgpack::pack(vec_buffer, w_vertex);
+            std::fwrite(vec_buffer.data(), vec_buffer.size(), 1, vec_file);
+            fclose(vec_file);
+            cout << "\tSave vectors to <" << vec_file_name << ">" << endl;
         }
-        cout << "\tSave to <" << model_name << ">" << endl;
+        else
+        {
+            cout << "\tfail to open file" << endl;
+        }
     }
     else
     {
-        cout << "\tfail to open file" << endl;
+        ofstream model(model_name);
+        if (model)
+        {
+            model << pnet.MAX_vid << " " << dim << endl;
+            for (long vid=0; vid!=pnet.MAX_vid; vid++)
+            {
+                model << pnet.vertex_hash.keys[vid];
+                for (int d=0; d<dim; ++d)
+                    model << " " << w_vertex[vid][d];
+                model << endl;
+            }
+            cout << "\tSave to <" << model_name << ">" << endl;
+        }
+        else
+        {
+            cout << "\tfail to open file" << endl;
+        }
+        model.close();
     }
 }
 
 void HPE::Init(int dim) {
-   
+
     this->dim = dim;
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dim << endl;
@@ -53,7 +83,7 @@ void HPE::Init(int dim) {
 
 
 void HPE::Train(int sample_times, int walk_steps, int negative_samples, double reg, double alpha, int workers){
-    
+
     omp_set_num_threads(workers);
 
     cout << "Model:" << endl;
@@ -72,7 +102,7 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double r
     unsigned long long total_sample_times = (unsigned long long)sample_times*1000000;
     double alpha_min = alpha * 0.0001;
     double alpha_last;
-    
+
     unsigned long long current_sample = 0;
     unsigned long long jobs = total_sample_times/workers;
 
@@ -82,9 +112,9 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double r
         unsigned long long count = 0;
         double _alpha = alpha;
         long v1, v2;
-        
+
         while (count<jobs)
-        {            
+        {
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
             pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, reg, walk_steps, negative_samples, _alpha);

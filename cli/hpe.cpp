@@ -14,7 +14,7 @@ int ArgPos(char *str, int argc, char **argv) {
 }
 
 int main(int argc, char **argv){
-    
+
     int i;
 
     if (argc == 1) {
@@ -25,6 +25,8 @@ int main(int argc, char **argv){
         printf("\t\tTrain the Network data\n");
         printf("\t-save <string>\n");
         printf("\t\tSave the representation data\n");
+        printf("\t-save_binary <int>\n");
+        printf("\t\tto save in binary format; default is 0\n");
         printf("\t-dimensions <int>\n");
         printf("\t\tDimension of vertex representation; default is 64\n");
         printf("\t-undirected <int>\n");
@@ -47,13 +49,14 @@ int main(int argc, char **argv){
 
         return 0;
     }
-    
+
     char network_file[100], rep_file[100];
-    int dimensions=64, undirected=1, negative_samples=5, walk_steps=5, sample_times=10, threads=1;
+    int dimensions=64, undirected=1, negative_samples=5, walk_steps=5, sample_times=10, threads=1, save_binary=0;
     double init_alpha=0.025, reg=0.01;
 
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-save", argc, argv)) > 0) strcpy(rep_file, argv[i + 1]);
+    if ((i = ArgPos((char *)"-save_binary", argc, argv)) > 0) save_binary = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-undirected", argc, argv)) > 0) undirected = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-dimensions", argc, argv)) > 0) dimensions = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-negative_samples", argc, argv)) > 0) negative_samples = atoi(argv[i + 1]);
@@ -68,7 +71,7 @@ int main(int argc, char **argv){
     hpe->LoadEdgeList(network_file, undirected);
     hpe->Init(dimensions);
     hpe->Train(sample_times, walk_steps, negative_samples, reg, init_alpha, threads);
-    hpe->SaveWeights(rep_file);
+    hpe->SaveWeights(rep_file, save_binary);
 
    return 0;
 
