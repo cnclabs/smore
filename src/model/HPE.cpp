@@ -15,14 +15,17 @@ void HPE::SaveWeights(string model_name, int save_binary){
         FILE* vec_file = fopen(vec_file_name.c_str(), "wb");
         if (key_file && vec_file)
         {
-            msgpack::sbuffer key_buffer;
-            msgpack::pack(key_buffer, pnet.vertex_hash.keys);
+            msgpack::sbuffer key_buffer, vec_buffer;
+            for (long vid=0; vid!=pnet.MAX_vid; vid++)
+            {
+                msgpack::pack(key_buffer, pnet.vertex_hash.keys[vid]);
+                msgpack::pack(vec_buffer, w_vertex[vid]);
+            }
+
             std::fwrite(key_buffer.data(), key_buffer.size(), 1, key_file);
             fclose(key_file);
             cout << "\tSave keys to <" << key_file_name << ">" << endl;
 
-            msgpack::sbuffer vec_buffer;
-            msgpack::pack(vec_buffer, w_vertex);
             std::fwrite(vec_buffer.data(), vec_buffer.size(), 1, vec_file);
             fclose(vec_file);
             cout << "\tSave vectors to <" << vec_file_name << ">" << endl;
