@@ -113,6 +113,29 @@ sh train_youtube.sh
 ```
 Changing the number of threads in *train_youtube.sh* could speedup the process.
 
+# Running with Docker
+- Running with locally built image
+  - Building docker image which is created following the instructions of Dockerfile
+  ```sh
+  docker build -t smore:latest .
+  ```
+  - Running container instantiated by image.
+  ```sh
+  docker run -it --name smore --rm -v "$PWD":/usr/local/smore/data smore:latest model_name -train training_dataset -save embedding [model_options]
+  ```
+  - Example:
+  ```sh
+  docker run -it --name smore --rm -v "$PWD":/usr/local/smore/data smore:latest  hpe -train net.txt -save rep.txt  
+  ```
+- Running with published image
+  - Running `smore.sh`
+  ```sh
+  ./smore.sh model_name -train training_dataset -save embedding [model_options]
+  ```
+  - Example:
+  ```
+  ./smore.sh model_name -train training_dataset -save embedding [model_options]
+  ```
 # Related Work
 You can find related work from [awesome-network-embedding](https://github.com/chihming/awesome-network-embedding).
 
