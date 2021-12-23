@@ -113,12 +113,12 @@ class proNet {
         void InitSigmoid();
         //void InitNegTable();
         void BuildAliasMethod(unordered_map<long, vector<long>>&, unordered_map<long, vector<double>>&);
-        
+
     public:
-        
+
         proNet();
         ~proNet();
-        
+
         void SetNegativeMethod(char*);
         void SetVertexMethod(char*);
 
@@ -147,23 +147,21 @@ class proNet {
         // Key Process
         HashTable vertex_hash;
 
-        // Pretrain
-        unordered_map< long, vector< double >> pretrain;
         //HashTable2 vertex_hash;
         unsigned int BKDRHash(char*);
         void InsertHashTable(HashTable&, char*);
         long SearchHashTable(HashTable&, char*);
-        
+
         // Math-related Process
         double fastSigmoid(double);
 
         // Data Process
         void LoadEdgeList(string, bool);
         void LoadFieldMeta(string);
-        
+
         vector< int > dynamic_walk;
         void LoadWalkMeta(string);
-        void LoadPreTrain(string,int);
+        void LoadPreTrain(string, int, vector<vector<double>>&);
 
         // Network Process
         long SourceSample();
@@ -200,7 +198,7 @@ class proNet {
         void Opt_SigmoidRegSGD(vector<double>&, vector<double>&, double, double, double, vector<double>&, vector<double>&);
 
         // Drawing Pairs
-        
+
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdatePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
         void UpdateCosinePair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, double);
@@ -240,7 +238,7 @@ class proNet {
 
         // user vertex vector, item vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
         void UpdateUIPair(vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
-      
+
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, community walk steps, alpha
         void UpdateCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
         void UpdateFCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, int, double);
@@ -255,7 +253,7 @@ class proNet {
 
         // vertex vector, context vector, vertex, context, dimension, walk_steps, negative samples, alpha
         void UpdateMSFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, double);
-        
+
         // vertex vector, context vector, vertex, context, dimension_f1, dimension_f2, walk_steps, negative samples, alpha
         //void UpdateMSDiffFieldCommunity(vector< vector<double> >&, vector< vector<double> >&, long, long, int, int, int, int, double);
 

@@ -10,7 +10,7 @@
 class DeepWalk {
 
     public:
-        
+
         DeepWalk();
         ~DeepWalk();
 
@@ -20,13 +20,14 @@ class DeepWalk {
         int dim;                // representation dimensions
         vector< vector<double> > w_vertex;
         vector< vector<double> > w_context;
-     
+
         // data function
         void LoadEdgeList(string, bool);
         void SaveWeights(string);
-        
+
         // model function
         void Init(int);
+        void Init(int, char*, char*);
         void Train(int, int, int, int, double, int);
 
 };

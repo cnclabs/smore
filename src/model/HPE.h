@@ -10,7 +10,7 @@
 class HPE: public LINE {
 
     public:
-        
+
         HPE();
         ~HPE();
 
@@ -18,6 +18,7 @@ class HPE: public LINE {
 
         // model function
         void Init(int);
+        void Init(int, char*, char*);
         void Train(int, int, int, double, double, int);
 
 };

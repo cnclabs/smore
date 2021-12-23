@@ -11,7 +11,7 @@ void DeepWalk::LoadEdgeList(string filename, bool undirect) {
 }
 
 void DeepWalk::SaveWeights(string model_name){
-    
+
     cout << "Save Model:" << endl;
     ofstream model(model_name);
     if (model)
@@ -33,11 +33,11 @@ void DeepWalk::SaveWeights(string model_name){
 }
 
 void DeepWalk::Init(int dim) {
-    
+
     this->dim = dim;
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dim << endl;
-    
+
     w_vertex.resize(pnet.MAX_vid);
     w_context.resize(pnet.MAX_vid);
 
@@ -56,8 +56,47 @@ void DeepWalk::Init(int dim) {
     }
 }
 
+
+void DeepWalk::Init(int dim, char* load_v, char* load_c) {
+
+    this->dim = dim;
+    cout << "Model Setting:" << endl;
+    cout << "\tdimension:\t\t" << dim << endl;
+
+    w_vertex.resize(pnet.MAX_vid);
+    w_context.resize(pnet.MAX_vid);
+
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
+    {
+        w_vertex[vid].resize(dim);
+        for (int d=0; d<dim;++d)
+            w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+    }
+
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
+    {
+        w_context[vid].resize(dim);
+        for (int d=0; d<dim;++d)
+            w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+    }
+
+    if (strlen(load_v))
+    {
+        cout << "\tload vertex pretrain:\t" << load_v << endl;
+        pnet.LoadPreTrain(load_v, dim, w_vertex);
+    }
+    if (strlen(load_c))
+    {
+        cout << "\tload context pretrain:\t" << load_c << endl;
+        pnet.LoadPreTrain(load_c, dim, w_context);
+    }
+
+}
+
+
+
 void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negative_samples, double alpha, int workers){
-    
+
     omp_set_num_threads(workers);
 
     cout << "Model:" << endl;
@@ -81,7 +120,7 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
 
     for (int t=0; t<walk_times; ++t)
     {
-        // shuffle the order for random keys access        
+        // shuffle the order for random keys access
         std::vector<long> random_keys(pnet.MAX_vid);
         for (long vid = 0; vid < pnet.MAX_vid; vid++) {
             random_keys[vid] = vid;
@@ -98,7 +137,7 @@ void DeepWalk::Train(int walk_times, int walk_steps, int window_size, int negati
             vector<long> walks = pnet.RandomWalk(random_keys[vid], walk_steps);
             vector<vector<long>> train_data = pnet.SkipGrams(walks, window_size, 0);
             pnet.UpdatePairs(w_vertex, w_context, train_data[0], train_data[1], dim, negative_samples, _alpha);
-            
+
             count++;
             if (count % MONITOR == 0)
             {

@@ -235,7 +235,7 @@ void proNet::LoadEdgeList(string filename, bool undirect) {
 
 }
 
-void proNet::LoadPreTrain(string filename, int tar_dim) {
+void proNet::LoadPreTrain(string filename, int tar_dim, vector<vector<double>>& given_vec) {
 
     FILE *fin;
     char c_line[1000];
@@ -254,8 +254,8 @@ void proNet::LoadPreTrain(string filename, int tar_dim) {
         tok_cnt += 1;
         pch = strtok(NULL," ");
     }
-    cout << max_line << ", " << dim << endl;
-    cout << "\t # of Pre-train data:\t" << max_line << "\tDimensions:\t" << dim << endl;
+    cout << "\t# of Pre-train:\t\t" << max_line << endl;
+    cout << "\tDimensions:\t\t" << dim << endl;
     if (dim != tar_dim){
         cout << "Dimension not matched, Skip Loading Pre-train model.";
         fclose(fin);
@@ -274,8 +274,11 @@ void proNet::LoadPreTrain(string filename, int tar_dim) {
                 tok_cnt += 1;
                 pch = strtok(NULL," ");
             }
-            long vid = SearchHashTable(vertex_hash,v);
-            if(vid != -1) pretrain[vid] = emb;
+            long vid = SearchHashTable(vertex_hash, v);
+            if(vid != -1)
+            {
+                given_vec[vid] = emb;
+            }
             else continue;
         }
         fclose(fin);

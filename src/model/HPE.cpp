@@ -4,7 +4,7 @@ HPE::HPE() {}
 HPE::~HPE() {}
 
 void HPE::SaveWeights(string model_name){
-    
+
     cout << "Save Model:" << endl;
     ofstream model(model_name);
     if (model)
@@ -26,7 +26,7 @@ void HPE::SaveWeights(string model_name){
 }
 
 void HPE::Init(int dim) {
-   
+
     this->dim = dim;
     cout << "Model Setting:" << endl;
     cout << "\tdimension:\t\t" << dim << endl;
@@ -51,9 +51,48 @@ void HPE::Init(int dim) {
     }
 }
 
+void HPE::Init(int dim, char* load_v, char* load_c) {
+
+    this->dim = dim;
+    cout << "Model Setting:" << endl;
+    cout << "\tdimension:\t\t" << dim << endl;
+
+    w_vertex.resize(pnet.MAX_vid);
+    w_context.resize(pnet.MAX_vid);
+
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
+    {
+        w_vertex[vid].resize(dim);
+        for (int d=0; d<dim;++d)
+        {
+            w_vertex[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+        }
+    }
+
+    for (long vid=0; vid<pnet.MAX_vid; ++vid)
+    {
+        w_context[vid].resize(dim);
+        for (int d=0; d<dim;++d)
+            w_context[vid][d] = (rand()/(double)RAND_MAX - 0.5) / dim;
+    }
+
+    if (strlen(load_v))
+    {
+        cout << "\tload pretrain:\t" << load_v << endl;
+        pnet.LoadPreTrain(load_v, dim, w_vertex);
+    }
+    if (strlen(load_c))
+    {
+        cout << "\tload pretrain:\t" << load_c << endl;
+        pnet.LoadPreTrain(load_c, dim, w_context);
+    }
+
+}
+
+
 
 void HPE::Train(int sample_times, int walk_steps, int negative_samples, double reg, double alpha, int workers){
-    
+
     omp_set_num_threads(workers);
 
     cout << "Model:" << endl;
@@ -72,7 +111,7 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double r
     unsigned long long total_sample_times = (unsigned long long)sample_times*1000000;
     double alpha_min = alpha * 0.0001;
     double alpha_last;
-    
+
     unsigned long long current_sample = 0;
     unsigned long long jobs = total_sample_times/workers;
 
@@ -82,9 +121,9 @@ void HPE::Train(int sample_times, int walk_steps, int negative_samples, double r
         unsigned long long count = 0;
         double _alpha = alpha;
         long v1, v2;
-        
+
         while (count<jobs)
-        {            
+        {
             v1 = pnet.SourceSample();
             v2 = pnet.TargetSample(v1);
             pnet.UpdateCommunity(w_vertex, w_context, v1, v2, dim, reg, walk_steps, negative_samples, _alpha);

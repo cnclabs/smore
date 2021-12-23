@@ -14,7 +14,7 @@ int ArgPos(char *str, int argc, char **argv) {
 }
 
 int main(int argc, char **argv){
-    
+
     int i;
 
     if (argc == 1) {
@@ -25,6 +25,10 @@ int main(int argc, char **argv){
         printf("\t\tTrain the Network data\n");
         printf("\t-save <string>\n");
         printf("\t\tSave the representation data\n");
+        printf("\t-load_v <string>\n");
+        printf("\t\tPath to vertex pretrain\n");
+        printf("\t-load_c <string>\n");
+        printf("\t\tPath to context pretrain\n");
         printf("\t-dimensions <int>\n");
         printf("\t\tDimension of vertex representation; default is 64\n");
         printf("\t-undirected <int>\n");
@@ -47,13 +51,15 @@ int main(int argc, char **argv){
 
         return 0;
     }
-    
-    char network_file[100], rep_file[100];
+
+    char network_file[100], rep_file[100], load_v[100]="", load_c[100]="";
     int dimensions=64, undirected=1, window_size=5, negative_samples=5, walk_times=10, walk_steps=5, sample_times=10, threads=1;
     double init_alpha=0.025, bfs=0.0;
 
     if ((i = ArgPos((char *)"-train", argc, argv)) > 0) strcpy(network_file, argv[i + 1]);
     if ((i = ArgPos((char *)"-save", argc, argv)) > 0) strcpy(rep_file, argv[i + 1]);
+    if ((i = ArgPos((char *)"-load_v", argc, argv)) > 0) strcpy(load_v, argv[i + 1]);
+    if ((i = ArgPos((char *)"-load_c", argc, argv)) > 0) strcpy(load_c, argv[i + 1]);
     if ((i = ArgPos((char *)"-undirected", argc, argv)) > 0) undirected = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-dimensions", argc, argv)) > 0) dimensions = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-window_size", argc, argv)) > 0) window_size = atoi(argv[i + 1]);
@@ -66,7 +72,7 @@ int main(int argc, char **argv){
     DeepWalk *dw;
     dw = new DeepWalk();
     dw->LoadEdgeList(network_file, undirected);
-    dw->Init(dimensions);
+    dw->Init(dimensions, load_v, load_c);
     dw->Train(walk_times, walk_steps, window_size, negative_samples, init_alpha, threads);
     dw->SaveWeights(rep_file);
 
