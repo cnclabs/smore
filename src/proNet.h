@@ -187,6 +187,9 @@ class proNet {
         void Opt_PUBPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&);
         int Opt_FBPRSGD(vector<double>&, vector<double>&, double, vector<double>&, vector<double>&, double);
 
+        // vertex representation, context representation, margin, sigma, alpha, vertex loss, context loss, alpha
+        int Opt_SBPRSGD(vector<double>&, vector<double>&, double, double, int, double, vector<double>&, vector<double>&);
+
         // vertex representation, context representation, label, alpha, vertex loss, context loss, alpha
         void Opt_SigmoidSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
         void Opt_CosineSGD(vector<double>&, vector<double>&, double, int, double, vector<double>&, vector<double>&);
@@ -218,6 +221,9 @@ class proNet {
 
         // vertex vector, context vector, vertex, context, dimension, negative samples, alpha
         void UpdateBPRPairs(vector< vector<double> >&, vector< vector<double> >&, vector<long>&, vector<long>&, vector<long>&, int, double, double);
+
+        // vertex vector, context vector, vertex, context, dimension, reg, margin, sigma, alpha
+        void UpdateSBPRPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, double, double, int, double);
 
         // vertex vector, context vector, vertex, context, dimension, regularization, negative samples, alpha
         void UpdateFactorizedPair(vector< vector<double> >&, vector< vector<double> >&, long, long, int, double, int, double);
