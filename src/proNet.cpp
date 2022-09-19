@@ -1067,6 +1067,35 @@ void proNet::Opt_BPRSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_
         loss_context_ptr[d] += g * w_vertex_ptr[d];
 }
 
+int proNet::Opt_SBPRSGD(vector<double>& w_vertex_ptr, vector<double>& w_context_ptr, double xi, double omega, int eta, double alpha, vector<double>& loss_vertex_ptr, vector<double>&           loss_context_ptr){
+
+    int d = 0;
+    double f = 0, g = 0, g_in_sigmoid=1, g_chain_diff=1;
+    int dimension = w_vertex_ptr.size();
+
+    for (d=0; d<dimension; ++d) // prediciton
+        f += w_vertex_ptr[d] * w_context_ptr[d];
+
+    g = (f-xi)/omega;
+    if (g > 2.0) return 0;
+    if (g < -2.0) g = -2.0;
+
+    for( int i=0; i<eta; i++)
+        g_in_sigmoid *= g;
+    g_chain_diff = g_in_sigmoid/g;
+
+    g = fastSigmoid(-1*g_in_sigmoid)*g_chain_diff/omega; // auto-gradient w.r.t eta
+    //g = fastSigmoid(-g*g*g)*g*g/omega; // when eta=5
+    //g = fastSigmoid(-g*g*g*g*g)*g*g*g*g/omega; // when eta=5
+
+    g *= alpha;
+
+    for (d=0; d<dimension; ++d) // store the back propagation error
+        loss_vertex_ptr[d] += g * w_context_ptr[d];
+    for (d=0; d<dimension; ++d) // update context
+        loss_context_ptr[d] += g * w_vertex_ptr[d];
+    return 1;
+}
 
 void proNet::Opt_SigmoidSGD1(double* w_vertex_ptr, double* w_context_ptr, double label, int dimension, double alpha, double* loss_vertex_ptr, double* loss_context_ptr){
     
@@ -1485,6 +1514,57 @@ void proNet::UpdateFBPRPair(vector< vector<double> >& w_vertex, vector< vector<d
 
 }
 
+void proNet::UpdateSBPRPair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context_i, int dimension, double reg, double xi, double omega, int eta, double alpha){
+
+    long context_j;
+    vector< double > vertex_err;
+    vector< double > context_err;
+    vector< double > context_vec;
+    vector< long > context_collection;
+    vertex_err.resize(dimension, 0.0);
+    context_err.resize(dimension, 0.0);
+    context_vec.resize(dimension, 0.0);
+
+    int d;
+    int update = 0;
+    double f=0.0;
+
+    for (int n=0; n<16; n++)
+    {
+        //context_i = TargetSample(vertex);
+        context_j = NegativeSample();
+
+        for (int d=0; d<dimension; d++)
+        {
+            context_err[d] = 0.0;
+            context_vec[d] = w_context[context_i][d] - w_context[context_j][d];
+        }
+
+        if (Opt_SBPRSGD(w_vertex[vertex], context_vec, xi, omega, eta, alpha, vertex_err, context_err)!=0)
+        {
+            for (int d=0; d<dimension; d++)
+            {
+                w_context[context_i][d] -= alpha*0.01*w_context[context_i][d];
+                w_context[context_j][d] -= alpha*0.01*w_context[context_j][d];
+                //w_vertex[vertex][d] -= alpha*0.01*w_vertex[vertex][d];
+
+                w_context[context_i][d] += context_err[d];
+                w_context[context_j][d] -= context_err[d];
+                //w_vertex[vertex][d] += vertex_err[d];
+            }
+            update += 1.0;
+            //return;
+        }
+    }
+
+    if (update!=0)
+    for (int d=0; d<dimension; d++)
+    {
+        w_vertex[vertex][d] -= alpha*0.01*w_vertex[vertex][d];
+        w_vertex[vertex][d] += vertex_err[d]/update;
+    }
+}
+
 void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, vector<long>& vertex, vector<long>& context_i, vector<long>& context_j, int dimension, double reg, double alpha){
     
     vector<long>::iterator it_v = vertex.begin();
@@ -1500,7 +1580,6 @@ void proNet::UpdateBPRPairs(vector< vector<double> >& w_vertex, vector< vector<d
     }
 
 }
-
 
 void proNet::UpdateFreezePair(vector< vector<double> >& w_vertex, vector< vector<double> >& w_context, long vertex, long context, int dimension, int negative_samples, double alpha){
     
