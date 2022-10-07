@@ -98,3 +98,10 @@ pyRecGraph.cpp
 
 # MAC .DS_Store file 
 .DS_Store
+
+cli/**
+!cli/*.cpp
+src/*.o
+src/**/*.o
+example/**
+!example/*.sh

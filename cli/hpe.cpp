@@ -52,7 +52,7 @@ int main(int argc, char **argv){
         return 0;
     }
 
-    char network_file[100], rep_file[100], load_v[100], load_c[100];
+    char network_file[100], rep_file[100], load_v[100] = "", load_c[100] = "";
     int dimensions=64, undirected=1, negative_samples=5, walk_steps=5, sample_times=10, threads=1;
     double init_alpha=0.025, reg=0.01;
 
