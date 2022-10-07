@@ -98,3 +98,6 @@ pyRecGraph.cpp
 
 # MAC .DS_Store file 
 .DS_Store
+
+# Cpp Build Files
+*.o
