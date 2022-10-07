@@ -44,6 +44,30 @@ $ git clone https://github.com/cnclabs/smore
 $ cd smore
 $ make
 ```
+## With CMake on Linux
+```
+mkdir build && cd build
+cmake ../
+make -j8
+```
+
+## With CMake on Mac
+There is a big chance that the default compiler on mac is Apple Clang, which not support `-fopenmp`, so you need install GCC first:
+```
+brew install gcc@12
+```
+Then set following environment variables in `~/.bashrc`:
+```
+export CC="/opt/homebrew/Cellar/gcc@12/12.1.0_1/bin/gcc-12"
+export CXX="/opt/homebrew/Cellar/gcc@12/12.1.0_1/bin/g++-12"
+```
+Then:
+```
+mkdir build && cd build
+cmake ../
+make -j8
+```
+
 
 # Task
 Given a network input:
